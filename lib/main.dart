@@ -141,6 +141,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
   static final Uri _portfolioUri = Uri.parse(
     'https://wxlfe.dev/?utm_source=planarity.xyz&utm_medium=Self%2BPromotion&utm_campaign=Footer%2BPortfolio%2BLink&utm_id=Footer%2BPortfolio%2BLink&utm_content=Footer%2BPortfolio%2BLink',
   );
+  static final Uri _originalGameUri = Uri.parse('http://johntantalo.com/');
   static const _startingLevel = 4;
   static const _statusKey = 'daily_status';
   static const _levelKey = 'daily_level';
@@ -573,6 +574,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       onPortfolioTap: () async {
         await launchUrl(_portfolioUri, mode: LaunchMode.externalApplication);
       },
+      onOriginalGameTap: () async {
+        await launchUrl(_originalGameUri, mode: LaunchMode.externalApplication);
+      },
     );
 
     return Scaffold(
@@ -619,6 +623,7 @@ class _HomeHeroContent extends StatelessWidget {
     required this.showLeaderboardBelowButton,
     required this.leaderboard,
     required this.onPortfolioTap,
+    required this.onOriginalGameTap,
   });
 
   final String buttonLabel;
@@ -627,6 +632,7 @@ class _HomeHeroContent extends StatelessWidget {
   final bool showLeaderboardBelowButton;
   final Widget leaderboard;
   final VoidCallback onPortfolioTap;
+  final VoidCallback onOriginalGameTap;
 
   @override
   Widget build(BuildContext context) {
@@ -684,15 +690,30 @@ class _HomeHeroContent extends StatelessWidget {
           leaderboard,
         ],
         const Spacer(),
-        InkWell(
-          onTap: onPortfolioTap,
-          child: Text(
-            '© nate wolfe',
-            style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.55),
-                  decoration: TextDecoration.underline,
-                ),
-          ),
+        Column(
+          children: [
+            InkWell(
+              onTap: onPortfolioTap,
+              child: Text(
+                '© nate wolfe',
+                style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.55),
+                      decoration: TextDecoration.underline,
+                    ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            InkWell(
+              onTap: onOriginalGameTap,
+              child: Text(
+                'original by john tantalo',
+                style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.55),
+                      decoration: TextDecoration.underline,
+                    ),
+              ),
+            ),
+          ],
         ),
       ],
     );
