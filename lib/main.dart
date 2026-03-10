@@ -142,6 +142,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     'https://wxlfe.dev/?utm_source=planarity.xyz&utm_medium=Self%2BPromotion&utm_campaign=Footer%2BPortfolio%2BLink&utm_id=Footer%2BPortfolio%2BLink&utm_content=Footer%2BPortfolio%2BLink',
   );
   static final Uri _originalGameUri = Uri.parse('http://johntantalo.com/');
+  static final Uri _planarGraphInfoUri = Uri.parse('https://en.wikipedia.org/wiki/Planar_graph');
   static const _startingLevel = 4;
   static const _statusKey = 'daily_status';
   static const _levelKey = 'daily_level';
@@ -503,6 +504,75 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     passwordController.dispose();
   }
 
+  Future<void> _showAboutModal() async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+
+        return Dialog(
+          backgroundColor: theme.colorScheme.surface,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+            side: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.35)),
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'about',
+                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'goal',
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'solve as many graphs as you can each day with as few moves as possible.',
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'why every puzzle is solvable',
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    "every graph in planarity is solvable because it's a planar graph. a planar graph is a graph that can be drawn on a flat surface so that no edges cross, except where they meet at shared vertices.",
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  InkWell(
+                    onTap: () async {
+                      await launchUrl(
+                        _planarGraphInfoUri,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                    child: Text(
+                      'wikipedia: planar graph',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_firebaseReady) {
@@ -563,6 +633,14 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
                             ],
                           )
                         : homeContent,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: IconButton(
+                    onPressed: _showAboutModal,
+                    icon: const FaIcon(FontAwesomeIcons.circleQuestion, size: 22),
+                    tooltip: 'about',
                   ),
                 ),
                 Align(
@@ -1257,7 +1335,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
         return;
       }
       _resolvingLevel = true;
-      final levelScore = max(0, _level - _movesUsed);
+      final levelScore = scoreForSolvedLevel(level: _level, movesUsed: _movesUsed);
       setState(() {
         _totalScore += levelScore;
       });
@@ -2094,18 +2172,18 @@ class PlanarityLevel {
 
 class PlanarityGenerator {
   static PlanarityLevel generate({required String dayKey, required int level}) {
-    final seed = _stableSeed(dayKey, level);
-    final random = Random(seed);
-    final nodeCount = max(1, level);
-    final circleNodes = _circleLayout(nodeCount);
-    final edges = _buildOuterPlanarEdges(circleNodes, random);
+    final nodeCount = max(2, level);
+    final structureRandom = Random(_stableSeed(dayKey, level));
+    final embedding = _circleLayout(nodeCount);
+    final edges = _buildPlanarEdges(embedding, structureRandom);
+    final positionsRandom = Random(_stableSeed(dayKey, 0));
+    final scattered = _scatterNodes(nodeCount, positionsRandom);
 
-    final scattered = _scatterNodes(nodeCount, random);
-    if (nodeCount >= 4) {
+    if (nodeCount >= 4 && edges.isNotEmpty) {
       var attempts = 0;
       while (_countCrossings(scattered, edges) == 0 && attempts < 30) {
         for (var i = 0; i < scattered.length; i++) {
-          scattered[i] = _randomPoint(random);
+          scattered[i] = _randomPoint(positionsRandom);
         }
         attempts += 1;
       }
@@ -2125,10 +2203,21 @@ class PlanarityGenerator {
     });
   }
 
-  static List<Edge> _buildOuterPlanarEdges(List<Offset> embedding, Random random) {
+  static List<Offset> _scatterNodes(int n, Random random) {
+    return List.generate(n, (_) => _randomPoint(random));
+  }
+
+  static Offset _randomPoint(Random random) {
+    return Offset(
+      50 + random.nextDouble() * 260,
+      60 + random.nextDouble() * 420,
+    );
+  }
+
+  static List<Edge> _buildPlanarEdges(List<Offset> embedding, Random random) {
     final n = embedding.length;
     if (n <= 1) {
-      return <Edge>[];
+      return const <Edge>[];
     }
 
     final edges = <Edge>{};
@@ -2137,19 +2226,19 @@ class PlanarityGenerator {
       edges.add(Edge(i, (i + 1) % n));
     }
 
-    final pairs = <Edge>[];
+    final candidates = <Edge>[];
     for (var a = 0; a < n; a++) {
       for (var b = a + 1; b < n; b++) {
         final isCycleNeighbor = (b == a + 1) || (a == 0 && b == n - 1);
         if (!isCycleNeighbor) {
-          pairs.add(Edge(a, b));
+          candidates.add(Edge(a, b));
         }
       }
     }
 
-    pairs.shuffle(random);
-    for (final candidate in pairs) {
-      final intersects = edges.any((existing) {
+    candidates.shuffle(random);
+    for (final candidate in candidates) {
+      final crossesExisting = edges.any((existing) {
         if (existing.sharesNode(candidate)) {
           return false;
         }
@@ -2160,24 +2249,12 @@ class PlanarityGenerator {
           embedding[existing.b],
         );
       });
-
-      if (!intersects && random.nextDouble() < 0.55) {
+      if (!crossesExisting && random.nextDouble() < 0.55) {
         edges.add(candidate);
       }
     }
 
     return edges.toList(growable: false);
-  }
-
-  static List<Offset> _scatterNodes(int n, Random random) {
-    return List.generate(n, (_) => _randomPoint(random));
-  }
-
-  static Offset _randomPoint(Random random) {
-    return Offset(
-      50 + random.nextDouble() * 260,
-      60 + random.nextDouble() * 420,
-    );
   }
 
   // Stable seed hash (FNV-1a style) to keep generation consistent across runs/platforms.
@@ -2228,6 +2305,10 @@ class GameSessionResult {
   final int score;
   final int level;
   final bool locked;
+}
+
+int scoreForSolvedLevel({required int level, required int movesUsed}) {
+  return max(0, level - movesUsed);
 }
 
 int _countCrossings(List<Offset> nodes, List<Edge> edges) {

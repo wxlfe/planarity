@@ -4,6 +4,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:planarity_flutter/main.dart';
 
 void main() {
+  test('score updates when a graph is solved', () {
+    expect(scoreForSolvedLevel(level: 6, movesUsed: 2), 4);
+    expect(scoreForSolvedLevel(level: 6, movesUsed: 6), 0);
+    expect(scoreForSolvedLevel(level: 6, movesUsed: 8), 0);
+  });
+
   testWidgets('Home page shows mobile leaderboard with global default', (
     WidgetTester tester,
   ) async {
