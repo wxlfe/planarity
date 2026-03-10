@@ -14,6 +14,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 bool _firebaseReady = false;
 
+const _dummyFriendsUri = 'https://example.com/friends';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _firebaseReady = await _initializeFirebase();
@@ -536,6 +538,19 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_firebaseReady) {
+      return StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          return _buildHomeScaffold(context, snapshot.data);
+        },
+      );
+    }
+
+    return _buildHomeScaffold(context, null);
+  }
+
+  Widget _buildHomeScaffold(BuildContext context, User? user) {
     if (!_isLoaded) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -543,11 +558,22 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     }
 
     final isLocked = _status == DailyPlayStatus.locked;
+    final isWide = MediaQuery.of(context).size.width >= 900;
     final buttonLabel = switch (_status) {
       DailyPlayStatus.ready => 'start',
       DailyPlayStatus.inProgress => 'continue - $_score',
       DailyPlayStatus.locked => 'locked - $_score',
     };
+    final homeContent = _HomeHeroContent(
+      buttonLabel: buttonLabel,
+      isLocked: isLocked,
+      onPlayPressed: _openChallenge,
+      showLeaderboardBelowButton: !isWide,
+      leaderboard: _LeaderboardCard(user: user),
+      onPortfolioTap: () async {
+        await launchUrl(_portfolioUri, mode: LaunchMode.externalApplication);
+      },
+    );
 
     return Scaffold(
       body: SafeArea(
@@ -556,67 +582,17 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
           child: Stack(
             children: [
               Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Spacer(),
-                    const _AnimatedHomeIcon(),
-                    const SizedBox(height: 20),
-                    Text(
-                      'planarity',
-                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.8,
-                          ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'untangle the graph',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w400,
-                          ),
-                    ),
-                    const SizedBox(height: 42),
-                    OutlinedButton(
-                      onPressed: isLocked ? null : _openChallenge,
-                      style: ButtonStyle(
-                        side: MaterialStateProperty.resolveWith((states) {
-                          if (states.contains(MaterialState.disabled)) {
-                            return BorderSide(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
-                            );
-                          }
-                          return BorderSide(color: Theme.of(context).colorScheme.onSurface);
-                        }),
-                        foregroundColor: MaterialStateProperty.resolveWith((states) {
-                          if (states.contains(MaterialState.disabled)) {
-                            return Theme.of(context).colorScheme.onSurface.withOpacity(0.3);
-                          }
-                          return Theme.of(context).colorScheme.onSurface;
-                        }),
-                      ),
-                      child: Text(
-                        buttonLabel,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                      ),
-                    ),
-                    const Spacer(),
-                    InkWell(
-                      onTap: () async {
-                        await launchUrl(_portfolioUri, mode: LaunchMode.externalApplication);
-                      },
-                      child: Text(
-                        '© nate wolfe',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
-                              decoration: TextDecoration.underline,
-                            ),
-                      ),
-                    ),
-                  ],
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1180),
+                  child: isWide
+                      ? Row(
+                          children: [
+                            Expanded(flex: 11, child: homeContent),
+                            const SizedBox(width: 40),
+                            Expanded(flex: 9, child: _LeaderboardCard(user: user)),
+                          ],
+                        )
+                      : homeContent,
                 ),
               ),
               Align(
@@ -633,6 +609,492 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       ),
     );
   }
+}
+
+class _HomeHeroContent extends StatelessWidget {
+  const _HomeHeroContent({
+    required this.buttonLabel,
+    required this.isLocked,
+    required this.onPlayPressed,
+    required this.showLeaderboardBelowButton,
+    required this.leaderboard,
+    required this.onPortfolioTap,
+  });
+
+  final String buttonLabel;
+  final bool isLocked;
+  final VoidCallback onPlayPressed;
+  final bool showLeaderboardBelowButton;
+  final Widget leaderboard;
+  final VoidCallback onPortfolioTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const Spacer(),
+        const _AnimatedHomeIcon(),
+        const SizedBox(height: 20),
+        Text(
+          'planarity',
+          style: theme.textTheme.displayMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.8,
+              ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'untangle the graph',
+          style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w400,
+              ),
+        ),
+        const SizedBox(height: 42),
+        OutlinedButton(
+          onPressed: isLocked ? null : onPlayPressed,
+          style: ButtonStyle(
+            side: MaterialStateProperty.resolveWith((states) {
+              if (states.contains(MaterialState.disabled)) {
+                return BorderSide(
+                  color: theme.colorScheme.onSurface.withOpacity(0.3),
+                );
+              }
+              return BorderSide(color: theme.colorScheme.onSurface);
+            }),
+            foregroundColor: MaterialStateProperty.resolveWith((states) {
+              if (states.contains(MaterialState.disabled)) {
+                return theme.colorScheme.onSurface.withOpacity(0.3);
+              }
+              return theme.colorScheme.onSurface;
+            }),
+          ),
+          child: Text(
+            buttonLabel,
+            style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
+        ),
+        if (showLeaderboardBelowButton) ...[
+          const SizedBox(height: 28),
+          leaderboard,
+        ],
+        const Spacer(),
+        InkWell(
+          onTap: onPortfolioTap,
+          child: Text(
+            '© nate wolfe',
+            style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.55),
+                  decoration: TextDecoration.underline,
+                ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+enum _LeaderboardTab { friends, global }
+
+class _LeaderboardCard extends StatefulWidget {
+  const _LeaderboardCard({this.user});
+
+  final User? user;
+
+  @override
+  State<_LeaderboardCard> createState() => _LeaderboardCardState();
+}
+
+class _LeaderboardCardState extends State<_LeaderboardCard> {
+  late _LeaderboardTab _selectedTab;
+
+  bool get _isSignedIn => widget.user != null;
+
+  bool get _friendsEnabled => _isSignedIn;
+
+  bool get _hasFriends => false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTab = _defaultTab;
+  }
+
+  @override
+  void didUpdateWidget(covariant _LeaderboardCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final signedInChanged = (oldWidget.user != null) != _isSignedIn;
+    if (signedInChanged || (!_friendsEnabled && _selectedTab == _LeaderboardTab.friends)) {
+      setState(() {
+        _selectedTab = _defaultTab;
+      });
+    }
+  }
+
+  _LeaderboardTab get _defaultTab =>
+      _isSignedIn ? _LeaderboardTab.friends : _LeaderboardTab.global;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(maxWidth: 420),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.colorScheme.onSurface.withOpacity(0.22)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'leaderboard',
+            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _LeaderboardTabButton(
+                  label: 'Friends',
+                  selected: _selectedTab == _LeaderboardTab.friends,
+                  enabled: _friendsEnabled,
+                  onPressed: _friendsEnabled
+                      ? () {
+                          setState(() {
+                            _selectedTab = _LeaderboardTab.friends;
+                          });
+                        }
+                      : null,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _LeaderboardTabButton(
+                  label: 'Global',
+                  selected: _selectedTab == _LeaderboardTab.global,
+                  enabled: true,
+                  onPressed: () {
+                    setState(() {
+                      _selectedTab = _LeaderboardTab.global;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 160),
+            child: _selectedTab == _LeaderboardTab.friends
+                ? _FriendsLeaderboardView(
+                    key: const ValueKey('friends'),
+                    user: widget.user,
+                    hasFriends: _hasFriends,
+                  )
+                : _GlobalLeaderboardView(
+                    key: const ValueKey('global'),
+                    user: widget.user,
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LeaderboardTabButton extends StatelessWidget {
+  const _LeaderboardTabButton({
+    required this.label,
+    required this.selected,
+    required this.enabled,
+    required this.onPressed,
+  });
+
+  final String label;
+  final bool selected;
+  final bool enabled;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = theme.colorScheme.onSurface;
+
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        backgroundColor: selected ? color : Colors.transparent,
+        foregroundColor: selected ? theme.colorScheme.surface : color,
+        side: BorderSide(
+          color: enabled ? color : color.withOpacity(0.24),
+        ),
+      ),
+      child: Text(
+        label,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          color: enabled
+              ? (selected ? theme.colorScheme.surface : color)
+              : color.withOpacity(0.3),
+        ),
+      ),
+    );
+  }
+}
+
+class _FriendsLeaderboardView extends StatelessWidget {
+  const _FriendsLeaderboardView({
+    super.key,
+    required this.user,
+    required this.hasFriends,
+  });
+
+  final User? user;
+  final bool hasFriends;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final signedInUser = user;
+
+    if (signedInUser == null) {
+      return Text(
+        'sign in to compare your score with friends.',
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.onSurface.withOpacity(0.72),
+        ),
+      );
+    }
+
+    if (!hasFriends) {
+      return Wrap(
+        spacing: 4,
+        runSpacing: 4,
+        children: [
+          Text(
+            "you haven't added any friends.",
+            style: theme.textTheme.bodyMedium,
+          ),
+          InkWell(
+            onTap: () async {
+              await launchUrl(Uri.parse(_dummyFriendsUri));
+            },
+            child: Text(
+              'add some here.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    final entries = _friendsEntriesFor(signedInUser);
+    return _LeaderboardTable(
+      entries: entries,
+      subtitle: 'you and your friends',
+    );
+  }
+}
+
+class _GlobalLeaderboardView extends StatelessWidget {
+  const _GlobalLeaderboardView({
+    super.key,
+    required this.user,
+  });
+
+  final User? user;
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = _globalEntriesFor(user);
+    final topEntry = entries.first;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _LeaderboardMetric(
+          label: 'global top score',
+          value: '${topEntry.score}',
+          detail: topEntry.name,
+        ),
+        const SizedBox(height: 14),
+        _LeaderboardTable(
+          entries: entries,
+          subtitle: user == null ? 'global snapshot' : 'your global position',
+        ),
+      ],
+    );
+  }
+}
+
+class _LeaderboardMetric extends StatelessWidget {
+  const _LeaderboardMetric({
+    required this.label,
+    required this.value,
+    required this.detail,
+  });
+
+  final String label;
+  final String value;
+  final String detail;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        Text(
+          detail,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface.withOpacity(0.72),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LeaderboardTable extends StatelessWidget {
+  const _LeaderboardTable({
+    required this.entries,
+    required this.subtitle,
+  });
+
+  final List<_LeaderboardEntry> entries;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          subtitle,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
+          ),
+        ),
+        const SizedBox(height: 10),
+        ...entries.map(
+          (entry) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 34,
+                  child: Text(
+                    '#${entry.rank}',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.75),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    entry.name,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: entry.isCurrentUser ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '${entry.score}',
+                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LeaderboardEntry {
+  const _LeaderboardEntry({
+    required this.rank,
+    required this.name,
+    required this.score,
+    this.isCurrentUser = false,
+  });
+
+  final int rank;
+  final String name;
+  final int score;
+  final bool isCurrentUser;
+}
+
+List<_LeaderboardEntry> _friendsEntriesFor(User user) {
+  final playerName = _displayNameForUser(user);
+  return [
+    _LeaderboardEntry(rank: 1, name: 'mia', score: 41),
+    _LeaderboardEntry(rank: 2, name: playerName, score: 36, isCurrentUser: true),
+    _LeaderboardEntry(rank: 3, name: 'rory', score: 29),
+    _LeaderboardEntry(rank: 4, name: 'alex', score: 25),
+  ];
+}
+
+List<_LeaderboardEntry> _globalEntriesFor(User? user) {
+  final entries = <_LeaderboardEntry>[
+    const _LeaderboardEntry(rank: 1, name: 'top score', score: 98),
+    const _LeaderboardEntry(rank: 2, name: 'sana', score: 94),
+    const _LeaderboardEntry(rank: 3, name: 'lee', score: 89),
+  ];
+
+  if (user == null) {
+    entries.add(const _LeaderboardEntry(rank: 154, name: 'guest', score: 12));
+    return entries;
+  }
+
+  entries.add(
+    _LeaderboardEntry(
+      rank: 28,
+      name: _displayNameForUser(user),
+      score: 47,
+      isCurrentUser: true,
+    ),
+  );
+  return entries;
+}
+
+String _displayNameForUser(User user) {
+  final displayName = user.displayName?.trim();
+  if (displayName != null && displayName.isNotEmpty) {
+    return displayName.toLowerCase();
+  }
+  final email = user.email?.trim().toLowerCase();
+  if (email != null && email.isNotEmpty) {
+    return email.split('@').first;
+  }
+  return 'you';
 }
 
 class PlanarityGamePage extends StatefulWidget {
