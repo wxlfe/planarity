@@ -547,34 +547,52 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-          child: Stack(
-            children: [
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1180),
-                  child: isWide
-                      ? Row(
-                          children: [
-                            Expanded(flex: 11, child: homeContent),
-                            const SizedBox(width: 40),
-                            Expanded(flex: 9, child: _LeaderboardCard(user: user)),
-                          ],
-                        )
-                      : homeContent,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final pageBody = Stack(
+              children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1180),
+                    child: isWide
+                        ? Row(
+                            children: [
+                              Expanded(flex: 11, child: homeContent),
+                              const SizedBox(width: 40),
+                              Expanded(flex: 9, child: _LeaderboardCard(user: user)),
+                            ],
+                          )
+                        : homeContent,
+                  ),
                 ),
-              ),
-              Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  onPressed: () => _showAuthModal(isSignIn: false),
-                  icon: const FaIcon(FontAwesomeIcons.circleUser, size: 22),
-                  tooltip: 'account',
+                Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    onPressed: () => _showAuthModal(isSignIn: false),
+                    icon: const FaIcon(FontAwesomeIcons.circleUser, size: 22),
+                    tooltip: 'account',
+                  ),
                 ),
+              ],
+            );
+
+            if (isWide) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+                child: SizedBox.expand(
+                  child: pageBody,
+                ),
+              );
+            }
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(child: pageBody),
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
