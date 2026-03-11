@@ -1,5 +1,5 @@
-name: planarity_flutter
-description: "A new Flutter project."
+name: planarity
+description: 'A new Flutter project.'
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -33,6 +33,7 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
+  cloud_firestore: ^6.0.1
   cupertino_icons: ^1.0.8
   firebase_auth: ^6.0.2
   firebase_core: ^4.1.1
@@ -58,7 +59,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -71,20 +71,20 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/app_icon.png"
+  image_path: 'assets/app_icon.png'
   min_sdk_android: 21
   web:
     generate: true
-    image_path: "assets/app_icon.png"
-    background_color: "#0f1319"
-    theme_color: "#0f1319"
+    image_path: 'assets/app_icon.png'
+    background_color: '#0f1319'
+    theme_color: '#0f1319'
   windows:
     generate: true
-    image_path: "assets/app_icon.png"
+    image_path: 'assets/app_icon.png'
     icon_size: 48
   macos:
     generate: true
-    image_path: "assets/app_icon.png"
+    image_path: 'assets/app_icon.png'
 
   # To add assets to your application, add an assets section, like this:
   # assets:
