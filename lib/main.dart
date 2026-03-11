@@ -1,16 +1,19 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'firebase_options.dart';
 
 bool _firebaseReady = false;
 
@@ -24,33 +27,9 @@ Future<void> main() async {
 
 Future<bool> _initializeFirebase() async {
   try {
-    if (kIsWeb) {
-      const apiKey = String.fromEnvironment('FIREBASE_WEB_API_KEY');
-      const appId = String.fromEnvironment('FIREBASE_WEB_APP_ID');
-      const messagingSenderId = String.fromEnvironment('FIREBASE_WEB_MESSAGING_SENDER_ID');
-      const projectId = String.fromEnvironment('FIREBASE_WEB_PROJECT_ID');
-
-      if (apiKey.isNotEmpty &&
-          appId.isNotEmpty &&
-          messagingSenderId.isNotEmpty &&
-          projectId.isNotEmpty) {
-        await Firebase.initializeApp(
-          options: const FirebaseOptions(
-            apiKey: apiKey,
-            appId: appId,
-            messagingSenderId: messagingSenderId,
-            projectId: projectId,
-            authDomain: String.fromEnvironment('FIREBASE_WEB_AUTH_DOMAIN'),
-            storageBucket: String.fromEnvironment('FIREBASE_WEB_STORAGE_BUCKET'),
-            measurementId: String.fromEnvironment('FIREBASE_WEB_MEASUREMENT_ID'),
-          ),
-        );
-        return true;
-      }
-      return false;
-    }
-
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     return true;
   } catch (_) {
     return false;
@@ -154,11 +133,23 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
   int _currentLevel = _startingLevel;
   int _score = 0;
   String? _lockedDay;
+  StreamSubscription<User?>? _authSubscription;
+  String? _activeUserId;
 
   @override
   void initState() {
     super.initState();
     _loadProgress();
+    if (_firebaseReady) {
+      _authSubscription = FirebaseAuth.instance.authStateChanges().listen(_handleAuthStateChange);
+      _handleAuthStateChange(FirebaseAuth.instance.currentUser);
+    }
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 
   String _todayKey() {
@@ -223,6 +214,57 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     }
   }
 
+  Future<void> _handleAuthStateChange(User? user) async {
+    final nextUserId = user?.uid;
+    if (nextUserId == _activeUserId) {
+      return;
+    }
+    _activeUserId = nextUserId;
+
+    if (user == null) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _status = DailyPlayStatus.ready;
+        _currentLevel = _startingLevel;
+        _score = 0;
+        _lockedDay = null;
+      });
+      await _saveProgress();
+      return;
+    }
+
+    final profileData = await _loadUserDocument(user.uid);
+    final syncedScore = _profileScore(profileData);
+    final syncedLevel = _profileCurrentLevel(profileData);
+    final lastPlayed = _profileLastPlayed(profileData);
+    final isLocked = _profileLocked(profileData);
+    final today = _todayKey();
+    final playedToday = lastPlayed == today;
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _status = playedToday
+          ? (isLocked ? DailyPlayStatus.locked : DailyPlayStatus.inProgress)
+          : DailyPlayStatus.ready;
+      _currentLevel = syncedLevel;
+      _score = syncedScore;
+      _lockedDay = playedToday ? today : null;
+    });
+    await _saveProgress();
+
+    if (!playedToday && isLocked) {
+      await _updateUserProgressFields(
+        userId: user.uid,
+        locked: false,
+      );
+    }
+  }
+
   Future<void> _saveProgress() async {
     final prefs = await _prefsOrNull();
     if (prefs == null) {
@@ -244,6 +286,53 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     await prefs.setString(_dayKey, _lockedDay!);
   }
 
+  Future<void> _syncCurrentScoreToFirestore({int addedScore = 0}) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return;
+    }
+
+    await _updateUserProgressFields(
+      userId: user.uid,
+      score: _score,
+      lifetimeScoreIncrement: addedScore > 0 ? addedScore : null,
+    );
+  }
+
+  Future<void> _updateUserProgressFields({
+    required String userId,
+    int? score,
+    int? currentLevel,
+    String? lastPlayed,
+    bool? locked,
+    int? lifetimeScoreIncrement,
+  }) async {
+    final data = <String, Object>{};
+    if (score != null) {
+      data['score'] = score;
+    }
+    if (currentLevel != null) {
+      data['currentLevel'] = currentLevel;
+    }
+    if (lastPlayed != null) {
+      data['lastPlayed'] = lastPlayed;
+    }
+    if (locked != null) {
+      data['locked'] = locked;
+    }
+    if (lifetimeScoreIncrement != null && lifetimeScoreIncrement > 0) {
+      data['lifetimeScore'] = FieldValue.increment(lifetimeScoreIncrement);
+    }
+    if (data.isEmpty) {
+      return;
+    }
+
+    await FirebaseFirestore.instance.collection('users').doc(userId).set(
+          data,
+          SetOptions(merge: true),
+        );
+  }
+
   Future<SharedPreferences?> _prefsOrNull() async {
     try {
       return await SharedPreferences.getInstance();
@@ -259,8 +348,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     }
 
     final today = _todayKey();
-    final startLevel = _status == DailyPlayStatus.inProgress ? _currentLevel : _startingLevel;
-    final startScore = _status == DailyPlayStatus.inProgress ? _score : 0;
+    final startLevel = _currentLevel;
+    final startScore = _score;
     setState(() {
       _status = DailyPlayStatus.inProgress;
       _lockedDay = today;
@@ -268,6 +357,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       _score = startScore;
     });
     await _saveProgress();
+    await _updateSignedInProgressForToday(locked: false);
 
     final result = await Navigator.of(context).push<GameSessionResult>(
       MaterialPageRoute(
@@ -286,6 +376,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       return;
     }
 
+    final previousScore = _score;
     setState(() {
       _score = result.score;
       _lockedDay = result.dayKey;
@@ -298,6 +389,30 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       }
     });
     await _saveProgress();
+    await _updateSignedInProgressForToday(
+      currentLevel: result.level,
+      locked: result.locked,
+    );
+    await _syncCurrentScoreToFirestore(
+      addedScore: max(0, result.score - previousScore),
+    );
+  }
+
+  Future<void> _updateSignedInProgressForToday({
+    int? currentLevel,
+    required bool locked,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return;
+    }
+
+    await _updateUserProgressFields(
+      userId: user.uid,
+      currentLevel: currentLevel ?? _currentLevel,
+      lastPlayed: _todayKey(),
+      locked: locked,
+    );
   }
 
   Future<String?> _submitAuth({
@@ -329,10 +444,24 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
           password: cleanedPassword,
         );
       } else {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: cleanedEmail,
           password: cleanedPassword,
         );
+        final user = credential.user;
+        if (user == null) {
+          return 'unable to create account right now';
+        }
+
+        try {
+          await _createUserDocument(user);
+        } on FirebaseException catch (error) {
+          await user.delete().catchError((_) {});
+          return _firestoreErrorMessage(error);
+        } catch (_) {
+          await user.delete().catchError((_) {});
+          return 'unable to create account right now';
+        }
       }
       return null;
     } on FirebaseAuthException catch (error) {
@@ -342,6 +471,17 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     } catch (_) {
       return 'unable to authenticate right now';
     }
+  }
+
+  Future<void> _createUserDocument(User user) {
+    return FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      'displayName': 'anonymous player',
+      'currentLevel': _startingLevel,
+      'lastPlayed': _todayKey(),
+      'locked': false,
+      'lifetimeScore': 0,
+      'score': 0,
+    });
   }
 
   String _authErrorMessage(FirebaseAuthException error) {
@@ -365,6 +505,18 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     }
   }
 
+  String _firestoreErrorMessage(FirebaseException error) {
+    switch (error.code) {
+      case 'permission-denied':
+        return 'unable to create your profile right now';
+      case 'network-request-failed':
+      case 'unavailable':
+        return 'network error. check your connection';
+      default:
+        return 'unable to create account right now';
+    }
+  }
+
   Future<void> _showAuthModal({required bool isSignIn}) async {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
@@ -377,20 +529,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
         final theme = Theme.of(context);
         final actionLabel = isSignIn ? 'sign in' : 'sign up';
         final subtitle =
-            isSignIn ? 'sign in to your account (firebase auth coming soon)' : 'create an account (firebase auth coming soon)';
+            isSignIn ? 'sign in with your email and password.' : 'create an account with your email and password.';
         final switchPrompt = isSignIn ? 'new here?' : 'already signed up?';
         final switchAction = isSignIn ? 'sign up' : 'sign in';
-
-        Widget socialButton({required IconData icon}) {
-          return OutlinedButton(
-            onPressed: null,
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(44, 44),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-            ),
-            child: FaIcon(icon, size: 18),
-          );
-        }
 
         return StatefulBuilder(
           builder: (context, setDialogState) {
@@ -410,7 +551,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'coming soon - $actionLabel',
+                        actionLabel,
                         style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: 8),
@@ -423,7 +564,6 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
                       const SizedBox(height: 14),
                       TextField(
                         controller: emailController,
-                        enabled: false,
                         keyboardType: TextInputType.emailAddress,
                         decoration: const InputDecoration(
                           labelText: 'email',
@@ -433,12 +573,45 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
                       const SizedBox(height: 10),
                       TextField(
                         controller: passwordController,
-                        enabled: false,
                         obscureText: true,
                         decoration: const InputDecoration(
                           labelText: 'password',
                           border: OutlineInputBorder(borderRadius: BorderRadius.zero),
                         ),
+                        onSubmitted: isSubmitting
+                            ? null
+                            : (_) async {
+                                setDialogState(() {
+                                  isSubmitting = true;
+                                  errorText = null;
+                                });
+
+                                final submitError = await _submitAuth(
+                                  isSignIn: isSignIn,
+                                  email: emailController.text,
+                                  password: passwordController.text,
+                                );
+
+                                if (!mounted || !context.mounted) {
+                                  return;
+                                }
+
+                                if (submitError == null) {
+                                  Navigator.of(context).pop();
+                                  if (!isSignIn) {
+                                    final signedInUser = FirebaseAuth.instance.currentUser;
+                                    if (signedInUser != null && mounted) {
+                                      await _showProfileModal(user: signedInUser);
+                                    }
+                                  }
+                                  return;
+                                }
+
+                                setDialogState(() {
+                                  isSubmitting = false;
+                                  errorText = submitError;
+                                });
+                              },
                       ),
                       if (errorText != null) ...[
                         const SizedBox(height: 8),
@@ -453,27 +626,48 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
-                          onPressed: null,
-                          child: Text(actionLabel),
+                          onPressed: isSubmitting
+                              ? null
+                              : () async {
+                                  setDialogState(() {
+                                    isSubmitting = true;
+                                    errorText = null;
+                                  });
+
+                                  final submitError = await _submitAuth(
+                                    isSignIn: isSignIn,
+                                    email: emailController.text,
+                                    password: passwordController.text,
+                                  );
+
+                                  if (!mounted || !context.mounted) {
+                                    return;
+                                  }
+
+                                  if (submitError == null) {
+                                    Navigator.of(context).pop();
+                                    if (!isSignIn) {
+                                      final signedInUser = FirebaseAuth.instance.currentUser;
+                                      if (signedInUser != null && mounted) {
+                                        await _showProfileModal(user: signedInUser);
+                                      }
+                                    }
+                                    return;
+                                  }
+
+                                  setDialogState(() {
+                                    isSubmitting = false;
+                                    errorText = submitError;
+                                  });
+                                },
+                          child: isSubmitting
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : Text(actionLabel),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'or continue with',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.72),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          socialButton(icon: FontAwesomeIcons.google),
-                          const SizedBox(width: 8),
-                          socialButton(icon: FontAwesomeIcons.facebookF),
-                          const SizedBox(width: 8),
-                          socialButton(icon: FontAwesomeIcons.apple),
-                        ],
                       ),
                       const SizedBox(height: 12),
                       Divider(height: 1, color: theme.colorScheme.onSurface.withOpacity(0.25)),
@@ -486,7 +680,12 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
                           ),
                           const SizedBox(width: 8),
                           OutlinedButton(
-                            onPressed: null,
+                            onPressed: isSubmitting
+                                ? null
+                                : () {
+                                    Navigator.of(context).pop();
+                                    _showAuthModal(isSignIn: !isSignIn);
+                                  },
                             child: Text(switchAction),
                           ),
                         ],
@@ -502,6 +701,184 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     );
     emailController.dispose();
     passwordController.dispose();
+  }
+
+  Future<void> _showProfileModal({required User user}) async {
+    final theme = Theme.of(context);
+    final profileData = await _loadUserDocument(user.uid);
+    final initialDisplayName = _profileDisplayName(profileData, user);
+    final lifetimeScore = _profileLifetimeScore(profileData);
+    final displayNameController = TextEditingController(text: initialDisplayName);
+    var shouldPersist = true;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: theme.colorScheme.surface,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+            side: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.35)),
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 460),
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'profile',
+                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'update how your name appears in your profile.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.72),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: displayNameController,
+                    textInputAction: TextInputAction.done,
+                    decoration: const InputDecoration(
+                      labelText: 'display name',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                    ),
+                    onSubmitted: (_) => Navigator.of(dialogContext).pop(),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'lifetime score',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$lifetimeScore',
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () async {
+                        shouldPersist = false;
+                        await _saveDisplayName(
+                          user: user,
+                          displayName: displayNameController.text,
+                        );
+                        if (!mounted || !dialogContext.mounted) {
+                          return;
+                        }
+                        await FirebaseAuth.instance.signOut();
+                        if (!mounted || !dialogContext.mounted) {
+                          return;
+                        }
+                        Navigator.of(dialogContext).pop();
+                      },
+                      child: const Text('sign out'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    if (shouldPersist) {
+      await _saveDisplayName(
+        user: user,
+        displayName: displayNameController.text,
+      );
+    }
+    displayNameController.dispose();
+  }
+
+  Future<Map<String, dynamic>?> _loadUserDocument(String uid) async {
+    final snapshot = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    return snapshot.data();
+  }
+
+  String _profileDisplayName(Map<String, dynamic>? profileData, User user) {
+    final profileDisplayName = profileData?['displayName'];
+    if (profileDisplayName is String && profileDisplayName.trim().isNotEmpty) {
+      return profileDisplayName.trim();
+    }
+
+    final authDisplayName = user.displayName?.trim();
+    if (authDisplayName != null && authDisplayName.isNotEmpty) {
+      return authDisplayName;
+    }
+
+    return 'anonymous player';
+  }
+
+  int _profileLifetimeScore(Map<String, dynamic>? profileData) {
+    final lifetimeScore = profileData?['lifetimeScore'];
+    if (lifetimeScore is int) {
+      return lifetimeScore;
+    }
+    if (lifetimeScore is num) {
+      return lifetimeScore.toInt();
+    }
+    return 0;
+  }
+
+  int _profileScore(Map<String, dynamic>? profileData) {
+    final score = profileData?['score'];
+    if (score is int) {
+      return max(0, score);
+    }
+    if (score is num) {
+      return max(0, score.toInt());
+    }
+    return 0;
+  }
+
+  int _profileCurrentLevel(Map<String, dynamic>? profileData) {
+    final currentLevel = profileData?['currentLevel'];
+    if (currentLevel is int) {
+      return max(_startingLevel, currentLevel);
+    }
+    if (currentLevel is num) {
+      return max(_startingLevel, currentLevel.toInt());
+    }
+    return _startingLevel;
+  }
+
+  String? _profileLastPlayed(Map<String, dynamic>? profileData) {
+    final lastPlayed = profileData?['lastPlayed'];
+    if (lastPlayed is String && lastPlayed.isNotEmpty) {
+      return lastPlayed;
+    }
+    return null;
+  }
+
+  bool _profileLocked(Map<String, dynamic>? profileData) {
+    final locked = profileData?['locked'];
+    if (locked is bool) {
+      return locked;
+    }
+    return false;
+  }
+
+  Future<void> _saveDisplayName({
+    required User user,
+    required String displayName,
+  }) async {
+    final cleanedDisplayName = displayName.trim().isEmpty ? 'anonymous player' : displayName.trim();
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      'displayName': cleanedDisplayName,
+    }, SetOptions(merge: true));
+    await user.updateDisplayName(cleanedDisplayName);
+    await user.reload();
   }
 
   Future<void> _showAboutModal() async {
@@ -651,7 +1028,13 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
                 Align(
                   alignment: Alignment.topRight,
                   child: IconButton(
-                    onPressed: () => _showAuthModal(isSignIn: false),
+                    onPressed: () {
+                      if (user == null) {
+                        _showAuthModal(isSignIn: false);
+                        return;
+                      }
+                      _showProfileModal(user: user);
+                    },
                     icon: const FaIcon(FontAwesomeIcons.circleUser, size: 22),
                     tooltip: 'account',
                   ),
@@ -1292,12 +1675,12 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
     );
   }
 
-  void _exitToHome() {
+  void _exitToHome({int? level}) {
     Navigator.of(context).pop(
       GameSessionResult(
         dayKey: widget.dayKey,
         score: _totalScore,
-        level: _level,
+        level: level ?? _level,
         locked: false,
       ),
     );
@@ -1372,7 +1755,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
         return;
       }
       if (!proceed) {
-        _exitToHome();
+        _exitToHome(level: _level + 1);
         return;
       }
       _startNextLevel();

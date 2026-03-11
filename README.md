@@ -1,17 +1,19 @@
-# planarity_flutter
+# planarity
 
-A new Flutter project.
+## Firebase auth setup
 
-## Getting Started
+This app now expects FlutterFire's generated options file at [lib/firebase_options.dart](/Users/wxlfe/Documents/Code/planarity/lib/firebase_options.dart). The checked-in file is only a placeholder so the project stays buildable until you generate the real config.
 
-This project is a starting point for a Flutter application.
+Run this from the project root once `flutter` is available in your shell:
 
-A few resources to get you started if this is your first Flutter project:
+```sh
+flutterfire configure
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+That command should overwrite [lib/firebase_options.dart](/Users/wxlfe/Documents/Code/planarity/lib/firebase_options.dart) with real values for the platforms you select. If you want Android, iOS, and macOS auth to work, make sure the Firebase apps you register match these bundle/application IDs already present in the repo:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Android: `dev.wxlfe.planarity`
+- iOS: `dev.wxlfe.planarity`
+- macOS: `dev.wxlfe.planarity`
+
+After `flutterfire configure`, email/password auth should work through the existing sign-in and sign-up flow in the app.
