@@ -48,17 +48,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyAsgmIwQ2F_CnE1ncWjqgPkU6z5wB9BsS4',
-    appId: '1:991765269846:web:a577cd1da97660adcadaf7',
+    appId: '1:991765269846:web:f6b750a5a774eed4cadaf7',
     messagingSenderId: '991765269846',
     projectId: 'planarity-xyz',
     authDomain: 'planarity-xyz.firebaseapp.com',
     storageBucket: 'planarity-xyz.firebasestorage.app',
-    measurementId: 'G-GTWRQRMHRS',
+    measurementId: 'G-Q2934PF6DM',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAp04A4BBhV3d3gceYQhIpcjxwqPlzZGTY',
-    appId: '1:991765269846:ios:6db8451c36de240ccadaf7',
+    appId: '1:991765269846:ios:8d26bdf3ed3bdaf1cadaf7',
     messagingSenderId: '991765269846',
     projectId: 'planarity-xyz',
     storageBucket: 'planarity-xyz.firebasestorage.app',
@@ -68,7 +68,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAp04A4BBhV3d3gceYQhIpcjxwqPlzZGTY',
-    appId: '1:991765269846:ios:6db8451c36de240ccadaf7',
+    appId: '1:991765269846:ios:8d26bdf3ed3bdaf1cadaf7',
     messagingSenderId: '991765269846',
     projectId: 'planarity-xyz',
     storageBucket: 'planarity-xyz.firebasestorage.app',
