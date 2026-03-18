@@ -2900,10 +2900,9 @@ class PlanarityLevel {
 class PlanarityGenerator {
   static PlanarityLevel generate({required String dayKey, required int level}) {
     final nodeCount = max(2, level);
-    final structureRandom = Random(_stableSeed(dayKey, level));
-    final embedding = _circleLayout(nodeCount);
-    final edges = _buildPlanarEdges(embedding, structureRandom);
-    final positionsRandom = Random(_stableSeed(dayKey, 0));
+    final structureRandom = _DeterministicRandom(_stableSeed(dayKey, nodeCount));
+    final edges = _buildPlanarEdges(nodeCount, structureRandom);
+    final positionsRandom = _DeterministicRandom(_stableSeed(dayKey, nodeCount));
     final scattered = _scatterNodes(nodeCount, positionsRandom);
 
     if (nodeCount >= 4 && edges.isNotEmpty) {
@@ -2919,30 +2918,18 @@ class PlanarityGenerator {
     return PlanarityLevel(nodes: scattered, edges: edges);
   }
 
-  static List<Offset> _circleLayout(int n) {
-    if (n == 1) {
-      return const [Offset(0, 0)];
-    }
-
-    return List.generate(n, (i) {
-      final angle = (2 * pi * i) / n;
-      return Offset(cos(angle), sin(angle));
-    });
-  }
-
-  static List<Offset> _scatterNodes(int n, Random random) {
+  static List<Offset> _scatterNodes(int n, _DeterministicRandom random) {
     return List.generate(n, (_) => _randomPoint(random));
   }
 
-  static Offset _randomPoint(Random random) {
+  static Offset _randomPoint(_DeterministicRandom random) {
     return Offset(
       50 + random.nextDouble() * 260,
       60 + random.nextDouble() * 420,
     );
   }
 
-  static List<Edge> _buildPlanarEdges(List<Offset> embedding, Random random) {
-    final n = embedding.length;
+  static List<Edge> _buildPlanarEdges(int n, _DeterministicRandom random) {
     if (n <= 1) {
       return const <Edge>[];
     }
@@ -2963,18 +2950,13 @@ class PlanarityGenerator {
       }
     }
 
-    candidates.shuffle(random);
+    _shuffleEdges(candidates, random);
     for (final candidate in candidates) {
       final crossesExisting = edges.any((existing) {
         if (existing.sharesNode(candidate)) {
           return false;
         }
-        return _segmentsIntersect(
-          embedding[candidate.a],
-          embedding[candidate.b],
-          embedding[existing.a],
-          embedding[existing.b],
-        );
+        return _crossesInConvexOrder(candidate, existing, n);
       });
       if (!crossesExisting && random.nextDouble() < 0.55) {
         edges.add(candidate);
@@ -2982,6 +2964,34 @@ class PlanarityGenerator {
     }
 
     return edges.toList(growable: false);
+  }
+
+  static void _shuffleEdges(List<Edge> edges, _DeterministicRandom random) {
+    for (var i = edges.length - 1; i > 0; i--) {
+      final swapIndex = random.nextInt(i + 1);
+      final current = edges[i];
+      edges[i] = edges[swapIndex];
+      edges[swapIndex] = current;
+    }
+  }
+
+  // For vertices placed in a consistent cyclic order on a convex polygon,
+  // two edges cross iff their endpoints interleave around the polygon.
+  static bool _crossesInConvexOrder(Edge a, Edge b, int nodeCount) {
+    final aToBStart = _isBetweenClockwise(start: a.a, value: b.a, end: a.b, nodeCount: nodeCount);
+    final aToBEnd = _isBetweenClockwise(start: a.a, value: b.b, end: a.b, nodeCount: nodeCount);
+    return aToBStart != aToBEnd;
+  }
+
+  static bool _isBetweenClockwise({
+    required int start,
+    required int value,
+    required int end,
+    required int nodeCount,
+  }) {
+    final relativeValue = (value - start + nodeCount) % nodeCount;
+    final relativeEnd = (end - start + nodeCount) % nodeCount;
+    return relativeValue > 0 && relativeValue < relativeEnd;
   }
 
   // Stable seed hash (FNV-1a style) to keep generation consistent across runs/platforms.
@@ -2993,6 +3003,22 @@ class PlanarityGenerator {
       hash = (hash * 0x01000193) & 0x7fffffff;
     }
     return hash;
+  }
+}
+
+class _DeterministicRandom {
+  _DeterministicRandom(int seed) : _state = seed & 0xffffffff;
+
+  int _state;
+
+  int nextInt(int max) {
+    assert(max > 0, 'max must be positive');
+    return (nextDouble() * max).floor();
+  }
+
+  double nextDouble() {
+    _state = (_state * 1664525 + 1013904223) & 0xffffffff;
+    return _state / 0x100000000;
   }
 }
 

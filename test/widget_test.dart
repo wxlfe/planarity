@@ -11,11 +11,38 @@ String _todayKey() {
   return '$year-$month-$day';
 }
 
+String _graphSignature(PlanarityLevel level) {
+  final nodeSignature = level.nodes
+      .map((node) => '${node.dx.toStringAsFixed(6)},${node.dy.toStringAsFixed(6)}')
+      .join('|');
+  final edgeSignature = level.edges.map((edge) => '${edge.a}-${edge.b}').join('|');
+  return '$nodeSignature::$edgeSignature';
+}
+
 void main() {
   test('score updates when a graph is solved', () {
     expect(scoreForSolvedLevel(level: 6, movesUsed: 2), 4);
     expect(scoreForSolvedLevel(level: 6, movesUsed: 6), 0);
     expect(scoreForSolvedLevel(level: 6, movesUsed: 8), 0);
+  });
+
+  test('daily graph generation is deterministic for the same day and node count', () {
+    final first = PlanarityGenerator.generate(dayKey: '2026-03-18', level: 6);
+    final second = PlanarityGenerator.generate(dayKey: '2026-03-18', level: 6);
+    final equivalentNodeCount = PlanarityGenerator.generate(dayKey: '2026-03-18', level: 2);
+    final equivalentNodeCountAgain = PlanarityGenerator.generate(dayKey: '2026-03-18', level: 1);
+
+    expect(_graphSignature(first), _graphSignature(second));
+    expect(_graphSignature(equivalentNodeCount), _graphSignature(equivalentNodeCountAgain));
+  });
+
+  test('daily graph generation changes when the day or node count changes', () {
+    final baseline = PlanarityGenerator.generate(dayKey: '2026-03-18', level: 6);
+    final differentDay = PlanarityGenerator.generate(dayKey: '2026-03-19', level: 6);
+    final differentNodeCount = PlanarityGenerator.generate(dayKey: '2026-03-18', level: 7);
+
+    expect(_graphSignature(baseline), isNot(_graphSignature(differentDay)));
+    expect(_graphSignature(baseline), isNot(_graphSignature(differentNodeCount)));
   });
 
   testWidgets('Home page shows mobile leaderboard with global default', (
