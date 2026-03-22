@@ -151,6 +151,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
   DailyPlayStatus _status = DailyPlayStatus.ready;
   int _currentLevel = _startingLevel;
   int _score = 0;
+  int _leaderboardRefreshTick = 0;
   String? _lockedDay;
   StreamSubscription<User?>? _authSubscription;
   String? _activeUserId;
@@ -257,6 +258,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       _score = 0;
       _lockedDay = null;
     });
+    _refreshLeaderboard();
     await _saveProgress();
 
     if (user != null) {
@@ -312,6 +314,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       }
       _isLoaded = true;
     });
+    _refreshLeaderboard();
 
     if (savedDay != today) {
       await prefs
@@ -340,6 +343,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
         _score = 0;
         _lockedDay = null;
       });
+      _refreshLeaderboard();
       await _saveProgress();
       _maybePromptToAuthenticateForFriendInvite();
       return;
@@ -369,6 +373,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       _score = syncedScore;
       _lockedDay = playedToday ? today : null;
     });
+    _refreshLeaderboard();
     await _saveProgress();
     _maybePromptToAddIncomingFriend(profileData: profileData);
 
@@ -415,6 +420,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       score: _score,
       lifetimeScoreIncrement: addedScore > 0 ? addedScore : null,
     );
+    _refreshLeaderboard();
   }
 
   Future<void> _updateUserProgressFields({
@@ -459,6 +465,15 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     }
   }
 
+  void _refreshLeaderboard() {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _leaderboardRefreshTick += 1;
+    });
+  }
+
   Future<void> _openChallenge() async {
     if (_status == DailyPlayStatus.locked) {
       setState(() {});
@@ -489,7 +504,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
 
     if (!mounted || result == null) {
       if (mounted) {
-        setState(() {});
+        _refreshLeaderboard();
       }
       return;
     }
@@ -514,6 +529,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     await _syncCurrentScoreToFirestore(
       addedScore: max(0, result.score - previousScore),
     );
+    _refreshLeaderboard();
   }
 
   Future<void> _updateSignedInProgressForToday({
@@ -789,6 +805,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       );
 
       if (!mounted || result == null) {
+        _refreshLeaderboard();
         return;
       }
 
@@ -800,6 +817,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       if (showProfileAfterNewAccount && result.userToEdit != null) {
         await _showProfileModal(user: result.userToEdit!);
       }
+      _refreshLeaderboard();
       return;
     }
   }
@@ -834,6 +852,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     );
 
     if (result == null || !mounted) {
+      _refreshLeaderboard();
       return;
     }
 
@@ -848,12 +867,14 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
         await GoogleSignIn.instance.signOut().catchError((_) {});
       }
       await FirebaseAuth.instance.signOut();
+      _refreshLeaderboard();
       return;
     }
 
     if (result.shouldPersist) {
       await _saveDisplayName(user: user, displayName: result.displayName);
     }
+    _refreshLeaderboard();
   }
 
   Future<Map<String, dynamic>?> _loadUserDocument(String uid) async {
@@ -1399,6 +1420,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
         );
       },
     );
+    _refreshLeaderboard();
   }
 
   @override
@@ -1424,7 +1446,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       isLocked: isLocked,
       onPlayPressed: _openChallenge,
       showLeaderboardBelowButton: !isWide,
-      leaderboard: _LeaderboardCard(user: user),
+      leaderboard: _LeaderboardCard(
+        user: user,
+        refreshToken: _leaderboardRefreshTick,
+      ),
       onPortfolioTap: () async {
         await launchUrl(_portfolioUri, mode: LaunchMode.externalApplication);
       },
@@ -1449,7 +1474,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
                               const SizedBox(width: 40),
                               Expanded(
                                 flex: 9,
-                                child: _LeaderboardCard(user: user),
+                                child: _LeaderboardCard(
+                                  user: user,
+                                  refreshToken: _leaderboardRefreshTick,
+                                ),
                               ),
                             ],
                           )
@@ -2387,12 +2415,82 @@ class _FriendAddResult {
   final String message;
 }
 
+String _leaderboardTodayKey() {
+  final now = DateTime.now().toUtc();
+  final year = now.year.toString().padLeft(4, '0');
+  final month = now.month.toString().padLeft(2, '0');
+  final day = now.day.toString().padLeft(2, '0');
+  return '$year-$month-$day';
+}
+
+String? _leaderboardDisplayNameFromData(Map<String, dynamic>? profileData) {
+  final profileDisplayName = profileData?['displayName'];
+  if (profileDisplayName is String && profileDisplayName.trim().isNotEmpty) {
+    return profileDisplayName.trim();
+  }
+  return null;
+}
+
+List<String> _leaderboardFriendIds(Map<String, dynamic>? profileData) {
+  final rawFriends = profileData?['friends'];
+  if (rawFriends is! List) {
+    return const <String>[];
+  }
+
+  final seen = <String>{};
+  final friends = <String>[];
+  for (final value in rawFriends) {
+    if (value is! String) {
+      continue;
+    }
+    final trimmed = value.trim();
+    if (trimmed.isEmpty || !seen.add(trimmed)) {
+      continue;
+    }
+    friends.add(trimmed);
+  }
+  return friends;
+}
+
+List<List<String>> _chunkedLeaderboardFriendIds(
+  List<String> friendIds, {
+  int chunkSize = 10,
+}) {
+  if (friendIds.isEmpty) {
+    return const <List<String>>[];
+  }
+
+  final sortedIds = List<String>.from(friendIds)..sort();
+  final chunks = <List<String>>[];
+  for (var index = 0; index < sortedIds.length; index += chunkSize) {
+    final end = min(index + chunkSize, sortedIds.length);
+    chunks.add(sortedIds.sublist(index, end));
+  }
+  return chunks;
+}
+
+int _leaderboardScoreFromData(Map<String, dynamic>? profileData) {
+  final playedToday = profileData?['lastPlayed'] == _leaderboardTodayKey();
+  if (!playedToday) {
+    return 0;
+  }
+  final score = profileData?['score'];
+  if (score is int) {
+    return max(0, score);
+  }
+  if (score is num) {
+    return max(0, score.toInt());
+  }
+  return 0;
+}
+
 enum _LeaderboardTab { friends, global }
 
 class _LeaderboardCard extends StatefulWidget {
-  const _LeaderboardCard({this.user});
+  const _LeaderboardCard({this.user, required this.refreshToken});
 
   final User? user;
+  final int refreshToken;
 
   @override
   State<_LeaderboardCard> createState() => _LeaderboardCardState();
@@ -2404,8 +2502,6 @@ class _LeaderboardCardState extends State<_LeaderboardCard> {
   bool get _isSignedIn => widget.user != null;
 
   bool get _friendsEnabled => _isSignedIn;
-
-  bool get _hasFriends => false;
 
   @override
   void initState() {
@@ -2428,6 +2524,15 @@ class _LeaderboardCardState extends State<_LeaderboardCard> {
   _LeaderboardTab get _defaultTab =>
       _isSignedIn ? _LeaderboardTab.friends : _LeaderboardTab.global;
 
+  void _selectTab(_LeaderboardTab tab) {
+    if (_selectedTab == tab) {
+      return;
+    }
+    setState(() {
+      _selectedTab = tab;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -2446,56 +2551,25 @@ class _LeaderboardCardState extends State<_LeaderboardCard> {
   }
 }
 
-class _TemporarilyBlurredLeaderboard extends StatelessWidget {
-  const _TemporarilyBlurredLeaderboard({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return ImageFiltered(
-      // Temporary presentation treatment for unreleased leaderboard data.
-      imageFilter: ui.ImageFilter.blur(sigmaX: 3.5, sigmaY: 3.5),
-      child: child,
-    );
-  }
-}
-
 class _LeaderboardCardContents extends StatelessWidget {
   const _LeaderboardCardContents();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          'coming soon - leaderboard',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 12),
-        const _TemporarilyBlurredLeaderboard(child: _LeaderboardBlurredBody()),
-      ],
-    );
-  }
-}
-
-class _LeaderboardBlurredBody extends StatelessWidget {
-  const _LeaderboardBlurredBody();
-
-  @override
-  Widget build(BuildContext context) {
     final state = context.findAncestorStateOfType<_LeaderboardCardState>()!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        Text(
+          'leaderboard',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
@@ -2503,7 +2577,9 @@ class _LeaderboardBlurredBody extends StatelessWidget {
                 label: 'Friends',
                 selected: state._selectedTab == _LeaderboardTab.friends,
                 enabled: state._friendsEnabled,
-                onPressed: null,
+                onPressed: state._friendsEnabled
+                    ? () => state._selectTab(_LeaderboardTab.friends)
+                    : null,
               ),
             ),
             const SizedBox(width: 8),
@@ -2512,7 +2588,7 @@ class _LeaderboardBlurredBody extends StatelessWidget {
                 label: 'Global',
                 selected: state._selectedTab == _LeaderboardTab.global,
                 enabled: true,
-                onPressed: null,
+                onPressed: () => state._selectTab(_LeaderboardTab.global),
               ),
             ),
           ],
@@ -2522,9 +2598,9 @@ class _LeaderboardBlurredBody extends StatelessWidget {
           duration: const Duration(milliseconds: 160),
           child: state._selectedTab == _LeaderboardTab.friends
               ? _FriendsLeaderboardView(
-                  key: const ValueKey('friends'),
+                  key: ValueKey('friends-${state.widget.refreshToken}'),
                   user: state.widget.user,
-                  hasFriends: state._hasFriends,
+                  refreshToken: state.widget.refreshToken,
                 )
               : _GlobalLeaderboardView(
                   key: const ValueKey('global'),
@@ -2574,20 +2650,169 @@ class _LeaderboardTabButton extends StatelessWidget {
   }
 }
 
-class _FriendsLeaderboardView extends StatelessWidget {
+class _FriendsLeaderboardView extends StatefulWidget {
   const _FriendsLeaderboardView({
     super.key,
     required this.user,
-    required this.hasFriends,
+    required this.refreshToken,
   });
 
   final User? user;
-  final bool hasFriends;
+  final int refreshToken;
+
+  @override
+  State<_FriendsLeaderboardView> createState() => _FriendsLeaderboardViewState();
+}
+
+class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>?
+  _userSubscription;
+  final Map<String, StreamSubscription<QuerySnapshot<Map<String, dynamic>>>>
+  _friendQuerySubscriptions =
+      <String, StreamSubscription<QuerySnapshot<Map<String, dynamic>>>>{};
+  Map<String, dynamic>? _userProfileData;
+  final Map<String, Map<String, dynamic>?> _friendProfileData =
+      <String, Map<String, dynamic>?>{};
+  Object? _loadError;
+  bool _isLoading = true;
+
+  User? get _user => widget.user;
+
+  @override
+  void initState() {
+    super.initState();
+    _startListening();
+  }
+
+  @override
+  void didUpdateWidget(covariant _FriendsLeaderboardView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.user?.uid != widget.user?.uid ||
+        oldWidget.refreshToken != widget.refreshToken) {
+      _startListening();
+    }
+  }
+
+  @override
+  void dispose() {
+    _cancelAllSubscriptions();
+    super.dispose();
+  }
+
+  void _cancelAllSubscriptions() {
+    _userSubscription?.cancel();
+    _userSubscription = null;
+    for (final subscription in _friendQuerySubscriptions.values) {
+      subscription.cancel();
+    }
+    _friendQuerySubscriptions.clear();
+  }
+
+  void _startListening() {
+    _cancelAllSubscriptions();
+    if (mounted) {
+      setState(() {
+        _userProfileData = null;
+        _friendProfileData.clear();
+        _loadError = null;
+        _isLoading = true;
+      });
+    } else {
+      _userProfileData = null;
+      _friendProfileData.clear();
+      _loadError = null;
+      _isLoading = true;
+    }
+
+    final user = _user;
+    if (user == null) {
+      if (mounted) {
+        setState(() {});
+      }
+      return;
+    }
+
+    final users = FirebaseFirestore.instance.collection('users');
+    _userSubscription = users.doc(user.uid).snapshots().listen(
+      (snapshot) {
+        _userProfileData = snapshot.data();
+        _loadError = null;
+        _syncFriendSubscriptions(_leaderboardFriendIds(_userProfileData));
+        _publishLeaderboard();
+      },
+      onError: (Object error) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _loadError = error;
+          _isLoading = false;
+        });
+      },
+    );
+  }
+
+  void _syncFriendSubscriptions(List<String> friendIds) {
+    final users = FirebaseFirestore.instance.collection('users');
+    final friendChunks = _chunkedLeaderboardFriendIds(friendIds);
+    final nextChunkKeys = friendChunks
+        .map((chunk) => chunk.join('\u0000'))
+        .toSet();
+    final currentChunkKeys = _friendQuerySubscriptions.keys.toSet();
+
+    for (final removedChunkKey in currentChunkKeys.difference(nextChunkKeys)) {
+      _friendQuerySubscriptions.remove(removedChunkKey)?.cancel();
+      for (final friendId in removedChunkKey.split('\u0000')) {
+        _friendProfileData.remove(friendId);
+      }
+    }
+
+    for (final chunk in friendChunks) {
+      final chunkKey = chunk.join('\u0000');
+      if (_friendQuerySubscriptions.containsKey(chunkKey)) {
+        continue;
+      }
+
+      _friendQuerySubscriptions[chunkKey] = users
+          .where(FieldPath.documentId, whereIn: chunk)
+          .snapshots()
+          .listen(
+        (snapshot) {
+          for (final friendId in chunk) {
+            _friendProfileData[friendId] = null;
+          }
+          for (final doc in snapshot.docs) {
+            _friendProfileData[doc.id] = doc.data();
+          }
+          _loadError = null;
+          _publishLeaderboard();
+        },
+        onError: (Object error) {
+          if (!mounted) {
+            return;
+          }
+          setState(() {
+            _loadError = error;
+            _isLoading = false;
+          });
+        },
+      );
+    }
+  }
+
+  void _publishLeaderboard() {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final signedInUser = user;
+    final signedInUser = widget.user;
 
     if (signedInUser == null) {
       return Text(
@@ -2598,19 +2823,97 @@ class _FriendsLeaderboardView extends StatelessWidget {
       );
     }
 
-    if (!hasFriends) {
+    if (_isLoading) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_loadError != null) {
+      return Text(
+        'unable to load friends leaderboard right now.',
+        style: theme.textTheme.bodyMedium,
+      );
+    }
+
+    final entries = _buildFriendsLeaderboardEntries(
+      user: signedInUser,
+      userProfileData: _userProfileData,
+      friendProfileData: _friendProfileData,
+    );
+    if (entries.length <= 1) {
       return Text(
         "you haven't added any friends yet. open your profile to invite someone.",
         style: theme.textTheme.bodyMedium,
       );
     }
 
-    final entries = _friendsEntriesFor(signedInUser);
     return _LeaderboardTable(
       entries: entries,
       subtitle: 'you and your friends',
     );
   }
+}
+
+List<_LeaderboardEntry> _buildFriendsLeaderboardEntries({
+  required User user,
+  required Map<String, dynamic>? userProfileData,
+  required Map<String, Map<String, dynamic>?> friendProfileData,
+}) {
+  final friendIds = _leaderboardFriendIds(userProfileData);
+  if (friendIds.isEmpty) {
+    return _friendsEntriesFor(user);
+  }
+
+  final standings = <_LeaderboardStanding>[
+    _LeaderboardStanding(
+      uid: user.uid,
+      name:
+          _leaderboardDisplayNameFromData(userProfileData) ??
+          _displayNameForUser(user),
+      score: _leaderboardScoreFromData(userProfileData),
+      isCurrentUser: true,
+    ),
+  ];
+
+  for (final friendId in friendIds) {
+    final friendData = friendProfileData[friendId];
+    if (friendData == null) {
+      continue;
+    }
+    standings.add(
+      _LeaderboardStanding(
+        uid: friendId,
+        name:
+            _leaderboardDisplayNameFromData(friendData) ?? 'anonymous player',
+        score: _leaderboardScoreFromData(friendData),
+        isCurrentUser: false,
+      ),
+    );
+  }
+
+  standings.sort((_LeaderboardStanding a, _LeaderboardStanding b) {
+    final byScore = b.score.compareTo(a.score);
+    if (byScore != 0) {
+      return byScore;
+    }
+    final byName = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    if (byName != 0) {
+      return byName;
+    }
+    return a.uid.compareTo(b.uid);
+  });
+
+  return [
+    for (var index = 0; index < standings.length; index += 1)
+      _LeaderboardEntry(
+        rank: index + 1,
+        name: standings[index].name,
+        score: standings[index].score,
+        isCurrentUser: standings[index].isCurrentUser,
+      ),
+  ];
 }
 
 class _GlobalLeaderboardView extends StatelessWidget {
@@ -2706,39 +3009,64 @@ class _LeaderboardTable extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         ...entries.map(
-          (entry) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 34,
-                  child: Text(
-                    '#${entry.rank}',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.75),
+          (entry) {
+            final isCurrentUser = entry.isCurrentUser;
+            final rowBackground = isCurrentUser
+                ? theme.colorScheme.onSurface
+                : Colors.transparent;
+            final rowForeground = isCurrentUser
+                ? theme.colorScheme.surface
+                : theme.colorScheme.onSurface;
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+              decoration: BoxDecoration(
+                color: rowBackground,
+                border: Border.all(
+                  color: isCurrentUser
+                      ? theme.colorScheme.onSurface
+                      : theme.colorScheme.onSurface.withOpacity(0.16),
+                ),
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 34,
+                    child: Text(
+                      '#${entry.rank}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: isCurrentUser
+                            ? rowForeground
+                            : theme.colorScheme.onSurface.withOpacity(0.75),
+                        fontWeight: isCurrentUser
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Text(
-                    entry.name,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: entry.isCurrentUser
-                          ? FontWeight.w700
-                          : FontWeight.w500,
+                  Expanded(
+                    child: Text(
+                      entry.name,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: rowForeground,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  '${entry.score}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+                  const SizedBox(width: 12),
+                  Text(
+                    '${entry.score}',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: rowForeground,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
+                ],
+              ),
+            );
+          },
         ),
       ],
     );
@@ -2759,18 +3087,28 @@ class _LeaderboardEntry {
   final bool isCurrentUser;
 }
 
+class _LeaderboardStanding {
+  const _LeaderboardStanding({
+    required this.uid,
+    required this.name,
+    required this.score,
+    required this.isCurrentUser,
+  });
+
+  final String uid;
+  final String name;
+  final int score;
+  final bool isCurrentUser;
+}
+
 List<_LeaderboardEntry> _friendsEntriesFor(User user) {
-  final playerName = _displayNameForUser(user);
   return [
-    _LeaderboardEntry(rank: 1, name: 'mia', score: 41),
     _LeaderboardEntry(
-      rank: 2,
-      name: playerName,
-      score: 36,
+      rank: 1,
+      name: _displayNameForUser(user),
+      score: 0,
       isCurrentUser: true,
     ),
-    _LeaderboardEntry(rank: 3, name: 'rory', score: 29),
-    _LeaderboardEntry(rank: 4, name: 'alex', score: 25),
   ];
 }
 
