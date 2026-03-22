@@ -25,6 +25,13 @@ jobs:
       - name: Build Flutter web
         run: flutter build web
 
+      - name: Prepare Vercel routing files
+        run: |
+          cp vercel.json build/web/vercel.json
+          mkdir -p build/web/.well-known
+          cp web/.well-known/apple-app-site-association build/web/.well-known/apple-app-site-association
+          cp web/.well-known/assetlinks.json build/web/.well-known/assetlinks.json
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
