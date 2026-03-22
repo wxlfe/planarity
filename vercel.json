@@ -47,8 +47,10 @@
       ]
     }
   ],
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    {
+      "source": "/add-friend",
+      "destination": "/index.html"
+    }
   ]
 }
