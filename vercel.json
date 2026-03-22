@@ -49,7 +49,7 @@
   ],
   "rewrites": [
     {
-      "source": "/add-friend",
+      "source": "/add-friend/:path*",
       "destination": "/index.html"
     }
   ]
