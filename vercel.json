@@ -46,11 +46,5 @@
         { "key": "Cache-Control", "value": "no-store, max-age=0" }
       ]
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/add-friend/:path*",
-      "destination": "/index.html"
-    }
   ]
 }

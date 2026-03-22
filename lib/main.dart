@@ -977,11 +977,11 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       return null;
     }
     final normalizedPath = uri.path.startsWith('/') ? uri.path : '/${uri.path}';
-    final isAddFriendRoute = normalizedPath == '/add-friend';
-    if (!isAddFriendRoute) {
+    final isRootInviteRoute = normalizedPath == '/' || normalizedPath.isEmpty;
+    if (!isRootInviteRoute) {
       return null;
     }
-    final uid = uri.queryParameters['uid']?.trim();
+    final uid = uri.queryParameters['invite']?.trim();
     if (uid == null || uid.isEmpty) {
       return null;
     }
@@ -992,8 +992,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     return Uri(
       scheme: 'https',
       host: 'planarity.xyz',
-      path: '/add-friend',
-      queryParameters: <String, String>{'uid': uid},
+      path: '/',
+      queryParameters: <String, String>{'invite': uid},
     ).toString();
   }
 
