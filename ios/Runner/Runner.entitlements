@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Kept for later restoration of universal links on paid Apple Developer teams.
+  Re-enable by wiring CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements
+  back into the Runner target build configurations in Runner.xcodeproj.
+-->
+<plist version="1.0">
+<dict>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:planarity.xyz</string>
+	</array>
+</dict>
+</plist>
