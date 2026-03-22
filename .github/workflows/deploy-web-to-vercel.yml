@@ -37,14 +37,14 @@ jobs:
 
       - name: Deploy Preview
         if: github.event_name == 'pull_request'
-        run: vercel deploy build/web --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel --cwd build/web deploy --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Deploy Production
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: vercel deploy build/web --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel --cwd build/web deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
