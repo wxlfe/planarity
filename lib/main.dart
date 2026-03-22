@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:app_links/app_links.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -19,8 +21,6 @@ import 'firebase_options.dart';
 
 bool _firebaseReady = false;
 bool _googleSignInReady = false;
-
-const _dummyFriendsUri = 'https://example.com/friends';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -109,18 +109,14 @@ ThemeData _buildTheme(Brightness brightness) {
       style: FilledButton.styleFrom(
         backgroundColor: isDark ? white : black,
         foregroundColor: isDark ? black : white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(0),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: isDark ? white : black,
         side: BorderSide(color: isDark ? white : black),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(0),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
       ),
     ),
     dividerColor: isDark ? Colors.white24 : Colors.black26,
@@ -142,7 +138,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     'https://wxlfe.dev/?utm_source=planarity.xyz&utm_medium=Self%2BPromotion&utm_campaign=Footer%2BPortfolio%2BLink&utm_id=Footer%2BPortfolio%2BLink&utm_content=Footer%2BPortfolio%2BLink',
   );
   static final Uri _originalGameUri = Uri.parse('http://johntantalo.com/');
-  static final Uri _planarGraphInfoUri = Uri.parse('https://en.wikipedia.org/wiki/Planar_graph');
+  static final Uri _planarGraphInfoUri = Uri.parse(
+    'https://en.wikipedia.org/wiki/Planar_graph',
+  );
   static const _startingLevel = 4;
   static const _statusKey = 'daily_status';
   static const _levelKey = 'daily_level';
@@ -158,23 +156,72 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
   String? _activeUserId;
   User? _currentUser;
   Timer? _dailyResetTimer;
+  String? _pendingFriendInviteUid;
+  bool _friendInvitePromptOpen = false;
+  bool _friendInviteAuthPromptOpen = false;
+  StreamSubscription<Uri>? _appLinkSubscription;
 
   @override
   void initState() {
     super.initState();
+    _pendingFriendInviteUid = _incomingFriendInviteUid();
+    _configureIncomingFriendLinks();
     _scheduleDailyReset();
     _loadProgress();
     if (_firebaseReady) {
-      _authSubscription = FirebaseAuth.instance.authStateChanges().listen(_handleAuthStateChange);
+      _authSubscription = FirebaseAuth.instance.authStateChanges().listen(
+        _handleAuthStateChange,
+      );
       _handleAuthStateChange(FirebaseAuth.instance.currentUser);
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybePromptToAuthenticateForFriendInvite();
+    });
   }
 
   @override
   void dispose() {
     _dailyResetTimer?.cancel();
     _authSubscription?.cancel();
+    _appLinkSubscription?.cancel();
     super.dispose();
+  }
+
+  Future<void> _configureIncomingFriendLinks() async {
+    if (kIsWeb) {
+      return;
+    }
+
+    final appLinks = AppLinks();
+
+    try {
+      final initialUri = await appLinks.getInitialLink();
+      _handleIncomingFriendInviteUri(initialUri);
+    } catch (error, stackTrace) {
+      debugPrint('Failed to read initial app link: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+
+    _appLinkSubscription = appLinks.uriLinkStream.listen(
+      _handleIncomingFriendInviteUri,
+      onError: (Object error, StackTrace stackTrace) {
+        debugPrint('Incoming app link failed: $error');
+        debugPrintStack(stackTrace: stackTrace);
+      },
+    );
+  }
+
+  void _handleIncomingFriendInviteUri(Uri? uri) {
+    final friendUid = _friendInviteUidFromUri(uri);
+    if (friendUid == null) {
+      return;
+    }
+    _pendingFriendInviteUid = friendUid;
+    _maybePromptToAuthenticateForFriendInvite();
+    final currentUser = _currentUser;
+    if (currentUser != null) {
+      _maybePromptToAddIncomingFriend(profileData: null);
+    }
   }
 
   String _todayKey() {
@@ -294,6 +341,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
         _lockedDay = null;
       });
       await _saveProgress();
+      _maybePromptToAuthenticateForFriendInvite();
       return;
     }
 
@@ -301,7 +349,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     final lastPlayed = _profileLastPlayed(profileData);
     final playedToday = lastPlayed == _todayKey();
     final syncedScore = _profileScore(profileData, playedToday: playedToday);
-    final syncedLevel = _profileCurrentLevel(profileData, playedToday: playedToday);
+    final syncedLevel = _profileCurrentLevel(
+      profileData,
+      playedToday: playedToday,
+    );
     final isLocked = _profileLocked(profileData);
     final today = _todayKey();
 
@@ -319,8 +370,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       _lockedDay = playedToday ? today : null;
     });
     await _saveProgress();
+    _maybePromptToAddIncomingFriend(profileData: profileData);
 
-    if (!playedToday && (isLocked || syncedScore != 0 || syncedLevel != _startingLevel)) {
+    if (!playedToday &&
+        (isLocked || syncedScore != 0 || syncedLevel != _startingLevel)) {
       await _updateUserProgressFields(
         userId: user.uid,
         score: 0,
@@ -392,10 +445,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       return;
     }
 
-    await FirebaseFirestore.instance.collection('users').doc(userId).set(
-          data,
-          SetOptions(merge: true),
-        );
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .set(data, SetOptions(merge: true));
   }
 
   Future<SharedPreferences?> _prefsOrNull() async {
@@ -491,7 +544,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     if (cleanedEmail.isEmpty || cleanedPassword.isEmpty) {
       return 'enter email and password';
     }
-    final emailValid = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(cleanedEmail);
+    final emailValid = RegExp(
+      r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+    ).hasMatch(cleanedEmail);
     if (!emailValid) {
       return 'enter a valid email';
     }
@@ -509,10 +564,11 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
           password: cleanedPassword,
         );
       } else {
-        final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: cleanedEmail,
-          password: cleanedPassword,
-        );
+        final credential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+              email: cleanedEmail,
+              password: cleanedPassword,
+            );
         final user = credential.user;
         if (user == null) {
           return 'unable to create account right now';
@@ -550,9 +606,13 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
 
   Future<_AuthSubmissionResult> _submitGoogleAuth() async {
     if (!_firebaseReady) {
-      return const _AuthSubmissionResult(errorText: 'auth configuration is missing');
+      return const _AuthSubmissionResult(
+        errorText: 'auth configuration is missing',
+      );
     }
-    if (!kIsWeb && (!_googleSignInReady || !GoogleSignIn.instance.supportsAuthenticate())) {
+    if (!kIsWeb &&
+        (!_googleSignInReady ||
+            !GoogleSignIn.instance.supportsAuthenticate())) {
       return const _AuthSubmissionResult(
         errorText: 'google sign-in is not available on this platform',
       );
@@ -562,7 +622,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       final credential = await _signInWithGoogle();
       final user = credential.user;
       if (user == null) {
-        return const _AuthSubmissionResult(errorText: 'unable to authenticate right now');
+        return const _AuthSubmissionResult(
+          errorText: 'unable to authenticate right now',
+        );
       }
 
       if (credential.additionalUserInfo?.isNewUser ?? false) {
@@ -570,7 +632,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       }
 
       return _AuthSubmissionResult(
-        userToEdit: credential.additionalUserInfo?.isNewUser ?? false ? user : null,
+        userToEdit: credential.additionalUserInfo?.isNewUser ?? false
+            ? user
+            : null,
       );
     } on GoogleSignInException catch (error, stackTrace) {
       debugPrint(
@@ -583,7 +647,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
         'Google platform auth failed: code=${error.code}, message=${error.message}',
       );
       debugPrintStack(stackTrace: stackTrace);
-      return _AuthSubmissionResult(errorText: _googlePlatformAuthErrorMessage(error));
+      return _AuthSubmissionResult(
+        errorText: _googlePlatformAuthErrorMessage(error),
+      );
     } on FirebaseAuthException catch (error, stackTrace) {
       debugPrint(
         'Firebase Google auth failed: code=${error.code}, message=${error.message}',
@@ -599,7 +665,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     } catch (error, stackTrace) {
       debugPrint('Unexpected Google auth failure: $error');
       debugPrintStack(stackTrace: stackTrace);
-      return const _AuthSubmissionResult(errorText: 'unable to authenticate right now');
+      return const _AuthSubmissionResult(
+        errorText: 'unable to authenticate right now',
+      );
     }
   }
 
@@ -610,7 +678,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
 
     final googleUser = await GoogleSignIn.instance.authenticate();
     final googleAuth = googleUser.authentication;
-    final credential = GoogleAuthProvider.credential(idToken: googleAuth.idToken);
+    final credential = GoogleAuthProvider.credential(
+      idToken: googleAuth.idToken,
+    );
     return FirebaseAuth.instance.signInWithCredential(credential);
   }
 
@@ -618,6 +688,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     return FirebaseFirestore.instance.collection('users').doc(user.uid).set({
       'displayName': _defaultDisplayName(user),
       'currentLevel': _startingLevel,
+      'friends': <String>[],
       'lastPlayed': _todayKey(),
       'locked': false,
       'lifetimeScore': 0,
@@ -677,7 +748,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
 
   String _googlePlatformAuthErrorMessage(PlatformException error) {
     final message = error.message;
-    if (message != null && message.contains('missing support for the following URL schemes')) {
+    if (message != null &&
+        message.contains('missing support for the following URL schemes')) {
       return 'google sign-in is not configured for this iOS app';
     }
     if (message != null && message.isNotEmpty) {
@@ -698,7 +770,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     }
   }
 
-  Future<void> _showAuthModal({required bool isSignIn}) async {
+  Future<void> _showAuthModal({
+    required bool isSignIn,
+    bool showProfileAfterNewAccount = true,
+  }) async {
     var nextMode = isSignIn;
 
     while (mounted) {
@@ -722,7 +797,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
         continue;
       }
 
-      if (result.userToEdit != null) {
+      if (showProfileAfterNewAccount && result.userToEdit != null) {
         await _showProfileModal(user: result.userToEdit!);
       }
       return;
@@ -736,12 +811,24 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     }
     final initialDisplayName = _profileDisplayName(profileData, user);
     final lifetimeScore = _profileLifetimeScore(profileData);
+    final initialFriendIds = _profileFriendIds(profileData);
     final result = await showDialog<_ProfileDialogResult>(
       context: context,
       builder: (dialogContext) {
         return _ProfileDialog(
           initialDisplayName: initialDisplayName,
+          initialFriendIds: initialFriendIds,
           lifetimeScore: lifetimeScore,
+          loadFriends: _loadFriendProfiles,
+          removeFriend: (friendUid) =>
+              _removeFriendPair(userId: user.uid, friendUid: friendUid),
+          buildInviteLink: () => _friendInvitePath(user.uid),
+          shareInvite: (inviteLink, isDark, sharePositionOrigin) =>
+              _shareFriendInviteCard(
+                inviteLink: inviteLink,
+                isDark: isDark,
+                sharePositionOrigin: sharePositionOrigin,
+              ),
         );
       },
     );
@@ -751,14 +838,13 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     }
 
     if (result.signOutRequested) {
-      await _saveDisplayName(
-        user: user,
-        displayName: result.displayName,
-      );
+      await _saveDisplayName(user: user, displayName: result.displayName);
       if (!mounted) {
         return;
       }
-      if (!kIsWeb && _googleSignInReady && GoogleSignIn.instance.supportsAuthenticate()) {
+      if (!kIsWeb &&
+          _googleSignInReady &&
+          GoogleSignIn.instance.supportsAuthenticate()) {
         await GoogleSignIn.instance.signOut().catchError((_) {});
       }
       await FirebaseAuth.instance.signOut();
@@ -766,22 +852,22 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     }
 
     if (result.shouldPersist) {
-      await _saveDisplayName(
-        user: user,
-        displayName: result.displayName,
-      );
+      await _saveDisplayName(user: user, displayName: result.displayName);
     }
   }
 
   Future<Map<String, dynamic>?> _loadUserDocument(String uid) async {
-    final snapshot = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
     return snapshot.data();
   }
 
   String _profileDisplayName(Map<String, dynamic>? profileData, User user) {
-    final profileDisplayName = profileData?['displayName'];
-    if (profileDisplayName is String && profileDisplayName.trim().isNotEmpty) {
-      return profileDisplayName.trim();
+    final profileDisplayName = _profileDisplayNameFromData(profileData);
+    if (profileDisplayName != null) {
+      return profileDisplayName;
     }
 
     final authDisplayName = user.displayName?.trim();
@@ -803,7 +889,18 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     return 0;
   }
 
-  int _profileScore(Map<String, dynamic>? profileData, {required bool playedToday}) {
+  String? _profileDisplayNameFromData(Map<String, dynamic>? profileData) {
+    final profileDisplayName = profileData?['displayName'];
+    if (profileDisplayName is String && profileDisplayName.trim().isNotEmpty) {
+      return profileDisplayName.trim();
+    }
+    return null;
+  }
+
+  int _profileScore(
+    Map<String, dynamic>? profileData, {
+    required bool playedToday,
+  }) {
     if (!playedToday) {
       return 0;
     }
@@ -817,7 +914,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     return 0;
   }
 
-  int _profileCurrentLevel(Map<String, dynamic>? profileData, {required bool playedToday}) {
+  int _profileCurrentLevel(
+    Map<String, dynamic>? profileData, {
+    required bool playedToday,
+  }) {
     if (!playedToday) {
       return _startingLevel;
     }
@@ -847,11 +947,376 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     return false;
   }
 
+  List<String> _profileFriendIds(Map<String, dynamic>? profileData) {
+    final rawFriends = profileData?['friends'];
+    if (rawFriends is! List) {
+      return const <String>[];
+    }
+
+    final seen = <String>{};
+    final friends = <String>[];
+    for (final value in rawFriends) {
+      if (value is! String) {
+        continue;
+      }
+      final trimmed = value.trim();
+      if (trimmed.isEmpty || !seen.add(trimmed)) {
+        continue;
+      }
+      friends.add(trimmed);
+    }
+    return friends;
+  }
+
+  String? _incomingFriendInviteUid() {
+    return kIsWeb ? _friendInviteUidFromUri(Uri.base) : null;
+  }
+
+  String? _friendInviteUidFromUri(Uri? uri) {
+    if (uri == null) {
+      return null;
+    }
+    final normalizedPath = uri.path.startsWith('/') ? uri.path : '/${uri.path}';
+    final isAddFriendRoute = normalizedPath == '/add-friend';
+    if (!isAddFriendRoute) {
+      return null;
+    }
+    final uid = uri.queryParameters['uid']?.trim();
+    if (uid == null || uid.isEmpty) {
+      return null;
+    }
+    return uid;
+  }
+
+  String _friendInvitePath(String uid) {
+    return Uri(
+      scheme: 'https',
+      host: 'planarity.xyz',
+      path: '/add-friend',
+      queryParameters: <String, String>{'uid': uid},
+    ).toString();
+  }
+
+  Future<List<_FriendProfile>> _loadFriendProfiles(
+    List<String> friendIds,
+  ) async {
+    if (friendIds.isEmpty) {
+      return const <_FriendProfile>[];
+    }
+
+    final futures = friendIds.map((uid) async {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
+      if (!snapshot.exists) {
+        return null;
+      }
+      final data = snapshot.data();
+      return _FriendProfile(
+        uid: uid,
+        displayName: _profileDisplayNameFromData(data) ?? 'anonymous player',
+        lifetimeScore: _profileLifetimeScore(data),
+      );
+    });
+
+    final friends = (await Future.wait(
+      futures,
+    )).whereType<_FriendProfile>().toList();
+    friends.sort(
+      (a, b) =>
+          a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase()),
+    );
+    return friends;
+  }
+
+  Future<void> _removeFriendPair({
+    required String userId,
+    required String friendUid,
+  }) async {
+    final batch = FirebaseFirestore.instance.batch();
+    final users = FirebaseFirestore.instance.collection('users');
+    batch.set(users.doc(userId), {
+      'friends': FieldValue.arrayRemove([friendUid]),
+    }, SetOptions(merge: true));
+    batch.set(users.doc(friendUid), {
+      'friends': FieldValue.arrayRemove([userId]),
+    }, SetOptions(merge: true));
+    await batch.commit();
+  }
+
+  Future<_FriendAddResult> _addFriendPair({
+    required String userId,
+    required String friendUid,
+    required List<String> existingFriendIds,
+  }) async {
+    if (userId == friendUid) {
+      return const _FriendAddResult(message: "you can't add yourself");
+    }
+    if (existingFriendIds.contains(friendUid)) {
+      return const _FriendAddResult(
+        message: 'this friend is already in your list',
+      );
+    }
+
+    final users = FirebaseFirestore.instance.collection('users');
+    final friendSnapshot = await users.doc(friendUid).get();
+    if (!friendSnapshot.exists) {
+      return const _FriendAddResult(
+        message: 'that friend invite is no longer valid',
+      );
+    }
+
+    final batch = FirebaseFirestore.instance.batch();
+    batch.set(users.doc(userId), {
+      'friends': FieldValue.arrayUnion([friendUid]),
+    }, SetOptions(merge: true));
+    batch.set(users.doc(friendUid), {
+      'friends': FieldValue.arrayUnion([userId]),
+    }, SetOptions(merge: true));
+    await batch.commit();
+
+    final friendName =
+        _profileDisplayNameFromData(friendSnapshot.data()) ?? 'your new friend';
+    return _FriendAddResult(message: 'added $friendName');
+  }
+
+  void _maybePromptToAddIncomingFriend({
+    required Map<String, dynamic>? profileData,
+  }) {
+    final currentUser = _currentUser;
+    final friendUid = _pendingFriendInviteUid;
+    if (!mounted ||
+        currentUser == null ||
+        friendUid == null ||
+        _friendInvitePromptOpen) {
+      return;
+    }
+    if (friendUid == currentUser.uid) {
+      _pendingFriendInviteUid = null;
+      return;
+    }
+
+    _friendInvitePromptOpen = true;
+    final existingFriendIds = _profileFriendIds(profileData);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final inviterData = await _loadUserDocument(friendUid);
+      final inviterName =
+          _profileDisplayNameFromData(inviterData) ?? 'this player';
+      if (!mounted) {
+        _friendInvitePromptOpen = false;
+        return;
+      }
+
+      final shouldAdd = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) {
+          final theme = Theme.of(dialogContext);
+          return Dialog(
+            backgroundColor: theme.colorScheme.surface,
+            surfaceTintColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+              side: BorderSide(
+                color: theme.colorScheme.onSurface.withOpacity(0.35),
+              ),
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'friend invite',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'add $inviterName to your friends list?',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        const Spacer(),
+                        TextButton(
+                          onPressed: () =>
+                              Navigator.of(dialogContext).pop(false),
+                          child: const Text('decline'),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton(
+                          onPressed: () =>
+                              Navigator.of(dialogContext).pop(true),
+                          child: const Text('add friend'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+
+      if (!mounted) {
+        _friendInvitePromptOpen = false;
+        return;
+      }
+
+      if (shouldAdd == true) {
+        final result = await _addFriendPair(
+          userId: currentUser.uid,
+          friendUid: friendUid,
+          existingFriendIds: existingFriendIds,
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(result.message)));
+        }
+      }
+
+      _pendingFriendInviteUid = null;
+      _friendInvitePromptOpen = false;
+    });
+  }
+
+  void _maybePromptToAuthenticateForFriendInvite() {
+    if (!mounted ||
+        _pendingFriendInviteUid == null ||
+        _currentUser != null ||
+        _friendInviteAuthPromptOpen) {
+      return;
+    }
+
+    _friendInviteAuthPromptOpen = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || _currentUser != null || _pendingFriendInviteUid == null) {
+        _friendInviteAuthPromptOpen = false;
+        return;
+      }
+
+      await _showAuthModal(isSignIn: false, showProfileAfterNewAccount: false);
+
+      _friendInviteAuthPromptOpen = false;
+    });
+  }
+
+  Future<void> _shareFriendInviteCard({
+    required String inviteLink,
+    required bool isDark,
+    Rect? sharePositionOrigin,
+  }) async {
+    try {
+      final bytes = await _buildFriendInviteShareImage(
+        inviteLink: inviteLink,
+        isDark: isDark,
+      );
+      final file = XFile.fromData(
+        bytes,
+        mimeType: 'image/png',
+        name: 'planarity-friend-invite.png',
+      );
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [file],
+          text: inviteLink,
+          sharePositionOrigin: sharePositionOrigin,
+        ),
+      );
+    } on MissingPluginException {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Share is unavailable on this build.')),
+      );
+    }
+  }
+
+  Future<Uint8List> _buildFriendInviteShareImage({
+    required String inviteLink,
+    required bool isDark,
+  }) async {
+    const width = 1080.0;
+    const height = 860.0;
+    const qrSize = 520.0;
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, width, height));
+    final bgColor = isDark ? Colors.black : Colors.white;
+    final fgColor = isDark ? Colors.white : Colors.black;
+
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, width, height),
+      Paint()..color = bgColor,
+    );
+
+    final title = TextPainter(
+      text: TextSpan(
+        text: 'planarity',
+        style: TextStyle(
+          color: fgColor,
+          fontSize: 62,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    const iconSize = 72.0;
+    const iconGap = 16.0;
+    final headingWidth = iconSize + iconGap + title.width;
+    final headingStartX = (width - headingWidth) / 2;
+    final iconRect = Rect.fromLTWH(headingStartX, 62, iconSize, iconSize);
+    _drawShareBrandIcon(canvas, iconRect);
+    title.paint(
+      canvas,
+      Offset(
+        headingStartX + iconSize + iconGap,
+        iconRect.top + (iconSize - title.height) / 2,
+      ),
+    );
+
+    final qrRect = Rect.fromLTWH((width - qrSize) / 2, 210, qrSize, qrSize);
+    canvas.drawRect(
+      qrRect.inflate(24),
+      Paint()..color = fgColor.withOpacity(isDark ? 0.08 : 0.05),
+    );
+
+    final qrPainter = QrPainter(
+      data: inviteLink,
+      version: QrVersions.auto,
+      gapless: false,
+      color: fgColor,
+      emptyColor: bgColor,
+    );
+    canvas.save();
+    canvas.translate(qrRect.left, qrRect.top);
+    qrPainter.paint(canvas, qrRect.size);
+    canvas.restore();
+
+    final image = await recorder.endRecording().toImage(
+      width.toInt(),
+      height.toInt(),
+    );
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    return byteData!.buffer.asUint8List();
+  }
+
   Future<void> _saveDisplayName({
     required User user,
     required String displayName,
   }) async {
-    final cleanedDisplayName = displayName.trim().isEmpty ? 'anonymous player' : displayName.trim();
+    final cleanedDisplayName = displayName.trim().isEmpty
+        ? 'anonymous player'
+        : displayName.trim();
     await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
       'displayName': cleanedDisplayName,
     }, SetOptions(merge: true));
@@ -870,7 +1335,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
-            side: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.35)),
+            side: BorderSide(
+              color: theme.colorScheme.onSurface.withOpacity(0.35),
+            ),
           ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
@@ -882,12 +1349,16 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
                 children: [
                   Text(
                     'about',
-                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 14),
                   Text(
                     'goal',
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -897,7 +1368,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
                   const SizedBox(height: 16),
                   Text(
                     'why every puzzle is solvable',
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -935,9 +1408,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
 
   Widget _buildHomeScaffold(BuildContext context, User? user) {
     if (!_isLoaded) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final isLocked = _status == DailyPlayStatus.locked;
@@ -976,7 +1447,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
                             children: [
                               Expanded(flex: 11, child: homeContent),
                               const SizedBox(width: 40),
-                              Expanded(flex: 9, child: _LeaderboardCard(user: user)),
+                              Expanded(
+                                flex: 9,
+                                child: _LeaderboardCard(user: user),
+                              ),
                             ],
                           )
                         : homeContent,
@@ -986,7 +1460,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
                   alignment: Alignment.topLeft,
                   child: IconButton(
                     onPressed: _showAboutModal,
-                    icon: const FaIcon(FontAwesomeIcons.circleQuestion, size: 22),
+                    icon: const FaIcon(
+                      FontAwesomeIcons.circleQuestion,
+                      size: 22,
+                    ),
                     tooltip: 'about',
                   ),
                 ),
@@ -1009,19 +1486,17 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
 
             if (isWide) {
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-                child: SizedBox.expand(
-                  child: pageBody,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 28,
                 ),
+                child: SizedBox.expand(child: pageBody),
               );
             }
 
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: IntrinsicHeight(child: pageBody),
-              ),
+              child: SizedBox(width: double.infinity, child: pageBody),
             );
           },
         ),
@@ -1054,118 +1529,124 @@ class _HomeHeroContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedHeight = constraints.hasBoundedHeight;
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Spacer(),
-        const _AnimatedHomeIcon(),
-        const SizedBox(height: 20),
-        Text(
-          'planarity',
-          style: theme.textTheme.displayMedium?.copyWith(
+        return Column(
+          mainAxisSize: hasBoundedHeight ? MainAxisSize.max : MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (hasBoundedHeight)
+              const Spacer()
+            else
+              const SizedBox(height: 24),
+            const _AnimatedHomeIcon(),
+            const SizedBox(height: 20),
+            Text(
+              'planarity',
+              style: theme.textTheme.displayMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.8,
               ),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          'untangle the graph',
-          style: theme.textTheme.titleMedium?.copyWith(
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'untangle the graph',
+              style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w400,
               ),
-        ),
-        const SizedBox(height: 21),
-        Text(
-          'daily score',
-          style: theme.textTheme.bodySmall?.copyWith(
+            ),
+            const SizedBox(height: 21),
+            Text(
+              'daily score',
+              style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.7),
-              ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          scoreLabel,
-          style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-        ),
-        const SizedBox(height: 21),
-        OutlinedButton(
-          onPressed: isLocked ? null : onPlayPressed,
-          style: ButtonStyle(
-            side: MaterialStateProperty.resolveWith((states) {
-              if (states.contains(MaterialState.disabled)) {
-                return BorderSide(
-                  color: theme.colorScheme.onSurface.withOpacity(0.3),
-                );
-              }
-              return BorderSide(color: theme.colorScheme.onSurface);
-            }),
-            foregroundColor: MaterialStateProperty.resolveWith((states) {
-              if (states.contains(MaterialState.disabled)) {
-                return theme.colorScheme.onSurface.withOpacity(0.3);
-              }
-              return theme.colorScheme.onSurface;
-            }),
-          ),
-          child: Text(
-            buttonLabel,
-            style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-          ),
-        ),
-        if (showLeaderboardBelowButton) ...[
-          const SizedBox(height: 28),
-          leaderboard,
-        ],
-        const Spacer(),
-        Column(
-          children: [
-            InkWell(
-              onTap: onPortfolioTap,
-              child: Text(
-                '© nate wolfe',
-                style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.55),
-                      decoration: TextDecoration.underline,
-                    ),
               ),
             ),
             const SizedBox(height: 4),
-            InkWell(
-              onTap: onOriginalGameTap,
+            Text(
+              scoreLabel,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 21),
+            OutlinedButton(
+              onPressed: isLocked ? null : onPlayPressed,
+              style: ButtonStyle(
+                side: MaterialStateProperty.resolveWith((states) {
+                  if (states.contains(MaterialState.disabled)) {
+                    return BorderSide(
+                      color: theme.colorScheme.onSurface.withOpacity(0.3),
+                    );
+                  }
+                  return BorderSide(color: theme.colorScheme.onSurface);
+                }),
+                foregroundColor: MaterialStateProperty.resolveWith((states) {
+                  if (states.contains(MaterialState.disabled)) {
+                    return theme.colorScheme.onSurface.withOpacity(0.3);
+                  }
+                  return theme.colorScheme.onSurface;
+                }),
+              ),
               child: Text(
-                'original by john tantalo',
-                style: theme.textTheme.bodySmall?.copyWith(
+                buttonLabel,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            if (showLeaderboardBelowButton) ...[
+              const SizedBox(height: 28),
+              leaderboard,
+            ],
+            if (hasBoundedHeight)
+              const Spacer()
+            else
+              const SizedBox(height: 24),
+            Column(
+              children: [
+                InkWell(
+                  onTap: onPortfolioTap,
+                  child: Text(
+                    '© nate wolfe',
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface.withOpacity(0.55),
                       decoration: TextDecoration.underline,
                     ),
-              ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                InkWell(
+                  onTap: onOriginalGameTap,
+                  child: Text(
+                    'original by john tantalo',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.55),
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 }
 
 class _AuthDialogResult {
-  const _AuthDialogResult({
-    this.nextIsSignIn,
-    this.userToEdit,
-  });
+  const _AuthDialogResult({this.nextIsSignIn, this.userToEdit});
 
   final bool? nextIsSignIn;
   final User? userToEdit;
 }
 
 class _AuthSubmissionResult {
-  const _AuthSubmissionResult({
-    this.errorText,
-    this.userToEdit,
-  });
+  const _AuthSubmissionResult({this.errorText, this.userToEdit});
 
   final String? errorText;
   final User? userToEdit;
@@ -1195,7 +1676,8 @@ class _AuthDialog extends StatefulWidget {
     required bool isSignIn,
     required String email,
     required String password,
-  }) onSubmit;
+  })
+  onSubmit;
   final Future<_AuthSubmissionResult> Function() onGoogleSubmit;
 
   @override
@@ -1241,7 +1723,9 @@ class _AuthDialogState extends State<_AuthDialog> {
     if (submitError == null) {
       Navigator.of(context).pop(
         _AuthDialogResult(
-          userToEdit: widget.isSignIn ? null : FirebaseAuth.instance.currentUser,
+          userToEdit: widget.isSignIn
+              ? null
+              : FirebaseAuth.instance.currentUser,
         ),
       );
       return;
@@ -1266,9 +1750,9 @@ class _AuthDialogState extends State<_AuthDialog> {
     }
 
     if (result.errorText == null) {
-      Navigator.of(context).pop(
-        _AuthDialogResult(userToEdit: result.userToEdit),
-      );
+      Navigator.of(
+        context,
+      ).pop(_AuthDialogResult(userToEdit: result.userToEdit));
       return;
     }
 
@@ -1305,7 +1789,9 @@ class _AuthDialogState extends State<_AuthDialog> {
             children: [
               Text(
                 actionLabel,
-                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -1357,7 +1843,10 @@ class _AuthDialogState extends State<_AuthDialog> {
                 ),
               ),
               const SizedBox(height: 12),
-              Divider(height: 1, color: theme.colorScheme.onSurface.withOpacity(0.25)),
+              Divider(
+                height: 1,
+                color: theme.colorScheme.onSurface.withOpacity(0.25),
+              ),
               const SizedBox(height: 12),
               Align(
                 alignment: Alignment.center,
@@ -1368,14 +1857,14 @@ class _AuthDialogState extends State<_AuthDialog> {
                 ),
               ),
               const SizedBox(height: 12),
-              Divider(height: 1, color: theme.colorScheme.onSurface.withOpacity(0.25)),
+              Divider(
+                height: 1,
+                color: theme.colorScheme.onSurface.withOpacity(0.25),
+              ),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Text(
-                    switchPrompt,
-                    style: theme.textTheme.bodyMedium,
-                  ),
+                  Text(switchPrompt, style: theme.textTheme.bodyMedium),
                   const SizedBox(width: 8),
                   OutlinedButton(
                     onPressed: _isSubmitting
@@ -1400,11 +1889,27 @@ class _AuthDialogState extends State<_AuthDialog> {
 class _ProfileDialog extends StatefulWidget {
   const _ProfileDialog({
     required this.initialDisplayName,
+    required this.initialFriendIds,
     required this.lifetimeScore,
+    required this.loadFriends,
+    required this.removeFriend,
+    required this.buildInviteLink,
+    required this.shareInvite,
   });
 
   final String initialDisplayName;
+  final List<String> initialFriendIds;
   final int lifetimeScore;
+  final Future<List<_FriendProfile>> Function(List<String> friendIds)
+  loadFriends;
+  final Future<void> Function(String friendUid) removeFriend;
+  final String Function() buildInviteLink;
+  final Future<void> Function(
+    String inviteLink,
+    bool isDark,
+    Rect? sharePositionOrigin,
+  )
+  shareInvite;
 
   @override
   State<_ProfileDialog> createState() => _ProfileDialogState();
@@ -1412,17 +1917,131 @@ class _ProfileDialog extends StatefulWidget {
 
 class _ProfileDialogState extends State<_ProfileDialog> {
   late final TextEditingController _displayNameController;
+  late List<String> _friendIds;
+  List<_FriendProfile> _friends = const <_FriendProfile>[];
+  final Set<String> _removingFriendIds = <String>{};
+  bool _friendsLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _displayNameController = TextEditingController(text: widget.initialDisplayName);
+    _displayNameController = TextEditingController(
+      text: widget.initialDisplayName,
+    );
+    _friendIds = List<String>.from(widget.initialFriendIds);
+    _refreshFriends();
   }
 
   @override
   void dispose() {
     _displayNameController.dispose();
     super.dispose();
+  }
+
+  Future<void> _refreshFriends() async {
+    setState(() {
+      _friendsLoading = true;
+    });
+    final friends = await widget.loadFriends(_friendIds);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _friends = friends;
+      _friendIds = friends.map((friend) => friend.uid).toList(growable: false);
+      _friendsLoading = false;
+    });
+  }
+
+  Future<void> _removeFriend(_FriendProfile friend) async {
+    final shouldRemove = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        final theme = Theme.of(dialogContext);
+        return Dialog(
+          backgroundColor: theme.colorScheme.surface,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+            side: BorderSide(
+              color: theme.colorScheme.onSurface.withOpacity(0.35),
+            ),
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'remove friend',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'remove ${friend.displayName} from your friends list?',
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Spacer(),
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(false),
+                        child: const Text('cancel'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(true),
+                        child: const Text('remove'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+    if (shouldRemove != true || !mounted) {
+      return;
+    }
+
+    setState(() {
+      _removingFriendIds.add(friend.uid);
+    });
+    try {
+      await widget.removeFriend(friend.uid);
+      if (!mounted) {
+        return;
+      }
+      _friendIds = _friendIds.where((uid) => uid != friend.uid).toList();
+      await _refreshFriends();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _removingFriendIds.remove(friend.uid);
+        });
+      }
+    }
+  }
+
+  Future<void> _showInviteDialog() async {
+    final inviteLink = widget.buildInviteLink();
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return _FriendInviteDialog(
+          inviteLink: inviteLink,
+          shareInvite: widget.shareInvite,
+        );
+      },
+    );
   }
 
   @override
@@ -1438,7 +2057,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 460),
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(18),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1446,7 +2065,9 @@ class _ProfileDialogState extends State<_ProfileDialog> {
             children: [
               Text(
                 'profile',
-                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -1483,8 +2104,105 @@ class _ProfileDialogState extends State<_ProfileDialog> {
               const SizedBox(height: 4),
               Text(
                 '${widget.lifetimeScore}',
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'friends',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: _showInviteDialog,
+                    icon: const FaIcon(FontAwesomeIcons.userPlus, size: 14),
+                    label: const Text('invite'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              if (_friendsLoading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (_friends.isEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: theme.colorScheme.onSurface.withOpacity(0.22),
+                    ),
+                  ),
+                  child: Text(
+                    "you haven't added any friends yet.",
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                )
+              else
+                ..._friends.map((friend) {
+                  final isRemoving = _removingFriendIds.contains(friend.uid);
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: theme.colorScheme.onSurface.withOpacity(0.22),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                friend.displayName,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'lifetime score ${friend.lifetimeScore}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.7),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        IconButton(
+                          onPressed: isRemoving
+                              ? null
+                              : () => _removeFriend(friend),
+                          tooltip: 'remove friend',
+                          icon: isRemoving
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const FaIcon(
+                                  FontAwesomeIcons.userMinus,
+                                  size: 14,
+                                ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
@@ -1507,6 +2225,166 @@ class _ProfileDialogState extends State<_ProfileDialog> {
       ),
     );
   }
+}
+
+class _FriendInviteDialog extends StatelessWidget {
+  const _FriendInviteDialog({
+    required this.inviteLink,
+    required this.shareInvite,
+  });
+
+  final String inviteLink;
+  final Future<void> Function(
+    String inviteLink,
+    bool isDark,
+    Rect? sharePositionOrigin,
+  )
+  shareInvite;
+
+  Future<void> _copyInviteLink(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: inviteLink));
+    if (!context.mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Invite link copied')));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Dialog(
+      backgroundColor: theme.colorScheme.surface,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+        side: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.35)),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'invite',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  Builder(
+                    builder: (buttonContext) {
+                      return IconButton(
+                        onPressed: () async {
+                          await shareInvite(
+                            inviteLink,
+                            theme.brightness == Brightness.dark,
+                            _sharePositionOriginForContext(buttonContext),
+                          );
+                        },
+                        tooltip: 'share',
+                        icon: const FaIcon(
+                          FontAwesomeIcons.shareNodes,
+                          size: 18,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'share this QR code or link to invite a friend',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.72),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: theme.colorScheme.onSurface.withOpacity(0.22),
+                    ),
+                  ),
+                  child: QrImageView(
+                    data: inviteLink,
+                    size: 220,
+                    backgroundColor: theme.colorScheme.surface,
+                    eyeStyle: QrEyeStyle(
+                      eyeShape: QrEyeShape.square,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    dataModuleStyle: QrDataModuleStyle(
+                      dataModuleShape: QrDataModuleShape.square,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: theme.colorScheme.onSurface.withOpacity(0.22),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: SelectableText(
+                        inviteLink,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: () => _copyInviteLink(context),
+                      tooltip: 'copy invite link',
+                      icon: const FaIcon(FontAwesomeIcons.copy, size: 16),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FriendProfile {
+  const _FriendProfile({
+    required this.uid,
+    required this.displayName,
+    required this.lifetimeScore,
+  });
+
+  final String uid;
+  final String displayName;
+  final int lifetimeScore;
+}
+
+class _FriendAddResult {
+  const _FriendAddResult({required this.message});
+
+  final String message;
 }
 
 enum _LeaderboardTab { friends, global }
@@ -1539,7 +2417,8 @@ class _LeaderboardCardState extends State<_LeaderboardCard> {
   void didUpdateWidget(covariant _LeaderboardCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     final signedInChanged = (oldWidget.user != null) != _isSignedIn;
-    if (signedInChanged || (!_friendsEnabled && _selectedTab == _LeaderboardTab.friends)) {
+    if (signedInChanged ||
+        (!_friendsEnabled && _selectedTab == _LeaderboardTab.friends)) {
       setState(() {
         _selectedTab = _defaultTab;
       });
@@ -1558,7 +2437,9 @@ class _LeaderboardCardState extends State<_LeaderboardCard> {
       constraints: const BoxConstraints(maxWidth: 420),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.onSurface.withOpacity(0.22)),
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withOpacity(0.22),
+        ),
       ),
       child: const _LeaderboardCardContents(),
     );
@@ -1585,7 +2466,6 @@ class _LeaderboardCardContents extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.findAncestorStateOfType<_LeaderboardCardState>()!;
     final theme = Theme.of(context);
 
     return Column(
@@ -1594,12 +2474,12 @@ class _LeaderboardCardContents extends StatelessWidget {
       children: [
         Text(
           'coming soon - leaderboard',
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
         ),
         const SizedBox(height: 12),
-        const _TemporarilyBlurredLeaderboard(
-          child: _LeaderboardBlurredBody(),
-        ),
+        const _TemporarilyBlurredLeaderboard(child: _LeaderboardBlurredBody()),
       ],
     );
   }
@@ -1679,9 +2559,7 @@ class _LeaderboardTabButton extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         backgroundColor: selected ? color : Colors.transparent,
         foregroundColor: selected ? theme.colorScheme.surface : color,
-        side: BorderSide(
-          color: enabled ? color : color.withOpacity(0.24),
-        ),
+        side: BorderSide(color: enabled ? color : color.withOpacity(0.24)),
       ),
       child: Text(
         label,
@@ -1721,26 +2599,9 @@ class _FriendsLeaderboardView extends StatelessWidget {
     }
 
     if (!hasFriends) {
-      return Wrap(
-        spacing: 4,
-        runSpacing: 4,
-        children: [
-          Text(
-            "you haven't added any friends.",
-            style: theme.textTheme.bodyMedium,
-          ),
-          InkWell(
-            onTap: () async {
-              await launchUrl(Uri.parse(_dummyFriendsUri));
-            },
-            child: Text(
-              'add some here.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
-        ],
+      return Text(
+        "you haven't added any friends yet. open your profile to invite someone.",
+        style: theme.textTheme.bodyMedium,
       );
     }
 
@@ -1753,10 +2614,7 @@ class _FriendsLeaderboardView extends StatelessWidget {
 }
 
 class _GlobalLeaderboardView extends StatelessWidget {
-  const _GlobalLeaderboardView({
-    super.key,
-    required this.user,
-  });
+  const _GlobalLeaderboardView({super.key, required this.user});
 
   final User? user;
 
@@ -1811,7 +2669,9 @@ class _LeaderboardMetric extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           value,
-          style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
         ),
         Text(
           detail,
@@ -1825,10 +2685,7 @@ class _LeaderboardMetric extends StatelessWidget {
 }
 
 class _LeaderboardTable extends StatelessWidget {
-  const _LeaderboardTable({
-    required this.entries,
-    required this.subtitle,
-  });
+  const _LeaderboardTable({required this.entries, required this.subtitle});
 
   final List<_LeaderboardEntry> entries;
   final String subtitle;
@@ -1866,14 +2723,18 @@ class _LeaderboardTable extends StatelessWidget {
                   child: Text(
                     entry.name,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: entry.isCurrentUser ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight: entry.isCurrentUser
+                          ? FontWeight.w700
+                          : FontWeight.w500,
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   '${entry.score}',
-                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),
@@ -1902,7 +2763,12 @@ List<_LeaderboardEntry> _friendsEntriesFor(User user) {
   final playerName = _displayNameForUser(user);
   return [
     _LeaderboardEntry(rank: 1, name: 'mia', score: 41),
-    _LeaderboardEntry(rank: 2, name: playerName, score: 36, isCurrentUser: true),
+    _LeaderboardEntry(
+      rank: 2,
+      name: playerName,
+      score: 36,
+      isCurrentUser: true,
+    ),
     _LeaderboardEntry(rank: 3, name: 'rory', score: 29),
     _LeaderboardEntry(rank: 4, name: 'alex', score: 25),
   ];
@@ -1976,7 +2842,10 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
     super.initState();
     _level = widget.startLevel;
     _totalScore = widget.startScore;
-    _current = PlanarityGenerator.generate(dayKey: widget.dayKey, level: _level);
+    _current = PlanarityGenerator.generate(
+      dayKey: widget.dayKey,
+      level: _level,
+    );
   }
 
   void _startNextLevel() {
@@ -1985,7 +2854,10 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       _movesUsed = 0;
       _activeNode = null;
       _dragStart = null;
-      _current = PlanarityGenerator.generate(dayKey: widget.dayKey, level: _level);
+      _current = PlanarityGenerator.generate(
+        dayKey: widget.dayKey,
+        level: _level,
+      );
       _needsCentering = true;
     });
   }
@@ -2062,7 +2934,10 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
         return;
       }
       _resolvingLevel = true;
-      final levelScore = scoreForSolvedLevel(level: _level, movesUsed: _movesUsed);
+      final levelScore = scoreForSolvedLevel(
+        level: _level,
+        movesUsed: _movesUsed,
+      );
       setState(() {
         _totalScore += levelScore;
       });
@@ -2113,7 +2988,10 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
 
   @override
   Widget build(BuildContext context) {
-    final crossingEdges = _findIntersectingEdges(_current.nodes, _current.edges);
+    final crossingEdges = _findIntersectingEdges(
+      _current.nodes,
+      _current.edges,
+    );
 
     return Scaffold(
       body: SafeArea(
@@ -2130,13 +3008,17 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                       alignment: Alignment.centerLeft,
                       child: IconButton(
                         onPressed: _exitToHome,
-                        icon: const FaIcon(FontAwesomeIcons.arrowLeft, size: 18),
+                        icon: const FaIcon(
+                          FontAwesomeIcons.arrowLeft,
+                          size: 18,
+                        ),
                         tooltip: 'back',
                       ),
                     ),
                     Text(
                       'planarity',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.6,
                           ),
@@ -2147,9 +3029,8 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                         padding: const EdgeInsets.only(right: 8),
                         child: Text(
                           '$_totalScore',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
@@ -2160,8 +3041,10 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
               Text(
                 'untangle the graph',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.75),
-                    ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withOpacity(0.75),
+                ),
               ),
               const SizedBox(height: 18),
               Row(
@@ -2180,7 +3063,10 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final boardSize = Size(constraints.maxWidth, constraints.maxHeight);
+                    final boardSize = Size(
+                      constraints.maxWidth,
+                      constraints.maxHeight,
+                    );
                     _maybeRecenterForBoard(boardSize);
 
                     return Stack(
@@ -2191,7 +3077,8 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                             nodes: _current.nodes,
                             edges: _current.edges,
                             intersectingEdges: crossingEdges,
-                            isDark: Theme.of(context).brightness == Brightness.dark,
+                            isDark:
+                                Theme.of(context).brightness == Brightness.dark,
                           ),
                         ),
                         ...List.generate(_current.nodes.length, (index) {
@@ -2201,8 +3088,10 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                             top: position.dy - 10,
                             child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
-                              onPanStart: (details) => _onPanStart(index, details),
-                              onPanUpdate: (details) => _onPanUpdate(index, details, boardSize),
+                              onPanStart: (details) =>
+                                  _onPanStart(index, details),
+                              onPanUpdate: (details) =>
+                                  _onPanUpdate(index, details, boardSize),
                               onPanEnd: (_) {
                                 _onPanEnd(index);
                               },
@@ -2211,7 +3100,9 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                                 height: 20,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Theme.of(context).colorScheme.onSurface,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
                                 ),
                               ),
                             ),
@@ -2230,7 +3121,8 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
   }
 
   void _maybeRecenterForBoard(Size boardSize) {
-    final sizeChanged = _lastBoardSize == null ||
+    final sizeChanged =
+        _lastBoardSize == null ||
         (_lastBoardSize!.width - boardSize.width).abs() > 0.5 ||
         (_lastBoardSize!.height - boardSize.height).abs() > 0.5;
     if (!_needsCentering && !sizeChanged) {
@@ -2325,24 +3217,40 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                     children: [
                       Expanded(
                         child: Text(
-                          solved ? 'solved ${nodes.length} nodes' : 'failed ${nodes.length} nodes',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                          solved
+                              ? 'solved ${nodes.length} nodes'
+                              : 'failed ${nodes.length} nodes',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                       ),
-                      IconButton(
-                        onPressed: () async {
-                          await _shareSolvedCard(
-                            solved: solved,
-                            totalMoves: totalMoves,
-                            movesUsed: movesUsed,
-                            totalScore: totalScore,
-                            nodes: nodes,
-                            edges: edges,
-                            isDark: Theme.of(context).brightness == Brightness.dark,
+                      Builder(
+                        builder: (buttonContext) {
+                          return IconButton(
+                            onPressed: () async {
+                              await _shareSolvedCard(
+                                solved: solved,
+                                totalMoves: totalMoves,
+                                movesUsed: movesUsed,
+                                totalScore: totalScore,
+                                nodes: nodes,
+                                edges: edges,
+                                isDark:
+                                    Theme.of(context).brightness ==
+                                    Brightness.dark,
+                                sharePositionOrigin:
+                                    _sharePositionOriginForContext(
+                                      buttonContext,
+                                    ),
+                              );
+                            },
+                            icon: const FaIcon(
+                              FontAwesomeIcons.shareNodes,
+                              size: 18,
+                            ),
+                            tooltip: 'share',
                           );
                         },
-                        icon: const FaIcon(FontAwesomeIcons.shareNodes, size: 18),
-                        tooltip: 'share',
                       ),
                     ],
                   ),
@@ -2362,15 +3270,20 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                       builder: (context, constraints) {
                         final fittedNodes = _normalizeNodesToRect(
                           nodes,
-                          (Offset.zero & Size(constraints.maxWidth, 180)).deflate(14),
+                          (Offset.zero & Size(constraints.maxWidth, 180))
+                              .deflate(14),
                         );
-                        final fittedCrossings = _findIntersectingEdges(fittedNodes, edges);
+                        final fittedCrossings = _findIntersectingEdges(
+                          fittedNodes,
+                          edges,
+                        );
                         return CustomPaint(
                           painter: GraphPainter(
                             nodes: fittedNodes,
                             edges: edges,
                             intersectingEdges: fittedCrossings,
-                            isDark: Theme.of(context).brightness == Brightness.dark,
+                            isDark:
+                                Theme.of(context).brightness == Brightness.dark,
                             drawNodes: true,
                           ),
                         );
@@ -2411,6 +3324,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
     required List<Offset> nodes,
     required List<Edge> edges,
     required bool isDark,
+    Rect? sharePositionOrigin,
   }) async {
     try {
       final bytes = await _buildShareImage(
@@ -2428,10 +3342,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
         name: solved ? 'planarity-solved.png' : 'planarity-failed.png',
       );
       await SharePlus.instance.share(
-        ShareParams(
-          files: [file],
-          text: solved ? 'planarity — graph solved' : 'planarity — run ended',
-        ),
+        ShareParams(files: [file], sharePositionOrigin: sharePositionOrigin),
       );
     } on MissingPluginException {
       if (!mounted) {
@@ -2471,7 +3382,11 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
     final title = TextPainter(
       text: TextSpan(
         text: 'planarity',
-        style: TextStyle(color: fgColor, fontSize: 62, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: fgColor,
+          fontSize: 62,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
@@ -2492,7 +3407,11 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
     final subtitle = TextPainter(
       text: TextSpan(
         text: 'untangle the graph',
-        style: TextStyle(color: fgColor.withOpacity(0.75), fontSize: 34, fontWeight: FontWeight.w400),
+        style: TextStyle(
+          color: fgColor.withOpacity(0.75),
+          fontSize: 34,
+          fontWeight: FontWeight.w400,
+        ),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
@@ -2518,7 +3437,12 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       x += (dotRadius * 2) + dotGap;
     }
 
-    final graphRect = Rect.fromLTWH(graphSide, graphTop, width - (2 * graphSide), graphHeight);
+    final graphRect = Rect.fromLTWH(
+      graphSide,
+      graphTop,
+      width - (2 * graphSide),
+      graphHeight,
+    );
     canvas.drawRect(
       graphRect,
       Paint()
@@ -2540,7 +3464,14 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
         ..color = fgColor.withOpacity(0.28);
       for (final edge in edges) {
         if (crossingEdges.contains(edge)) {
-          _drawDottedLine(canvas, normalized[edge.a], normalized[edge.b], crossingEdgePaint, 16, 10);
+          _drawDottedLine(
+            canvas,
+            normalized[edge.a],
+            normalized[edge.b],
+            crossingEdgePaint,
+            16,
+            10,
+          );
         } else {
           canvas.drawLine(normalized[edge.a], normalized[edge.b], edgePaint);
         }
@@ -2551,7 +3482,10 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       }
     }
 
-    final image = await recorder.endRecording().toImage(width.toInt(), height.toInt());
+    final image = await recorder.endRecording().toImage(
+      width.toInt(),
+      height.toInt(),
+    );
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     return byteData!.buffer.asUint8List();
   }
@@ -2571,12 +3505,14 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
     final offsetX = target.left + (target.width - usedW) / 2;
     final offsetY = target.top + (target.height - usedH) / 2;
 
-    return nodes.map((node) {
-      return Offset(
-        offsetX + ((node.dx - minX) * scale),
-        offsetY + ((node.dy - minY) * scale),
-      );
-    }).toList(growable: false);
+    return nodes
+        .map((node) {
+          return Offset(
+            offsetX + ((node.dx - minX) * scale),
+            offsetY + ((node.dy - minY) * scale),
+          );
+        })
+        .toList(growable: false);
   }
 }
 
@@ -2622,7 +3558,6 @@ class GraphPainter extends CustomPainter {
         canvas.drawCircle(node, 5.2, nodePaint);
       }
     }
-
   }
 
   @override
@@ -2679,7 +3614,8 @@ class _AnimatedHomeIcon extends StatefulWidget {
   State<_AnimatedHomeIcon> createState() => _AnimatedHomeIconState();
 }
 
-class _AnimatedHomeIconState extends State<_AnimatedHomeIcon> with TickerProviderStateMixin {
+class _AnimatedHomeIconState extends State<_AnimatedHomeIcon>
+    with TickerProviderStateMixin {
   static const _edges = <Edge>[
     Edge(0, 1),
     Edge(1, 2),
@@ -2705,24 +3641,30 @@ class _AnimatedHomeIconState extends State<_AnimatedHomeIcon> with TickerProvide
     _baseNodes = _initialNodes();
     _scrambleFromNodes = _baseNodes;
     _scrambleToNodes = _baseNodes;
-    _phaseX = List<double>.generate(_baseNodes.length, (_) => _random.nextDouble() * 2 * pi);
-    _phaseY = List<double>.generate(_baseNodes.length, (_) => _random.nextDouble() * 2 * pi);
+    _phaseX = List<double>.generate(
+      _baseNodes.length,
+      (_) => _random.nextDouble() * 2 * pi,
+    );
+    _phaseY = List<double>.generate(
+      _baseNodes.length,
+      (_) => _random.nextDouble() * 2 * pi,
+    );
     _driftController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 5),
     )..repeat();
-    _scrambleController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 420),
-    )
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          setState(() {
-            _baseNodes = _scrambleToNodes;
-          });
-          _scrambleController.reset();
-        }
-      });
+    _scrambleController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 420),
+        )..addStatusListener((status) {
+          if (status == AnimationStatus.completed) {
+            setState(() {
+              _baseNodes = _scrambleToNodes;
+            });
+            _scrambleController.reset();
+          }
+        });
   }
 
   @override
@@ -2749,8 +3691,14 @@ class _AnimatedHomeIconState extends State<_AnimatedHomeIcon> with TickerProvide
     setState(() {
       _scrambleFromNodes = currentAnchor;
       _scrambleToNodes = target;
-      _phaseX = List<double>.generate(_baseNodes.length, (_) => _random.nextDouble() * 2 * pi);
-      _phaseY = List<double>.generate(_baseNodes.length, (_) => _random.nextDouble() * 2 * pi);
+      _phaseX = List<double>.generate(
+        _baseNodes.length,
+        (_) => _random.nextDouble() * 2 * pi,
+      );
+      _phaseY = List<double>.generate(
+        _baseNodes.length,
+        (_) => _random.nextDouble() * 2 * pi,
+      );
     });
     _scrambleController
       ..reset()
@@ -2770,7 +3718,9 @@ class _AnimatedHomeIconState extends State<_AnimatedHomeIcon> with TickerProvide
         minBound + _random.nextDouble() * (maxBound - minBound),
         minBound + _random.nextDouble() * (maxBound - minBound),
       );
-      final tooClose = nodes.any((node) => (node - candidate).distance < minDistance);
+      final tooClose = nodes.any(
+        (node) => (node - candidate).distance < minDistance,
+      );
       if (!tooClose) {
         nodes.add(candidate);
       }
@@ -2785,9 +3735,15 @@ class _AnimatedHomeIconState extends State<_AnimatedHomeIcon> with TickerProvide
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final edgeColor = isDark ? const Color(0xFFF4F4F5).withOpacity(0.26) : Colors.black.withOpacity(0.28);
-    final nodeColor = isDark ? const Color(0xFFF4F4F5).withOpacity(0.94) : Colors.black.withOpacity(0.92);
-    final glowColor = isDark ? const Color(0xFFF4F4F5).withOpacity(0.08) : Colors.black.withOpacity(0.08);
+    final edgeColor = isDark
+        ? const Color(0xFFF4F4F5).withOpacity(0.26)
+        : Colors.black.withOpacity(0.28);
+    final nodeColor = isDark
+        ? const Color(0xFFF4F4F5).withOpacity(0.94)
+        : Colors.black.withOpacity(0.92);
+    final glowColor = isDark
+        ? const Color(0xFFF4F4F5).withOpacity(0.08)
+        : Colors.black.withOpacity(0.08);
 
     return GestureDetector(
       onTap: _scramble,
@@ -2799,7 +3755,9 @@ class _AnimatedHomeIconState extends State<_AnimatedHomeIcon> with TickerProvide
           builder: (context, _) {
             final t = _driftController.value * 2 * pi;
             final anchorNodes = _currentAnchorNodes();
-            final animatedNodes = List<Offset>.generate(anchorNodes.length, (index) {
+            final animatedNodes = List<Offset>.generate(anchorNodes.length, (
+              index,
+            ) {
               final base = anchorNodes[index];
               final dx = sin(t + _phaseX[index]) * 0.012;
               final dy = cos(t + _phaseY[index]) * 0.012;
@@ -2831,7 +3789,11 @@ class _AnimatedHomeIconState extends State<_AnimatedHomeIcon> with TickerProvide
 
     final curved = Curves.easeInOutCubic.transform(_scrambleController.value);
     return List<Offset>.generate(_scrambleFromNodes.length, (index) {
-      return Offset.lerp(_scrambleFromNodes[index], _scrambleToNodes[index], curved)!;
+      return Offset.lerp(
+        _scrambleFromNodes[index],
+        _scrambleToNodes[index],
+        curved,
+      )!;
     });
   }
 }
@@ -2854,10 +3816,7 @@ class _HomeIconPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final pxNodes = nodes
-        .map((n) => Offset(
-              n.dx * size.width,
-              n.dy * size.height,
-            ))
+        .map((n) => Offset(n.dx * size.width, n.dy * size.height))
         .toList(growable: false);
 
     final edgePaint = Paint()
@@ -2900,9 +3859,13 @@ class PlanarityLevel {
 class PlanarityGenerator {
   static PlanarityLevel generate({required String dayKey, required int level}) {
     final nodeCount = max(2, level);
-    final structureRandom = _DeterministicRandom(_stableSeed(dayKey, nodeCount));
+    final structureRandom = _DeterministicRandom(
+      _stableSeed(dayKey, nodeCount),
+    );
     final edges = _buildPlanarEdges(nodeCount, structureRandom);
-    final positionsRandom = _DeterministicRandom(_stableSeed(dayKey, nodeCount));
+    final positionsRandom = _DeterministicRandom(
+      _stableSeed(dayKey, nodeCount),
+    );
     final scattered = _scatterNodes(nodeCount, positionsRandom);
 
     if (nodeCount >= 4 && edges.isNotEmpty) {
@@ -2978,8 +3941,18 @@ class PlanarityGenerator {
   // For vertices placed in a consistent cyclic order on a convex polygon,
   // two edges cross iff their endpoints interleave around the polygon.
   static bool _crossesInConvexOrder(Edge a, Edge b, int nodeCount) {
-    final aToBStart = _isBetweenClockwise(start: a.a, value: b.a, end: a.b, nodeCount: nodeCount);
-    final aToBEnd = _isBetweenClockwise(start: a.a, value: b.b, end: a.b, nodeCount: nodeCount);
+    final aToBStart = _isBetweenClockwise(
+      start: a.a,
+      value: b.a,
+      end: a.b,
+      nodeCount: nodeCount,
+    );
+    final aToBEnd = _isBetweenClockwise(
+      start: a.a,
+      value: b.b,
+      end: a.b,
+      nodeCount: nodeCount,
+    );
     return aToBStart != aToBEnd;
   }
 
@@ -3023,9 +3996,7 @@ class _DeterministicRandom {
 }
 
 class Edge {
-  const Edge(int x, int y)
-      : a = x < y ? x : y,
-        b = x < y ? y : x;
+  const Edge(int x, int y) : a = x < y ? x : y, b = x < y ? y : x;
 
   final int a;
   final int b;
@@ -3078,7 +4049,12 @@ Set<Edge> _findIntersectingEdges(List<Offset> nodes, List<Edge> edges) {
         continue;
       }
 
-      if (_segmentsIntersect(nodes[e1.a], nodes[e1.b], nodes[e2.a], nodes[e2.b])) {
+      if (_segmentsIntersect(
+        nodes[e1.a],
+        nodes[e1.b],
+        nodes[e2.a],
+        nodes[e2.b],
+      )) {
         intersecting
           ..add(e1)
           ..add(e2);
@@ -3122,6 +4098,19 @@ void _drawDottedLine(
     canvas.drawLine(p1, p2, paint);
     distance += dashLength + dashGap;
   }
+}
+
+Rect? _sharePositionOriginForContext(BuildContext context) {
+  final renderObject = context.findRenderObject();
+  if (renderObject is! RenderBox || !renderObject.hasSize) {
+    return null;
+  }
+  final size = renderObject.size;
+  if (size.width <= 0 || size.height <= 0) {
+    return null;
+  }
+  final origin = renderObject.localToGlobal(Offset.zero);
+  return origin & size;
 }
 
 void _drawShareBrandIcon(Canvas canvas, Rect rect) {
