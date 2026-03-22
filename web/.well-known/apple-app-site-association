@@ -5,8 +5,7 @@
       {
         "appID": "A4495KV2T9.dev.wxlfe.planarity",
         "paths": [
-          "/add-friend",
-          "/add-friend/*"
+          "/"
         ]
       }
     ]
