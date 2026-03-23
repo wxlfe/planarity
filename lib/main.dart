@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
@@ -133,7 +134,8 @@ class PlanarityHomePage extends StatefulWidget {
 
 enum DailyPlayStatus { ready, inProgress, locked }
 
-class _PlanarityHomePageState extends State<PlanarityHomePage> {
+class _PlanarityHomePageState extends State<PlanarityHomePage>
+    with WidgetsBindingObserver {
   static final Uri _portfolioUri = Uri.parse(
     'https://wxlfe.dev/?utm_source=planarity.xyz&utm_medium=Self%2BPromotion&utm_campaign=Footer%2BPortfolio%2BLink&utm_id=Footer%2BPortfolio%2BLink&utm_content=Footer%2BPortfolio%2BLink',
   );
@@ -142,21 +144,17 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     'https://en.wikipedia.org/wiki/Planar_graph',
   );
   static const _startingLevel = 4;
-  static const _statusKey = 'daily_status';
-  static const _levelKey = 'daily_level';
-  static const _scoreKey = 'daily_score';
-  static const _dayKey = 'daily_day';
+  static const _localGuestUserDocumentKey = 'local_guest_user_document';
 
   bool _isLoaded = false;
   DailyPlayStatus _status = DailyPlayStatus.ready;
   int _currentLevel = _startingLevel;
   int _score = 0;
   int _leaderboardRefreshTick = 0;
-  String? _lockedDay;
+  _LeaderboardTab? _selectedLeaderboardTab;
   StreamSubscription<User?>? _authSubscription;
   String? _activeUserId;
   User? _currentUser;
-  Timer? _dailyResetTimer;
   String? _pendingFriendInviteUid;
   bool _friendInvitePromptOpen = false;
   bool _friendInviteAuthPromptOpen = false;
@@ -165,27 +163,36 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _pendingFriendInviteUid = _incomingFriendInviteUid();
     _configureIncomingFriendLinks();
-    _scheduleDailyReset();
-    _loadProgress();
     if (_firebaseReady) {
       _authSubscription = FirebaseAuth.instance.authStateChanges().listen(
         _handleAuthStateChange,
       );
-      _handleAuthStateChange(FirebaseAuth.instance.currentUser);
+      _reconcileUserState(FirebaseAuth.instance.currentUser, force: true);
+    } else {
+      _reconcileUserState(null, force: true);
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _maybePromptToAuthenticateForFriendInvite();
-    });
   }
 
   @override
   void dispose() {
-    _dailyResetTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _authSubscription?.cancel();
     _appLinkSubscription?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) {
+      return;
+    }
+    _reconcileUserState(
+      _firebaseReady ? FirebaseAuth.instance.currentUser : null,
+      force: true,
+    );
   }
 
   Future<void> _configureIncomingFriendLinks() async {
@@ -234,122 +241,19 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     return '$year-$month-$day';
   }
 
-  void _scheduleDailyReset() {
-    _dailyResetTimer?.cancel();
-    final now = DateTime.now().toUtc();
-    final nextMidnightUtc = DateTime.utc(now.year, now.month, now.day + 1);
-    _dailyResetTimer = Timer(nextMidnightUtc.difference(now), () async {
-      await _resetForNewDay();
-      if (mounted) {
-        _scheduleDailyReset();
-      }
-    });
-  }
-
-  Future<void> _resetForNewDay() async {
-    final user = _currentUser;
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _status = DailyPlayStatus.ready;
-      _currentLevel = _startingLevel;
-      _score = 0;
-      _lockedDay = null;
-    });
-    _refreshLeaderboard();
-    await _saveProgress();
-
-    if (user != null) {
-      await _updateUserProgressFields(
-        userId: user.uid,
-        score: 0,
-        currentLevel: _startingLevel,
-        locked: false,
-      );
-    }
-  }
-
-  Future<void> _loadProgress() async {
-    final prefs = await _prefsOrNull();
-    if (prefs == null) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _isLoaded = true;
-      });
-      return;
-    }
-
-    final today = _todayKey();
-    final savedDay = prefs.getString(_dayKey);
-    final savedStatusName = prefs.getString(_statusKey);
-    DailyPlayStatus? savedStatus;
-    for (final status in DailyPlayStatus.values) {
-      if (status.name == savedStatusName) {
-        savedStatus = status;
-        break;
-      }
-    }
-    final savedLevel = prefs.getInt(_levelKey) ?? _startingLevel;
-    final savedScore = prefs.getInt(_scoreKey) ?? 0;
-
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      if (savedDay == today && savedStatus != null) {
-        _lockedDay = savedDay;
-        _status = savedStatus;
-        _currentLevel = max(_startingLevel, savedLevel);
-        _score = max(0, savedScore);
-      } else {
-        _lockedDay = null;
-        _status = DailyPlayStatus.ready;
-        _currentLevel = _startingLevel;
-        _score = 0;
-      }
-      _isLoaded = true;
-    });
-    _refreshLeaderboard();
-
-    if (savedDay != today) {
-      await prefs
-        ..remove(_statusKey)
-        ..remove(_levelKey)
-        ..remove(_scoreKey)
-        ..remove(_dayKey);
-    }
-  }
-
   Future<void> _handleAuthStateChange(User? user) async {
+    await _reconcileUserState(user);
+  }
+
+  Future<void> _reconcileUserState(User? user, {bool force = false}) async {
     final nextUserId = user?.uid;
-    if (nextUserId == _activeUserId) {
+    if (!force && nextUserId == _activeUserId) {
       return;
     }
     _activeUserId = nextUserId;
 
-    if (user == null) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _currentUser = null;
-        _status = DailyPlayStatus.ready;
-        _currentLevel = _startingLevel;
-        _score = 0;
-        _lockedDay = null;
-      });
-      _refreshLeaderboard();
-      await _saveProgress();
-      _maybePromptToAuthenticateForFriendInvite();
-      return;
-    }
-
-    final profileData = await _loadUserDocument(user.uid);
+    final profileData = await _loadActiveUserDocument(user);
+    final signedInChanged = (_currentUser != null) != (user != null);
     final lastPlayed = _profileLastPlayed(profileData);
     final playedToday = lastPlayed == _todayKey();
     final syncedScore = _profileScore(profileData, playedToday: playedToday);
@@ -358,7 +262,6 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       playedToday: playedToday,
     );
     final isLocked = _profileLocked(profileData);
-    final today = _todayKey();
 
     if (!mounted) {
       return;
@@ -371,16 +274,25 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
           : DailyPlayStatus.ready;
       _currentLevel = syncedLevel;
       _score = syncedScore;
-      _lockedDay = playedToday ? today : null;
+      _isLoaded = true;
+      if (_selectedLeaderboardTab == null || signedInChanged) {
+        _selectedLeaderboardTab = user != null
+            ? _LeaderboardTab.friends
+            : _LeaderboardTab.global;
+      }
     });
     _refreshLeaderboard();
-    await _saveProgress();
+    if (user == null) {
+      _maybePromptToAuthenticateForFriendInvite();
+      return;
+    }
+
     _maybePromptToAddIncomingFriend(profileData: profileData);
 
     if (!playedToday &&
         (isLocked || syncedScore != 0 || syncedLevel != _startingLevel)) {
-      await _updateUserProgressFields(
-        userId: user.uid,
+      await _updateCurrentUserProgressFields(
+        user: user,
         score: 0,
         currentLevel: _startingLevel,
         locked: false,
@@ -388,39 +300,111 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     }
   }
 
-  Future<void> _saveProgress() async {
+  Map<String, dynamic> _defaultUserDocument({String? displayName}) {
+    return <String, dynamic>{
+      'displayName': displayName ?? 'anonymous player',
+      'currentLevel': _startingLevel,
+      'friends': <String>[],
+      'lastPlayed': '',
+      'locked': false,
+      'lifetimeScore': 0,
+      'score': 0,
+    };
+  }
+
+  Future<Map<String, dynamic>> _loadLocalGuestUserDocument() async {
+    final prefs = await _prefsOrNull();
+    if (prefs == null) {
+      return _defaultUserDocument();
+    }
+
+    final raw = prefs.getString(_localGuestUserDocumentKey);
+    if (raw == null || raw.isEmpty) {
+      final document = _defaultUserDocument();
+      await _saveLocalGuestUserDocument(document);
+      return document;
+    }
+
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic>) {
+        return <String, dynamic>{..._defaultUserDocument(), ...decoded};
+      }
+      if (decoded is Map) {
+        return <String, dynamic>{
+          ..._defaultUserDocument(),
+          ...decoded.map((key, value) => MapEntry(key.toString(), value)),
+        };
+      }
+    } catch (_) {}
+
+    final document = _defaultUserDocument();
+    await _saveLocalGuestUserDocument(document);
+    return document;
+  }
+
+  Future<void> _saveLocalGuestUserDocument(
+    Map<String, dynamic> document,
+  ) async {
     final prefs = await _prefsOrNull();
     if (prefs == null) {
       return;
     }
-
-    if (_lockedDay == null) {
-      await prefs
-        ..remove(_statusKey)
-        ..remove(_levelKey)
-        ..remove(_scoreKey)
-        ..remove(_dayKey);
-      return;
-    }
-
-    await prefs.setString(_statusKey, _status.name);
-    await prefs.setInt(_levelKey, _currentLevel);
-    await prefs.setInt(_scoreKey, _score);
-    await prefs.setString(_dayKey, _lockedDay!);
+    await prefs.setString(_localGuestUserDocumentKey, jsonEncode(document));
   }
 
-  Future<void> _syncCurrentScoreToFirestore({int addedScore = 0}) async {
-    final user = FirebaseAuth.instance.currentUser;
+  Future<Map<String, dynamic>?> _loadActiveUserDocument(User? user) async {
     if (user == null) {
+      return _loadLocalGuestUserDocument();
+    }
+
+    var profileData = await _loadUserDocument(user.uid);
+    if (profileData != null) {
+      return profileData;
+    }
+
+    await _ensureUserDocument(user);
+    return _loadUserDocument(user.uid);
+  }
+
+  Future<void> _updateCurrentUserProgressFields({
+    required User? user,
+    int? score,
+    int? currentLevel,
+    String? lastPlayed,
+    bool? locked,
+    int? lifetimeScoreIncrement,
+  }) async {
+    if (user != null) {
+      await _updateUserProgressFields(
+        userId: user.uid,
+        score: score,
+        currentLevel: currentLevel,
+        lastPlayed: lastPlayed,
+        locked: locked,
+        lifetimeScoreIncrement: lifetimeScoreIncrement,
+      );
       return;
     }
 
-    await _updateUserProgressFields(
-      userId: user.uid,
-      score: _score,
-      lifetimeScoreIncrement: addedScore > 0 ? addedScore : null,
-    );
-    _refreshLeaderboard();
+    final localDocument = await _loadLocalGuestUserDocument();
+    if (score != null) {
+      localDocument['score'] = score;
+    }
+    if (currentLevel != null) {
+      localDocument['currentLevel'] = currentLevel;
+    }
+    if (lastPlayed != null) {
+      localDocument['lastPlayed'] = lastPlayed;
+    }
+    if (locked != null) {
+      localDocument['locked'] = locked;
+    }
+    if (lifetimeScoreIncrement != null && lifetimeScoreIncrement > 0) {
+      localDocument['lifetimeScore'] =
+          _profileLifetimeScore(localDocument) + lifetimeScoreIncrement;
+    }
+    await _saveLocalGuestUserDocument(localDocument);
   }
 
   Future<void> _updateUserProgressFields({
@@ -475,6 +459,13 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
   }
 
   Future<void> _openChallenge() async {
+    await _reconcileUserState(
+      _firebaseReady ? FirebaseAuth.instance.currentUser : _currentUser,
+      force: true,
+    );
+    if (!mounted) {
+      return;
+    }
     if (_status == DailyPlayStatus.locked) {
       setState(() {});
       return;
@@ -485,12 +476,16 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     final startScore = _score;
     setState(() {
       _status = DailyPlayStatus.inProgress;
-      _lockedDay = today;
       _currentLevel = startLevel;
       _score = startScore;
     });
-    await _saveProgress();
-    await _updateSignedInProgressForToday(locked: false);
+    await _updateCurrentUserProgressFields(
+      user: _currentUser,
+      score: _score,
+      currentLevel: _currentLevel,
+      lastPlayed: today,
+      locked: false,
+    );
 
     final result = await Navigator.of(context).push<GameSessionResult>(
       MaterialPageRoute(
@@ -512,7 +507,6 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
     final previousScore = _score;
     setState(() {
       _score = result.score;
-      _lockedDay = result.dayKey;
       if (result.locked) {
         _status = DailyPlayStatus.locked;
         _currentLevel = result.level;
@@ -521,32 +515,15 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
         _currentLevel = result.level;
       }
     });
-    await _saveProgress();
-    await _updateSignedInProgressForToday(
+    await _updateCurrentUserProgressFields(
+      user: _currentUser,
+      score: _score,
       currentLevel: result.level,
+      lastPlayed: result.dayKey,
       locked: result.locked,
-    );
-    await _syncCurrentScoreToFirestore(
-      addedScore: max(0, result.score - previousScore),
+      lifetimeScoreIncrement: max(0, result.score - previousScore),
     );
     _refreshLeaderboard();
-  }
-
-  Future<void> _updateSignedInProgressForToday({
-    int? currentLevel,
-    required bool locked,
-  }) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      return;
-    }
-
-    await _updateUserProgressFields(
-      userId: user.uid,
-      currentLevel: currentLevel ?? _currentLevel,
-      lastPlayed: _todayKey(),
-      locked: locked,
-    );
   }
 
   Future<String?> _submitAuth({
@@ -701,15 +678,13 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
   }
 
   Future<void> _ensureUserDocument(User user) async {
-    return FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-      'displayName': _defaultDisplayName(user),
-      'currentLevel': _startingLevel,
-      'friends': <String>[],
-      'lastPlayed': _todayKey(),
-      'locked': false,
-      'lifetimeScore': 0,
-      'score': 0,
-    }, SetOptions(merge: true));
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .set(
+          _defaultUserDocument(displayName: _defaultDisplayName(user)),
+          SetOptions(merge: true),
+        );
   }
 
   String _defaultDisplayName(User user) {
@@ -1211,6 +1186,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
 
   void _maybePromptToAuthenticateForFriendInvite() {
     if (!mounted ||
+        !_isLoaded ||
         _pendingFriendInviteUid == null ||
         _currentUser != null ||
         _friendInviteAuthPromptOpen) {
@@ -1440,6 +1416,12 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       DailyPlayStatus.inProgress => 'continue',
       DailyPlayStatus.locked => 'locked',
     };
+    final leaderboardKey = ValueKey(
+      'leaderboard-${user?.uid ?? 'guest'}-$_leaderboardRefreshTick',
+    );
+    final selectedLeaderboardTab =
+        _selectedLeaderboardTab ??
+        (user != null ? _LeaderboardTab.friends : _LeaderboardTab.global);
     final homeContent = _HomeHeroContent(
       buttonLabel: buttonLabel,
       scoreLabel: '$_score',
@@ -1447,8 +1429,16 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
       onPlayPressed: _openChallenge,
       showLeaderboardBelowButton: !isWide,
       leaderboard: _LeaderboardCard(
+        key: leaderboardKey,
         user: user,
         refreshToken: _leaderboardRefreshTick,
+        onSignUpTap: () => _showAuthModal(isSignIn: false),
+        selectedTab: selectedLeaderboardTab,
+        onTabSelected: (_LeaderboardTab tab) {
+          setState(() {
+            _selectedLeaderboardTab = tab;
+          });
+        },
       ),
       onPortfolioTap: () async {
         await launchUrl(_portfolioUri, mode: LaunchMode.externalApplication);
@@ -1475,8 +1465,16 @@ class _PlanarityHomePageState extends State<PlanarityHomePage> {
                               Expanded(
                                 flex: 9,
                                 child: _LeaderboardCard(
+                                  key: leaderboardKey,
                                   user: user,
                                   refreshToken: _leaderboardRefreshTick,
+                                  onSignUpTap: () => _showAuthModal(isSignIn: false),
+                                  selectedTab: selectedLeaderboardTab,
+                                  onTabSelected: (_LeaderboardTab tab) {
+                                    setState(() {
+                                      _selectedLeaderboardTab = tab;
+                                    });
+                                  },
                                 ),
                               ),
                             ],
@@ -2484,54 +2482,31 @@ int _leaderboardScoreFromData(Map<String, dynamic>? profileData) {
   return 0;
 }
 
+bool _leaderboardLockedFromData(Map<String, dynamic>? profileData) {
+  final locked = profileData?['locked'];
+  if (locked is bool) {
+    return locked;
+  }
+  return false;
+}
+
 enum _LeaderboardTab { friends, global }
 
-class _LeaderboardCard extends StatefulWidget {
-  const _LeaderboardCard({this.user, required this.refreshToken});
+class _LeaderboardCard extends StatelessWidget {
+  const _LeaderboardCard({
+    super.key,
+    this.user,
+    required this.refreshToken,
+    required this.onSignUpTap,
+    required this.selectedTab,
+    required this.onTabSelected,
+  });
 
   final User? user;
   final int refreshToken;
-
-  @override
-  State<_LeaderboardCard> createState() => _LeaderboardCardState();
-}
-
-class _LeaderboardCardState extends State<_LeaderboardCard> {
-  late _LeaderboardTab _selectedTab;
-
-  bool get _isSignedIn => widget.user != null;
-
-  bool get _friendsEnabled => _isSignedIn;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedTab = _defaultTab;
-  }
-
-  @override
-  void didUpdateWidget(covariant _LeaderboardCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final signedInChanged = (oldWidget.user != null) != _isSignedIn;
-    if (signedInChanged ||
-        (!_friendsEnabled && _selectedTab == _LeaderboardTab.friends)) {
-      setState(() {
-        _selectedTab = _defaultTab;
-      });
-    }
-  }
-
-  _LeaderboardTab get _defaultTab =>
-      _isSignedIn ? _LeaderboardTab.friends : _LeaderboardTab.global;
-
-  void _selectTab(_LeaderboardTab tab) {
-    if (_selectedTab == tab) {
-      return;
-    }
-    setState(() {
-      _selectedTab = tab;
-    });
-  }
+  final VoidCallback onSignUpTap;
+  final _LeaderboardTab selectedTab;
+  final ValueChanged<_LeaderboardTab> onTabSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -2546,18 +2521,35 @@ class _LeaderboardCardState extends State<_LeaderboardCard> {
           color: theme.colorScheme.onSurface.withOpacity(0.22),
         ),
       ),
-      child: const _LeaderboardCardContents(),
+      child: _LeaderboardCardContents(
+        user: user,
+        refreshToken: refreshToken,
+        onSignUpTap: onSignUpTap,
+        selectedTab: selectedTab,
+        onTabSelected: onTabSelected,
+      ),
     );
   }
 }
 
 class _LeaderboardCardContents extends StatelessWidget {
-  const _LeaderboardCardContents();
+  const _LeaderboardCardContents({
+    required this.user,
+    required this.refreshToken,
+    required this.onSignUpTap,
+    required this.selectedTab,
+    required this.onTabSelected,
+  });
+
+  final User? user;
+  final int refreshToken;
+  final VoidCallback onSignUpTap;
+  final _LeaderboardTab selectedTab;
+  final ValueChanged<_LeaderboardTab> onTabSelected;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final state = context.findAncestorStateOfType<_LeaderboardCardState>()!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2574,21 +2566,19 @@ class _LeaderboardCardContents extends StatelessWidget {
           children: [
             Expanded(
               child: _LeaderboardTabButton(
-                label: 'Friends',
-                selected: state._selectedTab == _LeaderboardTab.friends,
-                enabled: state._friendsEnabled,
-                onPressed: state._friendsEnabled
-                    ? () => state._selectTab(_LeaderboardTab.friends)
-                    : null,
+                label: 'friends',
+                selected: selectedTab == _LeaderboardTab.friends,
+                enabled: true,
+                onPressed: () => onTabSelected(_LeaderboardTab.friends),
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: _LeaderboardTabButton(
-                label: 'Global',
-                selected: state._selectedTab == _LeaderboardTab.global,
+                label: 'global',
+                selected: selectedTab == _LeaderboardTab.global,
                 enabled: true,
-                onPressed: () => state._selectTab(_LeaderboardTab.global),
+                onPressed: () => onTabSelected(_LeaderboardTab.global),
               ),
             ),
           ],
@@ -2596,15 +2586,16 @@ class _LeaderboardCardContents extends StatelessWidget {
         const SizedBox(height: 16),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 160),
-          child: state._selectedTab == _LeaderboardTab.friends
+          child: selectedTab == _LeaderboardTab.friends
               ? _FriendsLeaderboardView(
-                  key: ValueKey('friends-${state.widget.refreshToken}'),
-                  user: state.widget.user,
-                  refreshToken: state.widget.refreshToken,
+                  key: ValueKey('friends-$refreshToken'),
+                  user: user,
+                  refreshToken: refreshToken,
+                  onSignUpTap: onSignUpTap,
                 )
               : _GlobalLeaderboardView(
                   key: const ValueKey('global'),
-                  user: state.widget.user,
+                  user: user,
                 ),
         ),
       ],
@@ -2655,18 +2646,20 @@ class _FriendsLeaderboardView extends StatefulWidget {
     super.key,
     required this.user,
     required this.refreshToken,
+    required this.onSignUpTap,
   });
 
   final User? user;
   final int refreshToken;
+  final VoidCallback onSignUpTap;
 
   @override
-  State<_FriendsLeaderboardView> createState() => _FriendsLeaderboardViewState();
+  State<_FriendsLeaderboardView> createState() =>
+      _FriendsLeaderboardViewState();
 }
 
 class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
-  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>?
-  _userSubscription;
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _userSubscription;
   final Map<String, StreamSubscription<QuerySnapshot<Map<String, dynamic>>>>
   _friendQuerySubscriptions =
       <String, StreamSubscription<QuerySnapshot<Map<String, dynamic>>>>{};
@@ -2733,23 +2726,26 @@ class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
     }
 
     final users = FirebaseFirestore.instance.collection('users');
-    _userSubscription = users.doc(user.uid).snapshots().listen(
-      (snapshot) {
-        _userProfileData = snapshot.data();
-        _loadError = null;
-        _syncFriendSubscriptions(_leaderboardFriendIds(_userProfileData));
-        _publishLeaderboard();
-      },
-      onError: (Object error) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          _loadError = error;
-          _isLoading = false;
-        });
-      },
-    );
+    _userSubscription = users
+        .doc(user.uid)
+        .snapshots()
+        .listen(
+          (snapshot) {
+            _userProfileData = snapshot.data();
+            _loadError = null;
+            _syncFriendSubscriptions(_leaderboardFriendIds(_userProfileData));
+            _publishLeaderboard();
+          },
+          onError: (Object error) {
+            if (!mounted) {
+              return;
+            }
+            setState(() {
+              _loadError = error;
+              _isLoading = false;
+            });
+          },
+        );
   }
 
   void _syncFriendSubscriptions(List<String> friendIds) {
@@ -2777,26 +2773,26 @@ class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
           .where(FieldPath.documentId, whereIn: chunk)
           .snapshots()
           .listen(
-        (snapshot) {
-          for (final friendId in chunk) {
-            _friendProfileData[friendId] = null;
-          }
-          for (final doc in snapshot.docs) {
-            _friendProfileData[doc.id] = doc.data();
-          }
-          _loadError = null;
-          _publishLeaderboard();
-        },
-        onError: (Object error) {
-          if (!mounted) {
-            return;
-          }
-          setState(() {
-            _loadError = error;
-            _isLoading = false;
-          });
-        },
-      );
+            (snapshot) {
+              for (final friendId in chunk) {
+                _friendProfileData[friendId] = null;
+              }
+              for (final doc in snapshot.docs) {
+                _friendProfileData[doc.id] = doc.data();
+              }
+              _loadError = null;
+              _publishLeaderboard();
+            },
+            onError: (Object error) {
+              if (!mounted) {
+                return;
+              }
+              setState(() {
+                _loadError = error;
+                _isLoading = false;
+              });
+            },
+          );
     }
   }
 
@@ -2815,11 +2811,24 @@ class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
     final signedInUser = widget.user;
 
     if (signedInUser == null) {
-      return Text(
-        'sign in to compare your score with friends.',
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onSurface.withOpacity(0.72),
-        ),
+      final messageStyle = theme.textTheme.bodyMedium?.copyWith(
+        color: theme.colorScheme.onSurface.withOpacity(0.72),
+      );
+      return Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          InkWell(
+            onTap: widget.onSignUpTap,
+            child: Text(
+              'sign up',
+              style: messageStyle?.copyWith(
+                decoration: TextDecoration.underline,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Text(' to compete with your friends', style: messageStyle),
+        ],
       );
     }
 
@@ -2873,6 +2882,7 @@ List<_LeaderboardEntry> _buildFriendsLeaderboardEntries({
           _leaderboardDisplayNameFromData(userProfileData) ??
           _displayNameForUser(user),
       score: _leaderboardScoreFromData(userProfileData),
+      isLocked: _leaderboardLockedFromData(userProfileData),
       isCurrentUser: true,
     ),
   ];
@@ -2885,9 +2895,9 @@ List<_LeaderboardEntry> _buildFriendsLeaderboardEntries({
     standings.add(
       _LeaderboardStanding(
         uid: friendId,
-        name:
-            _leaderboardDisplayNameFromData(friendData) ?? 'anonymous player',
+        name: _leaderboardDisplayNameFromData(friendData) ?? 'anonymous player',
         score: _leaderboardScoreFromData(friendData),
+        isLocked: _leaderboardLockedFromData(friendData),
         isCurrentUser: false,
       ),
     );
@@ -2911,6 +2921,7 @@ List<_LeaderboardEntry> _buildFriendsLeaderboardEntries({
         rank: index + 1,
         name: standings[index].name,
         score: standings[index].score,
+        isLocked: standings[index].isLocked,
         isCurrentUser: standings[index].isCurrentUser,
       ),
   ];
@@ -3008,66 +3019,77 @@ class _LeaderboardTable extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        ...entries.map(
-          (entry) {
-            final isCurrentUser = entry.isCurrentUser;
-            final rowBackground = isCurrentUser
-                ? theme.colorScheme.onSurface
-                : Colors.transparent;
-            final rowForeground = isCurrentUser
-                ? theme.colorScheme.surface
-                : theme.colorScheme.onSurface;
+        ...entries.map((entry) {
+          final isCurrentUser = entry.isCurrentUser;
+          final rowBackground = isCurrentUser
+              ? theme.colorScheme.onSurface
+              : Colors.transparent;
+          final rowForeground = isCurrentUser
+              ? theme.colorScheme.surface
+              : theme.colorScheme.onSurface;
 
-            return Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-              decoration: BoxDecoration(
-                color: rowBackground,
-                border: Border.all(
-                  color: isCurrentUser
-                      ? theme.colorScheme.onSurface
-                      : theme.colorScheme.onSurface.withOpacity(0.16),
-                ),
+          return Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+            decoration: BoxDecoration(
+              color: rowBackground,
+              border: Border.all(
+                color: isCurrentUser
+                    ? theme.colorScheme.onSurface
+                    : theme.colorScheme.onSurface.withOpacity(0.16),
               ),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 34,
-                    child: Text(
-                      '#${entry.rank}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isCurrentUser
-                            ? rowForeground
-                            : theme.colorScheme.onSurface.withOpacity(0.75),
-                        fontWeight: isCurrentUser
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                      ),
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 34,
+                  child: Text(
+                    '#${entry.rank}',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isCurrentUser
+                          ? rowForeground
+                          : theme.colorScheme.onSurface.withOpacity(0.75),
+                      fontWeight: isCurrentUser
+                          ? FontWeight.w700
+                          : FontWeight.w500,
                     ),
                   ),
-                  Expanded(
-                    child: Text(
-                      entry.name,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+                ),
+                Expanded(
+                  child: Text(
+                    entry.name,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: rowForeground,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (entry.isLocked) ...[
+                      FaIcon(
+                        FontAwesomeIcons.lock,
+                        size: 12,
                         color: rowForeground,
                       ),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(
+                      '${entry.score}',
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: rowForeground,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    '${entry.score}',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: rowForeground,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }),
       ],
     );
   }
@@ -3078,12 +3100,14 @@ class _LeaderboardEntry {
     required this.rank,
     required this.name,
     required this.score,
+    this.isLocked = false,
     this.isCurrentUser = false,
   });
 
   final int rank;
   final String name;
   final int score;
+  final bool isLocked;
   final bool isCurrentUser;
 }
 
@@ -3092,12 +3116,14 @@ class _LeaderboardStanding {
     required this.uid,
     required this.name,
     required this.score,
+    required this.isLocked,
     required this.isCurrentUser,
   });
 
   final String uid;
   final String name;
   final int score;
+  final bool isLocked;
   final bool isCurrentUser;
 }
 
@@ -3107,6 +3133,7 @@ List<_LeaderboardEntry> _friendsEntriesFor(User user) {
       rank: 1,
       name: _displayNameForUser(user),
       score: 0,
+      isLocked: false,
       isCurrentUser: true,
     ),
   ];
@@ -4311,9 +4338,20 @@ class PlanarityGenerator {
     var hash = 0x811C9DC5;
     for (final unit in input.codeUnits) {
       hash ^= unit;
-      hash = (hash * 0x01000193) & 0x7fffffff;
+      hash = _mul32(hash, 0x01000193) & 0x7fffffff;
     }
     return hash;
+  }
+
+  // Keep multiplication in 32-bit space so Dart VM and JS produce identical seeds.
+  static int _mul32(int a, int b) {
+    final aLow = a & 0xffff;
+    final aHigh = (a >>> 16) & 0xffff;
+    final bLow = b & 0xffff;
+    final bHigh = (b >>> 16) & 0xffff;
+    final low = aLow * bLow;
+    final mid = ((aHigh * bLow) + (aLow * bHigh)) & 0xffff;
+    return (low + (mid << 16)) & 0xffffffff;
   }
 }
 
