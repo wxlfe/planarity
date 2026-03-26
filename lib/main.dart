@@ -233,8 +233,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
   }
 
   String _todayKey() {
-    // Use UTC day so every player gets the same graph set for the same date.
-    final now = DateTime.now().toUtc();
+    // Use the device's local calendar day for daily progress resets.
+    final now = DateTime.now();
     final year = now.year.toString().padLeft(4, '0');
     final month = now.month.toString().padLeft(2, '0');
     final day = now.day.toString().padLeft(2, '0');
@@ -2414,7 +2414,7 @@ class _FriendAddResult {
 }
 
 String _leaderboardTodayKey() {
-  final now = DateTime.now().toUtc();
+  final now = DateTime.now();
   final year = now.year.toString().padLeft(4, '0');
   final month = now.month.toString().padLeft(2, '0');
   final day = now.day.toString().padLeft(2, '0');
