@@ -1,7 +1,52 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <!--
+  <head>
+    <!-- PWA Cleanup Script -->
+    <script>
+      (function () {
+        async function cleanupOldPwa() {
+          try {
+            if ('serviceWorker' in navigator) {
+              const regs = await navigator.serviceWorker.getRegistrations();
+              await Promise.all(
+                regs.map(async (reg) => {
+                  try {
+                    await reg.unregister();
+                  } catch (_) {}
+                }),
+              );
+            }
+          } catch (_) {}
+
+          try {
+            if ('caches' in window) {
+              const cacheNames = await caches.keys();
+              await Promise.all(cacheNames.map((name) => caches.delete(name)));
+            }
+          } catch (_) {}
+
+          // Optional, but useful if your old app stored state here
+          try {
+            localStorage.clear();
+          } catch (_) {}
+          try {
+            sessionStorage.clear();
+          } catch (_) {}
+
+          // One forced reload after cleanup
+          try {
+            const key = '__flutter_pwa_cleanup_done__';
+            if (!sessionStorage.getItem(key)) {
+              sessionStorage.setItem(key, '1');
+              location.replace(location.href);
+            }
+          } catch (_) {}
+        }
+
+        cleanupOldPwa();
+      })();
+    </script>
+    <!--
     If you are serving your web app in a path other than the root, change the
     href value below to reflect the base path you are serving from.
 
@@ -14,57 +59,58 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
-  <base href="$FLUTTER_BASE_HREF">
+    <base href="$FLUTTER_BASE_HREF" />
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="planarity">
-  <meta name="theme-color" content="#0f1319">
+    <meta charset="UTF-8" />
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
+    <meta name="description" content="planarity" />
+    <meta name="theme-color" content="#0f1319" />
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="planarity">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+    <!-- iOS meta tags & icons -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="planarity" />
+    <link rel="apple-touch-icon" href="icons/Icon-192.png" />
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png" />
 
-  <title>planarity</title>
-  <link rel="manifest" href="manifest.json">
-  <script>
-    (function () {
-      if (!('serviceWorker' in navigator)) {
-        return;
-      }
+    <title>planarity</title>
+    <link rel="manifest" href="manifest.json" />
+    <script>
+      (function () {
+        if (!('serviceWorker' in navigator)) {
+          return;
+        }
 
-      window.__pwaCleanup = (async function () {
-        try {
-          const registrations = await navigator.serviceWorker.getRegistrations();
-          await Promise.all(
-            registrations.map(async function (registration) {
-              try {
-                await registration.unregister();
-              } catch (_) {}
-            })
-          );
-
-          if ('caches' in window) {
-            const cacheNames = await caches.keys();
+        window.__pwaCleanup = (async function () {
+          try {
+            const registrations =
+              await navigator.serviceWorker.getRegistrations();
             await Promise.all(
-              cacheNames.map(function (cacheName) {
-                return caches.delete(cacheName);
-              })
+              registrations.map(async function (registration) {
+                try {
+                  await registration.unregister();
+                } catch (_) {}
+              }),
             );
-          }
-        } catch (_) {}
+
+            if ('caches' in window) {
+              const cacheNames = await caches.keys();
+              await Promise.all(
+                cacheNames.map(function (cacheName) {
+                  return caches.delete(cacheName);
+                }),
+              );
+            }
+          } catch (_) {}
+        })();
       })();
-    })();
-  </script>
-</head>
-<body>
-  <!--
+    </script>
+  </head>
+  <body>
+    <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader
     or to give the user feedback during the initialization process.
@@ -72,16 +118,16 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
-  <script>
-    window.addEventListener('load', async function () {
-      if (window.__pwaCleanup) {
-        await window.__pwaCleanup;
-      }
-      const scriptTag = document.createElement('script');
-      scriptTag.src = 'flutter_bootstrap.js';
-      scriptTag.async = true;
-      document.body.appendChild(scriptTag);
-    });
-  </script>
-</body>
+    <script>
+      window.addEventListener('load', async function () {
+        if (window.__pwaCleanup) {
+          await window.__pwaCleanup;
+        }
+        const scriptTag = document.createElement('script');
+        scriptTag.src = 'flutter_bootstrap.js';
+        scriptTag.async = true;
+        document.body.appendChild(scriptTag);
+      });
+    </script>
+  </body>
 </html>
