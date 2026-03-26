@@ -1,31 +1,31 @@
-self.addEventListener('install', (event) => {
+self.addEventListener('install', function () {
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', function (event) {
   event.waitUntil(
-    (async () => {
+    (async function () {
       try {
-        const names = await caches.keys();
-        await Promise.all(names.map((name) => caches.delete(name)));
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(function (cacheName) {
+            return caches.delete(cacheName);
+          })
+        );
       } catch (_) {}
 
-      try {
-        await self.clients.claim();
-      } catch (_) {}
+      await self.registration.unregister();
 
-      const windowClients = await self.clients.matchAll({
-        type: 'window',
+      const clients = await self.clients.matchAll({
         includeUncontrolled: true,
+        type: 'window',
       });
 
       await Promise.all(
-        windowClients.map((client) => client.navigate(client.url)),
+        clients.map(function (client) {
+          return client.navigate(client.url);
+        })
       );
-
-      try {
-        await self.registration.unregister();
-      } catch (_) {}
-    })(),
+    })()
   );
 });
