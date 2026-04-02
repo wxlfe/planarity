@@ -137,7 +137,7 @@ enum DailyPlayStatus { ready, inProgress, locked }
 class _PlanarityHomePageState extends State<PlanarityHomePage>
     with WidgetsBindingObserver {
   static final Uri _portfolioUri = Uri.parse(
-    'https://wxlfe.dev/?utm_source=planarity.xyz&utm_medium=Self%2BPromotion&utm_campaign=Footer%2BPortfolio%2BLink&utm_id=Footer%2BPortfolio%2BLink&utm_content=Footer%2BPortfolio%2BLink',
+    'https://wxlfe.dev/?utm_source=planarity&utm_medium=app&utm_campaign=internal_referral&utm_content=footer_portfolio_link',
   );
   static final Uri _originalGameUri = Uri.parse('http://johntantalo.com/');
   static final Uri _planarGraphInfoUri = Uri.parse(
@@ -1468,7 +1468,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
                                   key: leaderboardKey,
                                   user: user,
                                   refreshToken: _leaderboardRefreshTick,
-                                  onSignUpTap: () => _showAuthModal(isSignIn: false),
+                                  onSignUpTap: () =>
+                                      _showAuthModal(isSignIn: false),
                                   selectedTab: selectedLeaderboardTab,
                                   onTabSelected: (_LeaderboardTab tab) {
                                     setState(() {
@@ -1947,6 +1948,46 @@ class _ProfileDialogState extends State<_ProfileDialog> {
   List<_FriendProfile> _friends = const <_FriendProfile>[];
   final Set<String> _removingFriendIds = <String>{};
   bool _friendsLoading = true;
+  String? _displayNameErrorText;
+
+  String get _initialDisplayNameTrimmed => widget.initialDisplayName.trim();
+
+  String? _displayNameErrorForInput(String value) {
+    if (value.trim() == _initialDisplayNameTrimmed) {
+      return null;
+    }
+    return _displayNameValidationMessage(value);
+  }
+
+  void _updateDisplayNameValidation(String value) {
+    final nextErrorText = _displayNameErrorForInput(value);
+    if (_displayNameErrorText == nextErrorText) {
+      return;
+    }
+    setState(() {
+      _displayNameErrorText = nextErrorText;
+    });
+  }
+
+  void _submitProfileDialog({
+    required bool shouldPersist,
+    required bool signOutRequested,
+  }) {
+    final errorText = _displayNameErrorForInput(_displayNameController.text);
+    if (errorText != null) {
+      setState(() {
+        _displayNameErrorText = errorText;
+      });
+      return;
+    }
+    Navigator.of(context).pop(
+      _ProfileDialogResult(
+        displayName: _displayNameController.text,
+        shouldPersist: shouldPersist,
+        signOutRequested: signOutRequested,
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -2106,19 +2147,18 @@ class _ProfileDialogState extends State<_ProfileDialog> {
               TextField(
                 controller: _displayNameController,
                 textInputAction: TextInputAction.done,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'display name',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
+                  errorText: _displayNameErrorText,
                 ),
-                onSubmitted: (_) {
-                  Navigator.of(context).pop(
-                    _ProfileDialogResult(
-                      displayName: _displayNameController.text,
-                      shouldPersist: true,
-                      signOutRequested: false,
-                    ),
-                  );
-                },
+                onChanged: _updateDisplayNameValidation,
+                onSubmitted: (_) => _submitProfileDialog(
+                  shouldPersist: true,
+                  signOutRequested: false,
+                ),
               ),
               const SizedBox(height: 14),
               Text(
@@ -2233,15 +2273,10 @@ class _ProfileDialogState extends State<_ProfileDialog> {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(
-                      _ProfileDialogResult(
-                        displayName: _displayNameController.text,
-                        shouldPersist: false,
-                        signOutRequested: true,
-                      ),
-                    );
-                  },
+                  onPressed: () => _submitProfileDialog(
+                    shouldPersist: false,
+                    signOutRequested: true,
+                  ),
                   child: const Text('sign out'),
                 ),
               ),
@@ -2429,6 +2464,33 @@ String? _leaderboardDisplayNameFromData(Map<String, dynamic>? profileData) {
   return null;
 }
 
+final RegExp _displayNameEmailPattern = RegExp(
+  r'^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$',
+  caseSensitive: false,
+);
+
+final RegExp _displayNamePhonePattern = RegExp(
+  r'^(?:\+?\d{1,3}[\s.-]*)?(?:\(\d{3}\)|\d{3})[\s.-]*\d{3}[\s.-]*\d{4}$',
+);
+
+final RegExp _displayNameUrlPattern = RegExp(
+  r'^(?:(?:https?:\/\/)|(?:www\.))[^\s/$.?#].[^\s]*$',
+  caseSensitive: false,
+);
+
+String? _displayNameValidationMessage(String displayName) {
+  final trimmed = displayName.trim();
+  if (trimmed.isEmpty) {
+    return null;
+  }
+  if (_displayNameEmailPattern.hasMatch(trimmed) ||
+      _displayNamePhonePattern.hasMatch(trimmed) ||
+      _displayNameUrlPattern.hasMatch(trimmed)) {
+    return 'invalid name - try something else';
+  }
+  return null;
+}
+
 List<String> _leaderboardFriendIds(Map<String, dynamic>? profileData) {
   final rawFriends = profileData?['friends'];
   if (rawFriends is! List) {
@@ -2472,6 +2534,10 @@ int _leaderboardScoreFromData(Map<String, dynamic>? profileData) {
   if (!playedToday) {
     return 0;
   }
+  return _leaderboardRawScoreFromData(profileData);
+}
+
+int _leaderboardRawScoreFromData(Map<String, dynamic>? profileData) {
   final score = profileData?['score'];
   if (score is int) {
     return max(0, score);
@@ -2841,7 +2907,7 @@ class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
 
     if (_loadError != null) {
       return Text(
-        'unable to load friends leaderboard right now.',
+        'unable to load friends leaderboard right now',
         style: theme.textTheme.bodyMedium,
       );
     }
@@ -2927,15 +2993,391 @@ List<_LeaderboardEntry> _buildFriendsLeaderboardEntries({
   ];
 }
 
-class _GlobalLeaderboardView extends StatelessWidget {
+class _GlobalLeaderboardView extends StatefulWidget {
   const _GlobalLeaderboardView({super.key, required this.user});
 
   final User? user;
 
   @override
+  State<_GlobalLeaderboardView> createState() => _GlobalLeaderboardViewState();
+}
+
+class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _topSubscription;
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _userSubscription;
+  final Map<String, StreamSubscription<QuerySnapshot<Map<String, dynamic>>>>
+  _friendQuerySubscriptions =
+      <String, StreamSubscription<QuerySnapshot<Map<String, dynamic>>>>{};
+  final Map<String, Map<String, dynamic>?> _friendProfileData =
+      <String, Map<String, dynamic>?>{};
+  final Map<String, int> _globalRanks = <String, int>{};
+  final Map<String, Map<String, dynamic>> _topProfileData =
+      <String, Map<String, dynamic>>{};
+  List<String> _topUserIds = const <String>[];
+  Map<String, dynamic>? _userProfileData;
+  Object? _loadError;
+  bool _isLoading = true;
+  int _rankRefreshVersion = 0;
+
+  User? get _user => widget.user;
+
+  @override
+  void initState() {
+    super.initState();
+    _startListening();
+  }
+
+  @override
+  void didUpdateWidget(covariant _GlobalLeaderboardView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.user?.uid != widget.user?.uid) {
+      _startListening();
+    }
+  }
+
+  @override
+  void dispose() {
+    _cancelAllSubscriptions();
+    super.dispose();
+  }
+
+  void _cancelAllSubscriptions() {
+    _topSubscription?.cancel();
+    _topSubscription = null;
+    _userSubscription?.cancel();
+    _userSubscription = null;
+    for (final subscription in _friendQuerySubscriptions.values) {
+      subscription.cancel();
+    }
+    _friendQuerySubscriptions.clear();
+  }
+
+  void _startListening() {
+    _cancelAllSubscriptions();
+    if (mounted) {
+      setState(() {
+        _topUserIds = const <String>[];
+        _topProfileData.clear();
+        _userProfileData = null;
+        _friendProfileData.clear();
+        _globalRanks.clear();
+        _loadError = null;
+        _isLoading = true;
+      });
+    } else {
+      _topUserIds = const <String>[];
+      _topProfileData.clear();
+      _userProfileData = null;
+      _friendProfileData.clear();
+      _globalRanks.clear();
+      _loadError = null;
+      _isLoading = true;
+    }
+
+    final users = FirebaseFirestore.instance.collection('users');
+    _topSubscription = users
+        .where('lastPlayed', isEqualTo: _leaderboardTodayKey())
+        .orderBy('score', descending: true)
+        .limit(3)
+        .snapshots()
+        .listen(
+          (snapshot) {
+            _topUserIds = snapshot.docs
+                .map((doc) => doc.id)
+                .toList(growable: false);
+            _topProfileData
+              ..clear()
+              ..addEntries(
+                snapshot.docs.map((doc) => MapEntry(doc.id, doc.data())),
+              );
+            _loadError = null;
+            _publishLeaderboard();
+          },
+          onError: (Object error) {
+            debugPrint('Global leaderboard top query failed: $error');
+            if (!mounted) {
+              return;
+            }
+            setState(() {
+              _loadError = error;
+              _isLoading = false;
+            });
+          },
+        );
+
+    final user = _user;
+    if (user == null) {
+      return;
+    }
+
+    _userSubscription = users
+        .doc(user.uid)
+        .snapshots()
+        .listen(
+          (snapshot) {
+            _userProfileData = snapshot.data();
+            _loadError = null;
+            _syncFriendSubscriptions(_leaderboardFriendIds(_userProfileData));
+            _publishLeaderboard();
+          },
+          onError: (Object error) {
+            debugPrint('Global leaderboard user query failed: $error');
+            if (!mounted) {
+              return;
+            }
+            setState(() {
+              _loadError = error;
+              _isLoading = false;
+            });
+          },
+        );
+  }
+
+  void _syncFriendSubscriptions(List<String> friendIds) {
+    final users = FirebaseFirestore.instance.collection('users');
+    final friendChunks = _chunkedLeaderboardFriendIds(friendIds);
+    final nextChunkKeys = friendChunks
+        .map((chunk) => chunk.join('\u0000'))
+        .toSet();
+    final currentChunkKeys = _friendQuerySubscriptions.keys.toSet();
+
+    for (final removedChunkKey in currentChunkKeys.difference(nextChunkKeys)) {
+      _friendQuerySubscriptions.remove(removedChunkKey)?.cancel();
+      for (final friendId in removedChunkKey.split('\u0000')) {
+        _friendProfileData.remove(friendId);
+      }
+    }
+
+    for (final chunk in friendChunks) {
+      final chunkKey = chunk.join('\u0000');
+      if (_friendQuerySubscriptions.containsKey(chunkKey)) {
+        continue;
+      }
+
+      _friendQuerySubscriptions[chunkKey] = users
+          .where(FieldPath.documentId, whereIn: chunk)
+          .snapshots()
+          .listen(
+            (snapshot) {
+              for (final friendId in chunk) {
+                _friendProfileData[friendId] = null;
+              }
+              for (final doc in snapshot.docs) {
+                _friendProfileData[doc.id] = doc.data();
+              }
+              _loadError = null;
+              _publishLeaderboard();
+            },
+            onError: (Object error) {
+              debugPrint('Global leaderboard friend query failed: $error');
+              if (!mounted) {
+                return;
+              }
+              setState(() {
+                _loadError = error;
+                _isLoading = false;
+              });
+            },
+          );
+    }
+  }
+
+  List<_LeaderboardStanding> _selectedStandings() {
+    final standingsByUid = <String, _LeaderboardStanding>{};
+
+    for (final uid in _topUserIds) {
+      final profileData = _topProfileData[uid];
+      if (profileData == null) {
+        continue;
+      }
+      standingsByUid[uid] = _LeaderboardStanding(
+        uid: uid,
+        name:
+            _leaderboardDisplayNameFromData(profileData) ?? 'anonymous player',
+        score: _leaderboardScoreFromData(profileData),
+        isLocked: _leaderboardLockedFromData(profileData),
+        isCurrentUser: uid == _user?.uid,
+      );
+    }
+
+    final user = _user;
+    if (user != null) {
+      standingsByUid[user.uid] = _LeaderboardStanding(
+        uid: user.uid,
+        name:
+            _leaderboardDisplayNameFromData(_userProfileData) ??
+            _displayNameForUser(user),
+        score: _leaderboardScoreFromData(_userProfileData),
+        isLocked: _leaderboardLockedFromData(_userProfileData),
+        isCurrentUser: true,
+      );
+
+      for (final friendId in _leaderboardFriendIds(_userProfileData)) {
+        final friendData = _friendProfileData[friendId];
+        if (friendData == null) {
+          continue;
+        }
+        standingsByUid[friendId] = _LeaderboardStanding(
+          uid: friendId,
+          name:
+              _leaderboardDisplayNameFromData(friendData) ?? 'anonymous player',
+          score: _leaderboardScoreFromData(friendData),
+          isLocked: _leaderboardLockedFromData(friendData),
+          isCurrentUser: false,
+        );
+      }
+    }
+
+    final standings = standingsByUid.values.toList(growable: false);
+    standings.sort((_LeaderboardStanding a, _LeaderboardStanding b) {
+      final rankA = _globalRanks[a.uid];
+      final rankB = _globalRanks[b.uid];
+      if (rankA != null && rankB != null && rankA != rankB) {
+        return rankA.compareTo(rankB);
+      }
+      final byScore = b.score.compareTo(a.score);
+      if (byScore != 0) {
+        return byScore;
+      }
+      if (a.isCurrentUser != b.isCurrentUser) {
+        return a.isCurrentUser ? -1 : 1;
+      }
+      final byName = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      if (byName != 0) {
+        return byName;
+      }
+      return a.uid.compareTo(b.uid);
+    });
+    return standings;
+  }
+
+  Future<void> _refreshGlobalRanks() async {
+    final standings = _selectedStandings();
+    if (standings.isEmpty) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _globalRanks.clear();
+      });
+      return;
+    }
+
+    final requestVersion = ++_rankRefreshVersion;
+    final users = FirebaseFirestore.instance.collection('users');
+    final distinctScores =
+        standings.map((entry) => entry.score).toSet().toList()
+          ..sort((a, b) => b.compareTo(a));
+    final ranksByScore = <int, int>{};
+
+    try {
+      await Future.wait(
+        distinctScores.map((score) async {
+          final aggregateSnapshot = await users
+              .where('lastPlayed', isEqualTo: _leaderboardTodayKey())
+              .where('score', isGreaterThan: score)
+              .count()
+              .get();
+          ranksByScore[score] = (aggregateSnapshot.count ?? 0) + 1;
+        }),
+      );
+    } catch (error) {
+      debugPrint('Global leaderboard rank query failed: $error');
+      if (!mounted || requestVersion != _rankRefreshVersion) {
+        return;
+      }
+      setState(() {
+        _loadError = error;
+        _isLoading = false;
+      });
+      return;
+    }
+
+    if (!mounted || requestVersion != _rankRefreshVersion) {
+      return;
+    }
+
+    setState(() {
+      _globalRanks
+        ..clear()
+        ..addEntries(
+          standings.map(
+            (entry) => MapEntry(entry.uid, ranksByScore[entry.score] ?? 1),
+          ),
+        );
+      _isLoading = false;
+    });
+  }
+
+  void _publishLeaderboard() {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _isLoading = false;
+    });
+    unawaited(_refreshGlobalRanks());
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final entries = _globalEntriesFor(user);
-    final topEntry = entries.first;
+    final theme = Theme.of(context);
+    final standings = _selectedStandings();
+    final entries = standings
+        .map(
+          (standing) => _LeaderboardEntry(
+            rank: _globalRanks[standing.uid] ?? 0,
+            name: standing.name,
+            score: standing.score,
+            isLocked: standing.isLocked,
+            isCurrentUser: standing.isCurrentUser,
+          ),
+        )
+        .toList(growable: false);
+    _LeaderboardStanding? topStanding;
+    if (_topUserIds.isNotEmpty) {
+      final topUserId = _topUserIds.first;
+      for (final standing in standings) {
+        if (standing.uid == topUserId) {
+          topStanding = standing;
+          break;
+        }
+      }
+    }
+
+    if (_isLoading) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_loadError != null) {
+      final errorDetail = _loadError.toString().trim();
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'unable to load global leaderboard right now',
+            style: theme.textTheme.bodyMedium,
+          ),
+          if (errorDetail.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              errorDetail,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.72),
+              ),
+            ),
+          ],
+        ],
+      );
+    }
+
+    if (topStanding == null || entries.isEmpty) {
+      return Text('no global scores yet.', style: theme.textTheme.bodyMedium);
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2943,13 +3385,13 @@ class _GlobalLeaderboardView extends StatelessWidget {
       children: [
         _LeaderboardMetric(
           label: 'global top score',
-          value: '${topEntry.score}',
-          detail: topEntry.name,
+          value: '${topStanding.score}',
+          detail: topStanding.name,
         ),
         const SizedBox(height: 14),
         _LeaderboardTable(
           entries: entries,
-          subtitle: user == null ? 'global snapshot' : 'your global position',
+          subtitle: _user == null ? 'global snapshot' : 'your global position',
         ),
       ],
     );
@@ -3137,29 +3579,6 @@ List<_LeaderboardEntry> _friendsEntriesFor(User user) {
       isCurrentUser: true,
     ),
   ];
-}
-
-List<_LeaderboardEntry> _globalEntriesFor(User? user) {
-  final entries = <_LeaderboardEntry>[
-    const _LeaderboardEntry(rank: 1, name: 'top score', score: 98),
-    const _LeaderboardEntry(rank: 2, name: 'sana', score: 94),
-    const _LeaderboardEntry(rank: 3, name: 'lee', score: 89),
-  ];
-
-  if (user == null) {
-    entries.add(const _LeaderboardEntry(rank: 154, name: 'guest', score: 12));
-    return entries;
-  }
-
-  entries.add(
-    _LeaderboardEntry(
-      rank: 28,
-      name: _displayNameForUser(user),
-      score: 47,
-      isCurrentUser: true,
-    ),
-  );
-  return entries;
 }
 
 String _displayNameForUser(User user) {
