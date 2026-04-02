@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:app_links/app_links.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,8 @@ import 'firebase_options.dart';
 
 bool _firebaseReady = false;
 bool _googleSignInReady = false;
+FirebaseAnalytics? _analytics;
+FirebaseAnalyticsObserver? _analyticsObserver;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +38,11 @@ Future<bool> _initializeFirebase() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    final analytics = FirebaseAnalytics.instance;
+    await analytics.setAnalyticsCollectionEnabled(true);
+    await analytics.logAppOpen();
+    _analytics = analytics;
+    _analyticsObserver = FirebaseAnalyticsObserver(analytics: analytics);
     return true;
   } catch (error, stackTrace) {
     debugPrint('Firebase initialization failed: $error');
@@ -69,9 +77,105 @@ class PlanarityApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       theme: _buildTheme(Brightness.light),
       darkTheme: _buildTheme(Brightness.dark),
+      navigatorObservers: _analyticsObserver == null
+          ? const <NavigatorObserver>[]
+          : <NavigatorObserver>[_analyticsObserver!],
       home: const PlanarityHomePage(),
     );
   }
+}
+
+Future<void> _runAnalyticsCall(
+  String label,
+  Future<void> Function(FirebaseAnalytics analytics) action,
+) async {
+  final analytics = _analytics;
+  if (analytics == null) {
+    return;
+  }
+
+  try {
+    await action(analytics);
+  } catch (error, stackTrace) {
+    debugPrint('Analytics event failed: $label, error: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
+}
+
+String _analyticsLevelName(int level) => 'level_$level';
+
+Future<void> _logJoinGroupEvent(String groupId) {
+  return _runAnalyticsCall(
+    'join_group',
+    (analytics) => analytics.logJoinGroup(groupId: groupId),
+  );
+}
+
+Future<void> _logLevelStartEvent(int level) {
+  return _runAnalyticsCall(
+    'level_start',
+    (analytics) =>
+        analytics.logLevelStart(levelName: _analyticsLevelName(level)),
+  );
+}
+
+Future<void> _logLevelEndEvent({
+  required int level,
+  required bool success,
+}) {
+  return _runAnalyticsCall(
+    'level_end',
+    (analytics) => analytics.logLevelEnd(
+      levelName: _analyticsLevelName(level),
+      success: success ? 1 : 0,
+    ),
+  );
+}
+
+Future<void> _logLevelUpEvent(int level) {
+  return _runAnalyticsCall(
+    'level_up',
+    (analytics) => analytics.logLevelUp(level: level),
+  );
+}
+
+Future<void> _logLoginEvent(String method) {
+  return _runAnalyticsCall(
+    'login',
+    (analytics) => analytics.logLogin(loginMethod: method),
+  );
+}
+
+Future<void> _logPostScoreEvent({
+  required int score,
+  required int level,
+}) {
+  return _runAnalyticsCall(
+    'post_score',
+    (analytics) => analytics.logPostScore(score: score, level: level),
+  );
+}
+
+Future<void> _logShareEvent({
+  required String contentType,
+  required String itemId,
+  required String method,
+}) {
+  return _runAnalyticsCall(
+    'share',
+    (analytics) => analytics.logShare(
+      contentType: contentType,
+      itemId: itemId,
+      method: method,
+    ),
+  );
+}
+
+Future<void> _logSignUpEvent(String method) {
+  return _runAnalyticsCall(
+    'sign_up',
+    (analytics) => analytics.logSignUp(signUpMethod: method),
+  );
 }
 
 ThemeData _buildTheme(Brightness brightness) {
@@ -251,6 +355,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       return;
     }
     _activeUserId = nextUserId;
+    await _analytics?.setUserId(id: nextUserId);
 
     final profileData = await _loadActiveUserDocument(user);
     final signedInChanged = (_currentUser != null) != (user != null);
@@ -486,9 +591,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       lastPlayed: today,
       locked: false,
     );
-
     final result = await Navigator.of(context).push<GameSessionResult>(
       MaterialPageRoute(
+        settings: const RouteSettings(name: 'game_session'),
         builder: (_) => PlanarityGamePage(
           dayKey: today,
           startLevel: startLevel,
@@ -523,6 +628,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       locked: result.locked,
       lifetimeScoreIncrement: max(0, result.score - previousScore),
     );
+    await _logPostScoreEvent(score: result.score, level: result.level);
     _refreshLeaderboard();
   }
 
@@ -556,6 +662,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           email: cleanedEmail,
           password: cleanedPassword,
         );
+        await _logLoginEvent('email');
       } else {
         final credential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(
@@ -576,6 +683,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           await user.delete().catchError((_) {});
           return 'unable to create account right now';
         }
+        await _logSignUpEvent('email');
       }
       return null;
     } on FirebaseAuthException catch (error, stackTrace) {
@@ -622,6 +730,11 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
 
       if (credential.additionalUserInfo?.isNewUser ?? false) {
         await _ensureUserDocument(user);
+      }
+      if (credential.additionalUserInfo?.isNewUser ?? false) {
+        await _logSignUpEvent('google');
+      } else {
+        await _logLoginEvent('google');
       }
 
       return _AuthSubmissionResult(
@@ -1074,6 +1187,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
 
     final friendName =
         _profileDisplayNameFromData(friendSnapshot.data()) ?? 'your new friend';
+    await _logJoinGroupEvent('friends');
     return _FriendAddResult(message: 'added $friendName');
   }
 
@@ -1227,6 +1341,11 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           text: inviteLink,
           sharePositionOrigin: sharePositionOrigin,
         ),
+      );
+      await _logShareEvent(
+        contentType: 'friend_invite',
+        itemId: 'friend_invite_card',
+        method: 'system_share_sheet',
       );
     } on MissingPluginException {
       if (!mounted) {
@@ -3630,6 +3749,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       dayKey: widget.dayKey,
       level: _level,
     );
+    unawaited(_logLevelStartEvent(_level));
   }
 
   void _startNextLevel() {
@@ -3644,6 +3764,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       );
       _needsCentering = true;
     });
+    unawaited(_logLevelStartEvent(_level));
   }
 
   void _failRun() {
@@ -3725,6 +3846,8 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       setState(() {
         _totalScore += levelScore;
       });
+      await _logLevelEndEvent(level: _level, success: true);
+      await _logLevelUpEvent(_level + 1);
       final solvedNodes = List<Offset>.from(_current.nodes);
       final solvedEdges = List<Edge>.from(_current.edges);
       final proceed = await _showCompletionModal(
@@ -3752,6 +3875,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
         return;
       }
       _resolvingLevel = true;
+      await _logLevelEndEvent(level: _level, success: false);
       final finalNodes = List<Offset>.from(_current.nodes);
       final finalEdges = List<Edge>.from(_current.edges);
       await _showCompletionModal(
@@ -4127,6 +4251,11 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       );
       await SharePlus.instance.share(
         ShareParams(files: [file], sharePositionOrigin: sharePositionOrigin),
+      );
+      await _logShareEvent(
+        contentType: solved ? 'solved_result' : 'failed_result',
+        itemId: 'daily_result_card',
+        method: 'system_share_sheet',
       );
     } on MissingPluginException {
       if (!mounted) {
