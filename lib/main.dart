@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,8 +27,33 @@ bool _googleSignInReady = false;
 FirebaseAnalytics? _analytics;
 FirebaseAnalyticsObserver? _analyticsObserver;
 
+bool get _supportsMobileAds {
+  if (kIsWeb) {
+    return false;
+  }
+
+  return switch (defaultTargetPlatform) {
+    TargetPlatform.android || TargetPlatform.iOS => true,
+    _ => false,
+  };
+}
+
+Future<void> _initializeMobileAds() async {
+  if (!_supportsMobileAds) {
+    return;
+  }
+
+  try {
+    await MobileAds.instance.initialize();
+  } catch (error, stackTrace) {
+    debugPrint('Mobile Ads initialization failed: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await _initializeMobileAds();
   _firebaseReady = await _initializeFirebase();
   _googleSignInReady = await _initializeGoogleSignIn();
   runApp(const PlanarityApp());
@@ -119,10 +145,7 @@ Future<void> _logLevelStartEvent(int level) {
   );
 }
 
-Future<void> _logLevelEndEvent({
-  required int level,
-  required bool success,
-}) {
+Future<void> _logLevelEndEvent({required int level, required bool success}) {
   return _runAnalyticsCall(
     'level_end',
     (analytics) => analytics.logLevelEnd(
@@ -146,10 +169,7 @@ Future<void> _logLoginEvent(String method) {
   );
 }
 
-Future<void> _logPostScoreEvent({
-  required int score,
-  required int level,
-}) {
+Future<void> _logPostScoreEvent({required int score, required int level}) {
   return _runAnalyticsCall(
     'post_score',
     (analytics) => analytics.logPostScore(score: score, level: level),
@@ -3729,6 +3749,15 @@ class PlanarityGamePage extends StatefulWidget {
 }
 
 class _PlanarityGamePageState extends State<PlanarityGamePage> {
+  static const _androidDebugInterstitialAdUnitId =
+      'ca-app-pub-3940256099942544/1033173712';
+  static const _iosDebugInterstitialAdUnitId =
+      'ca-app-pub-3940256099942544/4411468910';
+  static const _androidInterstitialAdUnitId =
+      'ca-app-pub-1627227368495179/5369521604';
+  static const _iosInterstitialAdUnitId =
+      'ca-app-pub-1627227368495179/5468865000';
+
   late int _level;
   late int _totalScore;
   late PlanarityLevel _current;
@@ -3739,6 +3768,8 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
   Size? _lastBoardSize;
   bool _needsCentering = true;
   bool _recenterScheduled = false;
+  InterstitialAd? _interstitialAd;
+  bool _interstitialAdLoading = false;
 
   @override
   void initState() {
@@ -3750,6 +3781,13 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       level: _level,
     );
     unawaited(_logLevelStartEvent(_level));
+    _loadInterstitialAd();
+  }
+
+  @override
+  void dispose() {
+    _interstitialAd?.dispose();
+    super.dispose();
   }
 
   void _startNextLevel() {
@@ -3765,6 +3803,91 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       _needsCentering = true;
     });
     unawaited(_logLevelStartEvent(_level));
+  }
+
+  String? get _interstitialAdUnitId {
+    if (!_supportsMobileAds) {
+      return null;
+    }
+
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android =>
+        kDebugMode
+            ? _androidDebugInterstitialAdUnitId
+            : _androidInterstitialAdUnitId,
+      TargetPlatform.iOS =>
+        kDebugMode ? _iosDebugInterstitialAdUnitId : _iosInterstitialAdUnitId,
+      _ => null,
+    };
+  }
+
+  bool get _shouldShowInterstitialForCurrentLevel => _level % 3 == 0;
+
+  void _loadInterstitialAd() {
+    final adUnitId = _interstitialAdUnitId;
+    if (adUnitId == null || _interstitialAdLoading || _interstitialAd != null) {
+      return;
+    }
+
+    _interstitialAdLoading = true;
+    InterstitialAd.load(
+      adUnitId: adUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          _interstitialAdLoading = false;
+          _interstitialAd?.dispose();
+          _interstitialAd = ad;
+        },
+        onAdFailedToLoad: (error) {
+          _interstitialAdLoading = false;
+          _interstitialAd = null;
+          debugPrint('Interstitial ad failed to load: $error');
+        },
+      ),
+    );
+  }
+
+  Future<void> _showInterstitialAdIfNeeded() async {
+    if (!_shouldShowInterstitialForCurrentLevel) {
+      return;
+    }
+
+    final ad = _interstitialAd;
+    if (ad == null) {
+      _loadInterstitialAd();
+      return;
+    }
+
+    final completer = Completer<void>();
+
+    ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (ad) {
+        ad.dispose();
+        if (identical(_interstitialAd, ad)) {
+          _interstitialAd = null;
+        }
+        _loadInterstitialAd();
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      },
+      onAdFailedToShowFullScreenContent: (ad, error) {
+        debugPrint('Interstitial ad failed to show: $error');
+        ad.dispose();
+        if (identical(_interstitialAd, ad)) {
+          _interstitialAd = null;
+        }
+        _loadInterstitialAd();
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      },
+    );
+
+    _interstitialAd = null;
+    ad.show();
+    await completer.future;
   }
 
   void _failRun() {
@@ -3850,6 +3973,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       await _logLevelUpEvent(_level + 1);
       final solvedNodes = List<Offset>.from(_current.nodes);
       final solvedEdges = List<Edge>.from(_current.edges);
+      await _showInterstitialAdIfNeeded();
       final proceed = await _showCompletionModal(
         solved: true,
         totalMoves: _level,

@@ -3,6 +3,9 @@
         android:label="planarity"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-1627227368495179~2933163599" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
