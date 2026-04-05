@@ -21,10 +21,7 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return android;
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
@@ -75,4 +72,13 @@ class DefaultFirebaseOptions {
     iosClientId: '991765269846-6u5n56v48erd5vu6t9berg38ie774kb4.apps.googleusercontent.com',
     iosBundleId: 'dev.wxlfe.planarity',
   );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyD81fBLVZkzZ3WSzm7PZtvgyZ6KqYxCDkU',
+    appId: '1:991765269846:android:cddb0eab77744b4fcadaf7',
+    messagingSenderId: '991765269846',
+    projectId: 'planarity-xyz',
+    storageBucket: 'planarity-xyz.firebasestorage.app',
+  );
+
 }
