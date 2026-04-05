@@ -1719,7 +1719,7 @@ class _HomeHeroContent extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'untangle the graph',
+              'daily graph puzzle',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w400,
               ),
@@ -4071,7 +4071,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'untangle the graph',
+                'daily graph puzzle',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: Theme.of(
                     context,
@@ -4443,7 +4443,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
 
     final subtitle = TextPainter(
       text: TextSpan(
-        text: 'untangle the graph',
+        text: 'daily graph puzzle',
         style: TextStyle(
           color: fgColor.withOpacity(0.75),
           fontSize: 34,
