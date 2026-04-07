@@ -725,6 +725,44 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     }
   }
 
+  Future<String?> _sendPasswordReset(String email) async {
+    final cleanedEmail = email.trim().toLowerCase();
+
+    if (cleanedEmail.isEmpty) {
+      return 'enter your email first';
+    }
+    final emailValid = RegExp(
+      r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+    ).hasMatch(cleanedEmail);
+    if (!emailValid) {
+      return 'enter a valid email';
+    }
+    if (!_firebaseReady) {
+      return 'auth configuration is missing';
+    }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: cleanedEmail);
+      return null;
+    } on FirebaseAuthException catch (error, stackTrace) {
+      debugPrint(
+        'Firebase password reset failed: code=${error.code}, message=${error.message}',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+      return _authErrorMessage(error);
+    } on FirebaseException catch (error, stackTrace) {
+      debugPrint(
+        'Firebase password reset config failed: code=${error.code}, message=${error.message}',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+      return 'auth configuration is missing';
+    } catch (error, stackTrace) {
+      debugPrint('Unexpected password reset failure: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      return 'unable to send reset email right now';
+    }
+  }
+
   Future<_AuthSubmissionResult> _submitGoogleAuth() async {
     if (!_firebaseReady) {
       return const _AuthSubmissionResult(
@@ -907,6 +945,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           return _AuthDialog(
             isSignIn: nextMode,
             onSubmit: _submitAuth,
+            onForgotPassword: _sendPasswordReset,
             onGoogleSubmit: _submitGoogleAuth,
           );
         },
@@ -1834,6 +1873,7 @@ class _AuthDialog extends StatefulWidget {
   const _AuthDialog({
     required this.isSignIn,
     required this.onSubmit,
+    required this.onForgotPassword,
     required this.onGoogleSubmit,
   });
 
@@ -1844,6 +1884,7 @@ class _AuthDialog extends StatefulWidget {
     required String password,
   })
   onSubmit;
+  final Future<String?> Function(String email) onForgotPassword;
   final Future<_AuthSubmissionResult> Function() onGoogleSubmit;
 
   @override
@@ -1854,26 +1895,42 @@ class _AuthDialogState extends State<_AuthDialog> {
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
   String? _errorText;
+  String? _infoText;
   bool _isSubmitting = false;
+
+  bool get _hasValidEmail {
+    final cleanedEmail = _emailController.text.trim().toLowerCase();
+    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(cleanedEmail);
+  }
 
   @override
   void initState() {
     super.initState();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+    _emailController.addListener(_handleEmailChanged);
   }
 
   @override
   void dispose() {
+    _emailController.removeListener(_handleEmailChanged);
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _handleEmailChanged() {
+    if (!mounted) {
+      return;
+    }
+    setState(() {});
   }
 
   Future<void> _submit() async {
     setState(() {
       _isSubmitting = true;
       _errorText = null;
+      _infoText = null;
     });
 
     final submitError = await widget.onSubmit(
@@ -1903,10 +1960,34 @@ class _AuthDialogState extends State<_AuthDialog> {
     });
   }
 
+  Future<void> _forgotPassword() async {
+    setState(() {
+      _isSubmitting = true;
+      _errorText = null;
+      _infoText = null;
+    });
+
+    final submitError = await widget.onForgotPassword(_emailController.text);
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = false;
+      if (submitError == null) {
+        _infoText = 'if that email exists, we sent a reset link';
+      } else {
+        _errorText = submitError;
+      }
+    });
+  }
+
   Future<void> _submitGoogle() async {
     setState(() {
       _isSubmitting = true;
       _errorText = null;
+      _infoText = null;
     });
 
     final result = await widget.onGoogleSubmit();
@@ -1985,6 +2066,34 @@ class _AuthDialogState extends State<_AuthDialog> {
                 ),
                 onSubmitted: _isSubmitting ? null : (_) async => _submit(),
               ),
+              if (widget.isSignIn && _hasValidEmail) ...[
+                const SizedBox(height: 6),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: _isSubmitting ? null : _forgotPassword,
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    child: Text(
+                      'reset password',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ),
+                ),
+              ],
+              if (_infoText != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  _infoText!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.75),
+                  ),
+                ),
+              ],
               if (_errorText != null) ...[
                 const SizedBox(height: 8),
                 Text(
