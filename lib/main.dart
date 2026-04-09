@@ -984,7 +984,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           initialDisplayName: initialDisplayName,
           initialFriendIds: initialFriendIds,
           lifetimeScore: lifetimeScore,
-          loadFriends: _loadFriendProfiles,
+          loadFriends: (friendIds) => _loadFriendProfiles(user.uid, friendIds),
           removeFriend: (friendUid) =>
               _removeFriendPair(userId: user.uid, friendUid: friendUid),
           buildInviteLink: () => _friendInvitePath(user.uid),
@@ -1018,10 +1018,105 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       return;
     }
 
+    if (result.deleteAccountRequested) {
+      final errorText = await _deleteAccount(
+        user: user,
+        profileData: profileData,
+      );
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errorText ?? 'account deleted')));
+      _refreshLeaderboard();
+      return;
+    }
+
     if (result.shouldPersist) {
       await _saveDisplayName(user: user, displayName: result.displayName);
     }
     _refreshLeaderboard();
+  }
+
+  Future<String?> _deleteAccount({
+    required User user,
+    required Map<String, dynamic>? profileData,
+  }) async {
+    final userDocument = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid);
+    var userDocumentDeleted = false;
+
+    Future<void> restoreUserDocumentIfNeeded() async {
+      if (!userDocumentDeleted || profileData == null) {
+        return;
+      }
+      try {
+        await userDocument.set(profileData);
+      } catch (error, stackTrace) {
+        debugPrint('Unable to restore profile after delete failure: $error');
+        debugPrintStack(stackTrace: stackTrace);
+      }
+    }
+
+    try {
+      await userDocument.delete();
+      userDocumentDeleted = true;
+      await user.delete();
+      try {
+        if (!kIsWeb &&
+            _googleSignInReady &&
+            GoogleSignIn.instance.supportsAuthenticate()) {
+          await GoogleSignIn.instance.signOut();
+        }
+      } catch (_) {
+        // The Firebase account is already deleted; stale Google client state
+        // should not turn a successful account deletion into a failure.
+      }
+      return null;
+    } on FirebaseAuthException catch (error, stackTrace) {
+      debugPrint(
+        'Firebase account deletion failed: code=${error.code}, message=${error.message}',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+      await restoreUserDocumentIfNeeded();
+      return _deleteAccountAuthErrorMessage(error);
+    } on FirebaseException catch (error, stackTrace) {
+      debugPrint(
+        'Firestore account deletion failed: code=${error.code}, message=${error.message}',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+      return _deleteAccountFirestoreErrorMessage(error);
+    } catch (error, stackTrace) {
+      debugPrint('Unexpected account deletion failure: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      await restoreUserDocumentIfNeeded();
+      return 'unable to delete your account right now';
+    }
+  }
+
+  String _deleteAccountAuthErrorMessage(FirebaseAuthException error) {
+    switch (error.code) {
+      case 'requires-recent-login':
+        return 'sign in again before deleting your account';
+      case 'network-request-failed':
+        return 'network error. check your connection';
+      default:
+        return 'unable to delete your account right now';
+    }
+  }
+
+  String _deleteAccountFirestoreErrorMessage(FirebaseException error) {
+    switch (error.code) {
+      case 'permission-denied':
+        return 'unable to delete your profile right now';
+      case 'network-request-failed':
+      case 'unavailable':
+        return 'network error. check your connection';
+      default:
+        return 'unable to delete your account right now';
+    }
   }
 
   Future<Map<String, dynamic>?> _loadUserDocument(String uid) async {
@@ -1166,6 +1261,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
   }
 
   Future<List<_FriendProfile>> _loadFriendProfiles(
+    String userId,
     List<String> friendIds,
   ) async {
     if (friendIds.isEmpty) {
@@ -1178,7 +1274,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           .doc(uid)
           .get();
       if (!snapshot.exists) {
-        return null;
+        return _MissingFriendProfile(uid);
       }
       final data = snapshot.data();
       return _FriendProfile(
@@ -1188,9 +1284,19 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       );
     });
 
-    final friends = (await Future.wait(
-      futures,
-    )).whereType<_FriendProfile>().toList();
+    final loadedFriends = await Future.wait(futures);
+    final missingFriendIds = loadedFriends
+        .whereType<_MissingFriendProfile>()
+        .map((friend) => friend.uid)
+        .toList(growable: false);
+    unawaited(
+      _removeFriendIdsFromUserDocument(
+        userId: userId,
+        friendIds: missingFriendIds,
+      ),
+    );
+
+    final friends = loadedFriends.whereType<_FriendProfile>().toList();
     friends.sort(
       (a, b) =>
           a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase()),
@@ -1862,11 +1968,13 @@ class _ProfileDialogResult {
     required this.displayName,
     required this.shouldPersist,
     required this.signOutRequested,
+    required this.deleteAccountRequested,
   });
 
   final String displayName;
   final bool shouldPersist;
   final bool signOutRequested;
+  final bool deleteAccountRequested;
 }
 
 class _AuthDialog extends StatefulWidget {
@@ -2195,7 +2303,9 @@ class _ProfileDialogState extends State<_ProfileDialog> {
   late List<String> _friendIds;
   List<_FriendProfile> _friends = const <_FriendProfile>[];
   final Set<String> _removingFriendIds = <String>{};
+  Timer? _deleteAccountResetTimer;
   bool _friendsLoading = true;
+  bool _deleteAccountConfirming = false;
   String? _displayNameErrorText;
 
   String get _initialDisplayNameTrimmed => widget.initialDisplayName.trim();
@@ -2220,6 +2330,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
   void _submitProfileDialog({
     required bool shouldPersist,
     required bool signOutRequested,
+    required bool deleteAccountRequested,
   }) {
     final errorText = _displayNameErrorForInput(_displayNameController.text);
     if (errorText != null) {
@@ -2233,8 +2344,37 @@ class _ProfileDialogState extends State<_ProfileDialog> {
         displayName: _displayNameController.text,
         shouldPersist: shouldPersist,
         signOutRequested: signOutRequested,
+        deleteAccountRequested: deleteAccountRequested,
       ),
     );
+  }
+
+  void _handleDeleteAccountPressed() {
+    if (_deleteAccountConfirming) {
+      _deleteAccountResetTimer?.cancel();
+      Navigator.of(context).pop(
+        _ProfileDialogResult(
+          displayName: _displayNameController.text,
+          shouldPersist: false,
+          signOutRequested: false,
+          deleteAccountRequested: true,
+        ),
+      );
+      return;
+    }
+
+    _deleteAccountResetTimer?.cancel();
+    setState(() {
+      _deleteAccountConfirming = true;
+    });
+    _deleteAccountResetTimer = Timer(const Duration(seconds: 15), () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _deleteAccountConfirming = false;
+      });
+    });
   }
 
   @override
@@ -2249,6 +2389,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
 
   @override
   void dispose() {
+    _deleteAccountResetTimer?.cancel();
     _displayNameController.dispose();
     super.dispose();
   }
@@ -2406,6 +2547,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                 onSubmitted: (_) => _submitProfileDialog(
                   shouldPersist: true,
                   signOutRequested: false,
+                  deleteAccountRequested: false,
                 ),
               ),
               const SizedBox(height: 14),
@@ -2524,8 +2666,26 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                   onPressed: () => _submitProfileDialog(
                     shouldPersist: false,
                     signOutRequested: true,
+                    deleteAccountRequested: false,
                   ),
                   child: const Text('sign out'),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: theme.colorScheme.onSurface.withValues(
+                      alpha: _deleteAccountConfirming ? 0.72 : 0.56,
+                    ),
+                  ),
+                  onPressed: _handleDeleteAccountPressed,
+                  child: Text(
+                    _deleteAccountConfirming
+                        ? 'press again to delete'
+                        : 'delete account',
+                  ),
                 ),
               ),
             ],
@@ -2690,6 +2850,12 @@ class _FriendProfile {
   final int lifetimeScore;
 }
 
+class _MissingFriendProfile {
+  const _MissingFriendProfile(this.uid);
+
+  final String uid;
+}
+
 class _FriendAddResult {
   const _FriendAddResult({required this.message});
 
@@ -2775,6 +2941,25 @@ List<List<String>> _chunkedLeaderboardFriendIds(
     chunks.add(sortedIds.sublist(index, end));
   }
   return chunks;
+}
+
+Future<void> _removeFriendIdsFromUserDocument({
+  required String userId,
+  required Iterable<String> friendIds,
+}) async {
+  final uniqueFriendIds = friendIds.toSet().toList(growable: false);
+  if (uniqueFriendIds.isEmpty) {
+    return;
+  }
+
+  try {
+    await FirebaseFirestore.instance.collection('users').doc(userId).set({
+      'friends': FieldValue.arrayRemove(uniqueFriendIds),
+    }, SetOptions(merge: true));
+  } catch (error, stackTrace) {
+    debugPrint('Unable to remove missing friends: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
 }
 
 int _leaderboardScoreFromData(Map<String, dynamic>? profileData) {
@@ -3088,11 +3273,15 @@ class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
           .snapshots()
           .listen(
             (snapshot) {
+              final foundFriendIds = snapshot.docs.map((doc) => doc.id).toSet();
               for (final friendId in chunk) {
                 _friendProfileData[friendId] = null;
               }
               for (final doc in snapshot.docs) {
                 _friendProfileData[doc.id] = doc.data();
+              }
+              if (!snapshot.metadata.isFromCache) {
+                _removeMissingFriendIds(chunk, foundFriendIds);
               }
               _loadError = null;
               _publishLeaderboard();
@@ -3108,6 +3297,23 @@ class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
             },
           );
     }
+  }
+
+  void _removeMissingFriendIds(List<String> friendIds, Set<String> foundIds) {
+    final user = _user;
+    if (user == null) {
+      return;
+    }
+
+    final missingFriendIds = friendIds
+        .where((friendId) => !foundIds.contains(friendId))
+        .toList(growable: false);
+    unawaited(
+      _removeFriendIdsFromUserDocument(
+        userId: user.uid,
+        friendIds: missingFriendIds,
+      ),
+    );
   }
 
   void _publishLeaderboard() {
@@ -3407,11 +3613,15 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
           .snapshots()
           .listen(
             (snapshot) {
+              final foundFriendIds = snapshot.docs.map((doc) => doc.id).toSet();
               for (final friendId in chunk) {
                 _friendProfileData[friendId] = null;
               }
               for (final doc in snapshot.docs) {
                 _friendProfileData[doc.id] = doc.data();
+              }
+              if (!snapshot.metadata.isFromCache) {
+                _removeMissingFriendIds(chunk, foundFriendIds);
               }
               _loadError = null;
               _publishLeaderboard();
@@ -3428,6 +3638,23 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
             },
           );
     }
+  }
+
+  void _removeMissingFriendIds(List<String> friendIds, Set<String> foundIds) {
+    final user = _user;
+    if (user == null) {
+      return;
+    }
+
+    final missingFriendIds = friendIds
+        .where((friendId) => !foundIds.contains(friendId))
+        .toList(growable: false);
+    unawaited(
+      _removeFriendIdsFromUserDocument(
+        userId: user.uid,
+        friendIds: missingFriendIds,
+      ),
+    );
   }
 
   List<_LeaderboardStanding> _selectedStandings() {
