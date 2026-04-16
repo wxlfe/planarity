@@ -1160,7 +1160,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     }
 
     if (result.signOutRequested) {
-      await _saveDisplayName(user: user, displayName: result.displayName);
+      if (_displayNameValidationMessage(result.displayName) == null) {
+        await _saveDisplayName(user: user, displayName: result.displayName);
+      }
       if (!mounted) {
         return;
       }
@@ -1751,6 +1753,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     required User user,
     required String displayName,
   }) async {
+    final displayNameError = _displayNameValidationMessage(displayName);
+    if (displayNameError != null) {
+      throw ArgumentError.value(displayName, 'displayName', displayNameError);
+    }
     final cleanedDisplayName = displayName.trim().isEmpty
         ? 'anonymous player'
         : displayName.trim();
@@ -2511,7 +2517,9 @@ class _ProfileDialogState extends State<_ProfileDialog> {
     required bool signOutRequested,
     required bool deleteAccountRequested,
   }) {
-    final errorText = _displayNameErrorForInput(_displayNameController.text);
+    final errorText = shouldPersist
+        ? _displayNameValidationMessage(_displayNameController.text)
+        : null;
     if (errorText != null) {
       setState(() {
         _displayNameErrorText = errorText;
@@ -3058,18 +3066,90 @@ String? _leaderboardDisplayNameFromData(Map<String, dynamic>? profileData) {
 }
 
 final RegExp _displayNameEmailPattern = RegExp(
-  r'^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$',
+  r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b',
   caseSensitive: false,
 );
 
-final RegExp _displayNamePhonePattern = RegExp(
-  r'^(?:\+?\d{1,3}[\s.-]*)?(?:\(\d{3}\)|\d{3})[\s.-]*\d{3}[\s.-]*\d{4}$',
-);
+final RegExp _displayNamePhonePattern = RegExp(r'(?:\+?\d[\d\s().-]{6,}\d)');
 
 final RegExp _displayNameUrlPattern = RegExp(
-  r'^(?:(?:https?:\/\/)|(?:www\.))[^\s/$.?#].[^\s]*$',
+  r'\b(?:(?:https?:\/\/|www\.)[^\s]+|[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.(?:com|org|net|edu|gov|mil|io|co|us|app|dev|gg|me|info|biz|xyz|site|online|link|tv|ai|ly|to|uk|ca|au|de|fr|jp|nl|se|no|es|it)(?:\/[^\s]*)?)\b',
   caseSensitive: false,
 );
+
+final RegExp _displayNamePoBoxPattern = RegExp(
+  r'\b(?:p\.?\s*o\.?\s*box|post office box)\s+\d+\b',
+  caseSensitive: false,
+);
+
+final RegExp _displayNameStreetAddressPattern = RegExp(
+  r"\b\d{1,6}\s+(?:[a-z0-9.'-]+\s+){0,5}(?:street|st\.?|avenue|ave\.?|road|rd\.?|boulevard|blvd\.?|lane|ln\.?|drive|dr\.?|court|ct\.?|circle|cir\.?|place|pl\.?|way|terrace|ter\.?|trail|trl\.?|parkway|pkwy\.?|highway|hwy\.?|route|rte\.?|square|sq\.?)\b",
+  caseSensitive: false,
+);
+
+// Compact deny-list adapted from common LDNOOBW/Google profanity lists.
+// Keep this conservative: terms below are matched after punctuation and common
+// leetspeak are normalized, so short ambiguous words are intentionally omitted.
+const List<String> _displayNameProfanityTerms = <String>[
+  'anal',
+  'anus',
+  'arsehole',
+  'asshole',
+  'bastard',
+  'bitch',
+  'blowjob',
+  'bollock',
+  'boner',
+  'boob',
+  'bullshit',
+  'buttplug',
+  'chink',
+  'clit',
+  'cock',
+  'coon',
+  'cum',
+  'cunt',
+  'dick',
+  'dildo',
+  'douche',
+  'dyke',
+  'fag',
+  'faggot',
+  'fuck',
+  'goddamn',
+  'gook',
+  'handjob',
+  'homo',
+  'jizz',
+  'kike',
+  'masturbat',
+  'motherfuck',
+  'nazi',
+  'nigga',
+  'nigger',
+  'penis',
+  'piss',
+  'porn',
+  'prick',
+  'pussy',
+  'queef',
+  'rape',
+  'retard',
+  'rimjob',
+  'shit',
+  'skank',
+  'slut',
+  'spic',
+  'tit',
+  'twat',
+  'vagina',
+  'wank',
+  'whore',
+];
+
+String? displayNameValidationMessage(String displayName) {
+  return _displayNameValidationMessage(displayName);
+}
 
 String? _displayNameValidationMessage(String displayName) {
   final trimmed = displayName.trim();
@@ -3077,11 +3157,65 @@ String? _displayNameValidationMessage(String displayName) {
     return null;
   }
   if (_displayNameEmailPattern.hasMatch(trimmed) ||
-      _displayNamePhonePattern.hasMatch(trimmed) ||
-      _displayNameUrlPattern.hasMatch(trimmed)) {
+      _containsPhoneNumber(trimmed) ||
+      _displayNameUrlPattern.hasMatch(trimmed) ||
+      _displayNamePoBoxPattern.hasMatch(trimmed) ||
+      _displayNameStreetAddressPattern.hasMatch(trimmed) ||
+      _containsProfanity(trimmed)) {
     return 'invalid name - try something else';
   }
   return null;
+}
+
+bool _containsPhoneNumber(String displayName) {
+  for (final match in _displayNamePhonePattern.allMatches(displayName)) {
+    final digits = match.group(0)?.replaceAll(RegExp(r'\D'), '') ?? '';
+    if (digits.length >= 7 && digits.length <= 15) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool _containsProfanity(String displayName) {
+  final normalized = _normalizeDisplayNameForProfanity(displayName);
+  return _displayNameProfanityTerms.any(normalized.contains);
+}
+
+String _normalizeDisplayNameForProfanity(String displayName) {
+  final buffer = StringBuffer();
+  for (final rune in displayName.toLowerCase().runes) {
+    final char = String.fromCharCode(rune);
+    switch (char) {
+      case '0':
+        buffer.write('o');
+        break;
+      case '1':
+      case '!':
+      case '|':
+        buffer.write('i');
+        break;
+      case '3':
+        buffer.write('e');
+        break;
+      case '4':
+      case '@':
+        buffer.write('a');
+        break;
+      case '5':
+      case r'$':
+        buffer.write('s');
+        break;
+      case '7':
+        buffer.write('t');
+        break;
+      default:
+        if (rune >= 97 && rune <= 122) {
+          buffer.write(char);
+        }
+    }
+  }
+  return buffer.toString();
 }
 
 List<String> _leaderboardFriendIds(Map<String, dynamic>? profileData) {
