@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:app_links/app_links.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,6 +19,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'firebase_options.dart';
@@ -34,6 +36,17 @@ bool get _supportsMobileAds {
 
   return switch (defaultTargetPlatform) {
     TargetPlatform.android || TargetPlatform.iOS => true,
+    _ => false,
+  };
+}
+
+bool get _supportsAppleSignIn {
+  if (kIsWeb) {
+    return true;
+  }
+
+  return switch (defaultTargetPlatform) {
+    TargetPlatform.iOS || TargetPlatform.macOS => true,
     _ => false,
   };
 }
@@ -835,6 +848,82 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     }
   }
 
+  Future<_AuthSubmissionResult> _submitAppleAuth() async {
+    if (!_firebaseReady) {
+      return const _AuthSubmissionResult(
+        errorText: 'auth configuration is missing',
+      );
+    }
+    if (!_supportsAppleSignIn) {
+      return const _AuthSubmissionResult(
+        errorText: 'apple sign-in is not available on this platform',
+      );
+    }
+
+    try {
+      final credential = await _signInWithApple();
+      final user = credential.user;
+      if (user == null) {
+        return const _AuthSubmissionResult(
+          errorText: 'unable to authenticate right now',
+        );
+      }
+
+      if (credential.additionalUserInfo?.isNewUser ?? false) {
+        await _ensureUserDocument(user);
+      }
+      if (credential.additionalUserInfo?.isNewUser ?? false) {
+        await _logSignUpEvent('apple');
+      } else {
+        await _logLoginEvent('apple');
+      }
+
+      return _AuthSubmissionResult(
+        userToEdit: credential.additionalUserInfo?.isNewUser ?? false
+            ? user
+            : null,
+      );
+    } on SignInWithAppleAuthorizationException catch (error, stackTrace) {
+      debugPrint(
+        'Apple sign-in failed: code=${error.code.name}, message=${error.message}',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+      return _AuthSubmissionResult(errorText: _appleAuthErrorMessage(error));
+    } on SignInWithAppleNotSupportedException catch (error, stackTrace) {
+      debugPrint('Apple sign-in is not supported: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      return const _AuthSubmissionResult(
+        errorText: 'apple sign-in is not available on this platform',
+      );
+    } on PlatformException catch (error, stackTrace) {
+      debugPrint(
+        'Apple platform auth failed: code=${error.code}, message=${error.message}',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+      return _AuthSubmissionResult(
+        errorText: _applePlatformAuthErrorMessage(error),
+      );
+    } on FirebaseAuthException catch (error, stackTrace) {
+      debugPrint(
+        'Firebase Apple auth failed: code=${error.code}, message=${error.message}',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+      return _AuthSubmissionResult(errorText: _authErrorMessage(error));
+    } on FirebaseException catch (error, stackTrace) {
+      debugPrint(
+        'Apple auth config failed: code=${error.code}, message=${error.message}',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+      return _AuthSubmissionResult(errorText: _firestoreErrorMessage(error));
+    } catch (error, stackTrace) {
+      debugPrint('Unexpected Apple auth failure: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      return const _AuthSubmissionResult(
+        errorText: 'unable to authenticate right now',
+      );
+    }
+  }
+
   Future<UserCredential> _signInWithGoogle() async {
     if (kIsWeb) {
       return FirebaseAuth.instance.signInWithPopup(GoogleAuthProvider());
@@ -844,6 +933,49 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     final googleAuth = googleUser.authentication;
     final credential = GoogleAuthProvider.credential(
       idToken: googleAuth.idToken,
+    );
+    return FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
+  Future<UserCredential> _signInWithApple() async {
+    if (kIsWeb) {
+      final provider = AppleAuthProvider()
+        ..addScope('email')
+        ..addScope('name');
+      return FirebaseAuth.instance.signInWithPopup(provider);
+    }
+
+    final appleAvailable = await SignInWithApple.isAvailable();
+    if (!appleAvailable) {
+      throw const SignInWithAppleNotSupportedException(
+        message: 'Sign in with Apple is not available',
+      );
+    }
+
+    final rawNonce = generateNonce();
+    final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
+    final appleCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: const [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+      nonce: hashedNonce,
+    );
+    final idToken = appleCredential.identityToken;
+    if (idToken == null || idToken.isEmpty) {
+      throw FirebaseAuthException(
+        code: 'missing-apple-id-token',
+        message: 'Apple did not return an identity token.',
+      );
+    }
+
+    final credential = AppleAuthProvider.credentialWithIDToken(
+      idToken,
+      rawNonce,
+      AppleFullPersonName(
+        givenName: appleCredential.givenName,
+        familyName: appleCredential.familyName,
+      ),
     );
     return FirebaseAuth.instance.signInWithCredential(credential);
   }
@@ -881,7 +1013,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       case 'too-many-requests':
         return 'too many attempts. try again later';
       case 'operation-not-allowed':
-        return 'email/password sign-in is not enabled';
+        return 'this sign-in method is not enabled';
       case 'app-not-authorized':
       case 'invalid-api-key':
         return 'auth configuration is invalid for this app';
@@ -920,6 +1052,29 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     return 'unable to authenticate right now';
   }
 
+  String? _appleAuthErrorMessage(SignInWithAppleAuthorizationException error) {
+    switch (error.code) {
+      case AuthorizationErrorCode.canceled:
+        return '';
+      case AuthorizationErrorCode.notHandled:
+      case AuthorizationErrorCode.notInteractive:
+        return 'apple sign-in is not available right now';
+      default:
+        if (error.message.isNotEmpty) {
+          return error.message;
+        }
+        return 'unable to authenticate right now';
+    }
+  }
+
+  String _applePlatformAuthErrorMessage(PlatformException error) {
+    final message = error.message;
+    if (message != null && message.isNotEmpty) {
+      return message;
+    }
+    return 'unable to authenticate right now';
+  }
+
   String _firestoreErrorMessage(FirebaseException error) {
     switch (error.code) {
       case 'permission-denied':
@@ -947,6 +1102,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
             onSubmit: _submitAuth,
             onForgotPassword: _sendPasswordReset,
             onGoogleSubmit: _submitGoogleAuth,
+            onAppleSubmit: _submitAppleAuth,
           );
         },
       );
@@ -1983,6 +2139,7 @@ class _AuthDialog extends StatefulWidget {
     required this.onSubmit,
     required this.onForgotPassword,
     required this.onGoogleSubmit,
+    required this.onAppleSubmit,
   });
 
   final bool isSignIn;
@@ -1994,6 +2151,7 @@ class _AuthDialog extends StatefulWidget {
   onSubmit;
   final Future<String?> Function(String email) onForgotPassword;
   final Future<_AuthSubmissionResult> Function() onGoogleSubmit;
+  final Future<_AuthSubmissionResult> Function() onAppleSubmit;
 
   @override
   State<_AuthDialog> createState() => _AuthDialogState();
@@ -2092,13 +2250,23 @@ class _AuthDialogState extends State<_AuthDialog> {
   }
 
   Future<void> _submitGoogle() async {
+    await _submitProvider(widget.onGoogleSubmit);
+  }
+
+  Future<void> _submitApple() async {
+    await _submitProvider(widget.onAppleSubmit);
+  }
+
+  Future<void> _submitProvider(
+    Future<_AuthSubmissionResult> Function() submitProvider,
+  ) async {
     setState(() {
       _isSubmitting = true;
       _errorText = null;
       _infoText = null;
     });
 
-    final result = await widget.onGoogleSubmit();
+    final result = await submitProvider();
 
     if (!mounted) {
       return;
@@ -2233,10 +2401,21 @@ class _AuthDialogState extends State<_AuthDialog> {
               const SizedBox(height: 12),
               Align(
                 alignment: Alignment.center,
-                child: IconButton.outlined(
-                  onPressed: _isSubmitting ? null : _submitGoogle,
-                  tooltip: 'continue with Google',
-                  icon: const FaIcon(FontAwesomeIcons.google, size: 18),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton.outlined(
+                      onPressed: _isSubmitting ? null : _submitGoogle,
+                      tooltip: 'continue with Google',
+                      icon: const FaIcon(FontAwesomeIcons.google, size: 18),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton.outlined(
+                      onPressed: _isSubmitting ? null : _submitApple,
+                      tooltip: 'continue with Apple',
+                      icon: const FaIcon(FontAwesomeIcons.apple, size: 20),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 12),
