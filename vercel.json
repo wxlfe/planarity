@@ -3,7 +3,9 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/privacy", "destination": "/privacy.html" },
-    { "source": "/privacy/", "destination": "/privacy.html" }
+    { "source": "/privacy/", "destination": "/privacy.html" },
+    { "source": "/support", "destination": "/support.html" },
+    { "source": "/support/", "destination": "/support.html" }
   ],
   "headers": [
     {
@@ -32,6 +34,18 @@
     },
     {
       "source": "/privacy.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0" }
+      ]
+    },
+    {
+      "source": "/support",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0" }
+      ]
+    },
+    {
+      "source": "/support.html",
       "headers": [
         { "key": "Cache-Control", "value": "no-store, max-age=0" }
       ]

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="support for planarity">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <title>support | planarity</title>
+  <style>
+    @font-face {
+      font-family: "GeistMono";
+      src: url("fonts/GeistMono-VariableFont_wght.ttf") format("truetype"),
+        url("assets/assets/fonts/GeistMono-VariableFont_wght.ttf") format("truetype");
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      color-scheme: light dark;
+      --bg: #ffffff;
+      --fg: #000000;
+      --muted: rgba(0, 0, 0, 0.68);
+      --soft: rgba(0, 0, 0, 0.08);
+      --rule: rgba(0, 0, 0, 0.24);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #000000;
+        --fg: #ffffff;
+        --muted: rgba(255, 255, 255, 0.72);
+        --soft: rgba(255, 255, 255, 0.1);
+        --rule: rgba(255, 255, 255, 0.28);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "GeistMono";
+      line-height: 1.62;
+    }
+
+    main {
+      width: min(920px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: clamp(24px, 6vw, 56px) 0 72px;
+    }
+
+    article {
+      border-top: 1px solid var(--fg);
+      padding: clamp(22px, 5vw, 48px) 0 0;
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.15;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      max-width: 12ch;
+      font-size: clamp(2.2rem, 10vw, 6rem);
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin-top: 42px;
+      padding-top: 24px;
+      border-top: 1px solid var(--rule);
+      font-size: 1.35rem;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin-top: 26px;
+      font-size: 1rem;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    p,
+    li {
+      color: var(--muted);
+    }
+
+    a {
+      color: var(--fg);
+      text-underline-offset: 0.18em;
+    }
+
+    ul {
+      padding-left: 1.35rem;
+    }
+
+    .meta {
+      margin: 0 0 28px;
+      color: var(--muted);
+    }
+
+    .contact {
+      margin-top: 28px;
+      padding: 18px 0 0;
+      border-top: 1px solid var(--rule);
+    }
+
+    .contact p {
+      margin-bottom: 0;
+    }
+
+    .home-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      margin-bottom: 22px;
+      padding: 0 14px;
+      border: 1px solid var(--rule);
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+
+    .home-link:hover,
+    .home-link:focus-visible {
+      background: var(--fg);
+      color: var(--bg);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="home-link" href="/">back to planarity</a>
+    <article>
+      <h1>support</h1>
+      <p class="meta">last updated: 04/17/2026</p>
+
+      <p>
+        need help with planarity? use the instructions below for common account,
+        password, safety, and app setting questions. for anything else, contact
+        support at <a href="mailto:nate@wxlfe.dev">nate@wxlfe.dev</a>.
+      </p>
+
+      <h2>1. contact support</h2>
+      <p>
+        email:
+        <a href="mailto:nate@wxlfe.dev?subject=planarity%20support">nate@wxlfe.dev</a>
+      </p>
+      <p>
+        please include the email address on your account, your device type, and a
+        short description of what happened. do not send your password.
+      </p>
+
+      <h2>2. delete your account</h2>
+      <p>if you can access your account, you can delete it directly in the app:</p>
+      <ul>
+        <li>open planarity and sign in;</li>
+        <li>open the account/profile screen;</li>
+        <li>select "delete account"; and</li>
+        <li>press again to confirm when the button changes to "press again to delete."</li>
+      </ul>
+      <p>
+        this deletes your account and associated profile records used for
+        gameplay, leaderboards, and friend features, subject to any information
+        we are required or permitted to keep by law.
+      </p>
+      <p>
+        if you cannot access the app, or if the app asks you to sign in again
+        before deleting, email
+        <a href="mailto:nate@wxlfe.dev?subject=planarity%20account%20deletion">nate@wxlfe.dev</a>
+        and ask for account deletion help.
+      </p>
+
+      <h2>3. reset your password</h2>
+      <p>
+        for email and password accounts, open planarity, choose "sign in," enter
+        your email address, and use the "reset password" link in the sign-in
+        form. if the email exists, planarity will send a password reset email.
+      </p>
+      <p>
+        google and apple sign-in passwords are managed by google or apple, not by
+        planarity. use the account recovery tools from the provider you used to
+        sign in.
+      </p>
+
+      <h2>4. report or hide a player</h2>
+      <p>
+        you can report players from leaderboards or your friends list. open the
+        more-options menu next to the player, choose "report player," select a
+        reason, add details if helpful, and submit the report.
+      </p>
+      <p>
+        from the same menu, choose "hide user name" to hide that player's display
+        name on your device. you can use the menu again to unhide the name later.
+      </p>
+      <p>
+        when you report a friend, planarity may also remove that friend
+        connection from your account.
+      </p>
+
+      <h2>5. change your display name</h2>
+      <p>
+        sign in, open the account/profile screen, edit the display name field,
+        and save. avoid using sensitive personal information in your display name
+        because it may appear in leaderboards or friend features.
+      </p>
+
+      <h2>6. use light or dark mode</h2>
+      <p>
+        planarity follows your system appearance setting. to switch between light
+        and dark mode, change the display or appearance setting on your device or
+        browser, then reopen or refresh planarity if needed.
+      </p>
+
+      <h2>7. guest progress and accounts</h2>
+      <p>
+        if you play without signing in, your progress may be stored only on your
+        device. signing in helps keep account features, profile records,
+        leaderboards, and friend features connected to your account.
+      </p>
+
+      <h2>8. privacy questions</h2>
+      <p>
+        for privacy requests or more detail about how planarity handles data,
+        read the <a href="/privacy">privacy policy</a> or email
+        <a href="mailto:nate@wxlfe.dev?subject=planarity%20privacy%20request">nate@wxlfe.dev</a>.
+      </p>
+
+      <div class="contact">
+        <p>
+          nate wolfe<br>
+          <a href="mailto:nate@wxlfe.dev">nate@wxlfe.dev</a>
+        </p>
+      </div>
+    </article>
+  </main>
+</body>
+</html>
