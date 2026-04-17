@@ -1,0 +1,173 @@
+{
+  "@@locale": "ar",
+  "account": "الحساب",
+  "accountDeleted": "تم حذف الحساب",
+  "accountExistsSignInInstead": "الحساب موجود - سجّل الدخول بدلًا من ذلك",
+  "addedFriend": "تمت إضافة {friendName}",
+  "@addedFriend": {
+    "placeholders": {
+      "friendName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriendQuestion": "هل تريد إضافة {inviterName} إلى قائمة أصدقائك؟",
+  "@addFriendQuestion": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriend": "إضافة صديق",
+  "alreadySignedUp": "هل سجلت بالفعل؟",
+  "anonymousPlayer": "لاعب مجهول",
+  "appleSignInUnavailablePlatform": "تسجيل الدخول عبر Apple غير متاح على هذه المنصة",
+  "appleSignInUnavailableRightNow": "تسجيل الدخول عبر Apple غير متاح الآن",
+  "authConfigurationInvalid": "إعدادات المصادقة غير صالحة لهذا التطبيق",
+  "authConfigurationMissing": "إعدادات المصادقة مفقودة",
+  "back": "رجوع",
+  "cancel": "إلغاء",
+  "continueLabel": "متابعة",
+  "continueWithScore": "متابعة - {totalScore}",
+  "@continueWithScore": {
+    "placeholders": {
+      "totalScore": {
+        "type": "int"
+      }
+    }
+  },
+  "continueWithApple": "المتابعة باستخدام Apple",
+  "continueWithGoogle": "المتابعة باستخدام Google",
+  "copyInviteLink": "نسخ رابط الدعوة",
+  "copyrightNateWolfe": "© nate wolfe",
+  "createAccountSubtitle": "أنشئ حسابًا باستخدام بريدك الإلكتروني وكلمة المرور",
+  "dailyGraphPuzzle": "لغز الرسم البياني اليومي",
+  "dailyScore": "نتيجة اليوم",
+  "decline": "رفض",
+  "deleteAccount": "حذف الحساب",
+  "details": "التفاصيل",
+  "detailsTooLong": "يجب أن تكون التفاصيل 1000 حرف أو أقل",
+  "displayName": "اسم العرض",
+  "email": "البريد الإلكتروني",
+  "enterEmailAndPassword": "أدخل البريد الإلكتروني وكلمة المرور",
+  "enterEmailFirst": "أدخل بريدك الإلكتروني أولًا",
+  "enterValidEmail": "أدخل بريدًا إلكترونيًا صالحًا",
+  "failedNodes": "فشل {nodeCount} عقد",
+  "@failedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "friendInvite": "دعوة صداقة",
+  "friends": "الأصدقاء",
+  "global": "عالمي",
+  "globalSnapshot": "لقطة عالمية",
+  "globalTopScore": "أعلى نتيجة عالمية",
+  "googleSignInUnavailablePlatform": "تسجيل الدخول عبر Google غير متاح على هذه المنصة",
+  "googleSignInNotConfigured": "تسجيل الدخول عبر Google غير مهيأ لهذا التطبيق",
+  "googleSignInNotConfiguredIos": "تسجيل الدخول عبر Google غير مهيأ لتطبيق iOS هذا",
+  "home": "الرئيسية",
+  "hideUserName": "إخفاء اسم المستخدم",
+  "ifEmailExistsResetLink": "إذا كان هذا البريد موجودًا، فقد أرسلنا رابط إعادة التعيين",
+  "invalidEmailOrPassword": "البريد الإلكتروني أو كلمة المرور غير صالحة",
+  "invalidNameTrySomethingElse": "اسم غير صالح - جرّب اسمًا آخر",
+  "invite": "دعوة",
+  "inviteLinkCopied": "تم نسخ رابط الدعوة",
+  "leaderboard": "لوحة الصدارة",
+  "lifetimeScore": "النتيجة الكلية",
+  "lifetimeScoreValue": "النتيجة الكلية {score}",
+  "@lifetimeScoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "locked": "مقفل",
+  "macosKeychainNotConfigured": "وصول سلسلة مفاتيح macOS غير مهيأ",
+  "moreOptions": "خيارات أكثر",
+  "networkErrorCheckConnection": "خطأ في الشبكة - تحقق من الاتصال",
+  "newHere": "جديد هنا؟",
+  "noFriendsYet": "لم تضف أي أصدقاء بعد",
+  "noFriendsLeaderboard": "لم تضف أي أصدقاء بعد - افتح ملفك الشخصي لدعوة شخص ما",
+  "noGlobalScoresYet": "لا توجد نتائج عالمية بعد",
+  "originalByJohnTantalo": "الأصل من john tantalo",
+  "password": "كلمة المرور",
+  "passwordMinLength": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
+  "passwordTooWeak": "كلمة المرور ضعيفة جدًا",
+  "planarity": "planarity",
+  "planarGraphWikipedia": "ويكيبيديا: رسم بياني مستوٍ",
+  "pressAgainToDelete": "اضغط مرة أخرى للحذف",
+  "profile": "الملف الشخصي",
+  "profileSubtitle": "حدّث طريقة ظهور اسمك في ملفك الشخصي",
+  "reason": "السبب",
+  "remove": "إزالة",
+  "removeFriendQuestion": "هل تريد إزالة {displayName} من قائمة أصدقائك؟",
+  "@removeFriendQuestion": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFriend": "إزالة صديق",
+  "reportPlayer": "الإبلاغ عن لاعب",
+  "reportSubmitted": "تم إرسال البلاغ",
+  "reportSubmittedUnableRemoveFriend": "تم إرسال البلاغ - تعذرت إزالة الصديق",
+  "resetPassword": "إعادة تعيين كلمة المرور",
+  "share": "مشاركة",
+  "shareInvitePrompt": "شارك رمز QR أو الرابط هذا لدعوة صديق",
+  "shareUnavailableBuild": "المشاركة غير متاحة في هذا الإصدار",
+  "signIn": "تسجيل الدخول",
+  "signInAgainBeforeDeleting": "سجّل الدخول مرة أخرى قبل حذف حسابك",
+  "signInMethodNotEnabled": "طريقة تسجيل الدخول هذه غير مفعلة",
+  "signInSubtitle": "سجّل الدخول ببريدك الإلكتروني وكلمة المرور",
+  "signOut": "تسجيل الخروج",
+  "signUp": "إنشاء حساب",
+  "signUpToCompete": " للمنافسة مع أصدقائك",
+  "solvedNodes": "تم حل {nodeCount} عقد",
+  "@solvedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "start": "ابدأ",
+  "submit": "إرسال",
+  "thisPlayer": "هذا اللاعب",
+  "tooManyAttempts": "محاولات كثيرة جدًا - حاول لاحقًا",
+  "unableAuthenticateRightNow": "تعذرت المصادقة الآن",
+  "unableCreateAccountRightNow": "تعذر إنشاء الحساب الآن",
+  "unableCreateProfileRightNow": "تعذر إنشاء ملفك الشخصي الآن",
+  "unableDeleteAccountRightNow": "تعذر حذف حسابك الآن",
+  "unableDeleteProfileRightNow": "تعذر حذف ملفك الشخصي الآن",
+  "unableLoadFriendsLeaderboard": "تعذر تحميل لوحة أصدقاء الصدارة الآن",
+  "unableLoadGlobalLeaderboard": "تعذر تحميل لوحة الصدارة العالمية الآن",
+  "unableSendResetEmailRightNow": "تعذر إرسال بريد إعادة التعيين الآن",
+  "unableSubmitReportRightNow": "تعذر إرسال البلاغ الآن",
+  "unableUpdateHiddenNames": "تعذر تحديث الأسماء المخفية",
+  "unableCreateAccountNoUser": "تعذر إنشاء الحساب الآن",
+  "unhideUserName": "إظهار اسم المستخدم",
+  "you": "أنت",
+  "youAndYourFriends": "أنت وأصدقاؤك",
+  "youAlreadyReportedPlayer": "لقد أبلغت عن هذا اللاعب بالفعل",
+  "youCantAddYourself": "لا يمكنك إضافة نفسك",
+  "yourGlobalPosition": "مركزك العالمي",
+  "yourNewFriend": "صديقك الجديد",
+  "friendAlreadyInList": "هذا الصديق موجود بالفعل في قائمتك",
+  "friendInviteNoLongerValid": "دعوة الصداقة هذه لم تعد صالحة",
+  "about": "حول",
+  "goal": "الهدف",
+  "goalDescription": "حل أكبر عدد ممكن من الرسوم البيانية كل يوم بأقل عدد ممكن من الحركات",
+  "whyEveryPuzzleIsSolvable": "لماذا كل لغز قابل للحل",
+  "planarGraphDescription": "كل رسم بياني في planarity قابل للحل لأنه رسم بياني مستوٍ. الرسم البياني المستوي يمكن رسمه على سطح مسطح بحيث لا تتقاطع الحواف إلا عند الرؤوس المشتركة.",
+  "reportReasonInappropriateDisplayName": "اسم عرض غير مناسب",
+  "reportReasonAbuse": "إساءة أو مضايقة",
+  "reportReasonImpersonation": "انتحال شخصية",
+  "reportReasonSpam": "رسائل مزعجة أو احتيال",
+  "reportReasonOther": "أخرى"
+}

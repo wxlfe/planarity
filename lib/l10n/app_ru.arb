@@ -1,0 +1,173 @@
+{
+  "@@locale": "ru",
+  "account": "аккаунт",
+  "accountDeleted": "аккаунт удален",
+  "accountExistsSignInInstead": "аккаунт уже существует - войдите",
+  "addedFriend": "{friendName} добавлен",
+  "@addedFriend": {
+    "placeholders": {
+      "friendName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriendQuestion": "добавить {inviterName} в список друзей?",
+  "@addFriendQuestion": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriend": "добавить друга",
+  "alreadySignedUp": "уже зарегистрированы?",
+  "anonymousPlayer": "анонимный игрок",
+  "appleSignInUnavailablePlatform": "вход в систему через Apple недоступен на этой платформе",
+  "appleSignInUnavailableRightNow": "вход в Apple сейчас недоступен",
+  "authConfigurationInvalid": "Конфигурация аутентификации недействительна для этого приложения",
+  "authConfigurationMissing": "конфигурация аутентификации отсутствует",
+  "back": "назад",
+  "cancel": "отмена",
+  "continueLabel": "продолжить",
+  "continueWithScore": "продолжить - {totalScore}",
+  "@continueWithScore": {
+    "placeholders": {
+      "totalScore": {
+        "type": "int"
+      }
+    }
+  },
+  "continueWithApple": "продолжить с Apple",
+  "continueWithGoogle": "продолжить с Google",
+  "copyInviteLink": "скопировать ссылку-приглашение",
+  "copyrightNateWolfe": "© nate wolfe",
+  "createAccountSubtitle": "создайте учетную запись с вашим адресом электронной почты и паролем.",
+  "dailyGraphPuzzle": "ежедневная головоломка с графами",
+  "dailyScore": "дневной счет",
+  "decline": "отклонить",
+  "deleteAccount": "удалить аккаунт",
+  "details": "подробности",
+  "detailsTooLong": "Подробности должны содержать не более 1000 символов.",
+  "displayName": "отображаемое имя",
+  "email": "эл. почта",
+  "enterEmailAndPassword": "введите адрес электронной почты и пароль",
+  "enterEmailFirst": "сначала введите свой адрес электронной почты",
+  "enterValidEmail": "введите действительный адрес электронной почты",
+  "failedNodes": "не удалось {nodeCount} узлов",
+  "@failedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "friendInvite": "приглашение друга",
+  "friends": "друзья",
+  "global": "глобально",
+  "globalSnapshot": "глобальный снимок",
+  "globalTopScore": "глобальный лучший результат",
+  "googleSignInUnavailablePlatform": "вход в Google недоступен на этой платформе",
+  "googleSignInNotConfigured": "Вход в Google не настроен для этого приложения",
+  "googleSignInNotConfiguredIos": "Вход в Google не настроен для этого приложения iOS",
+  "home": "главная",
+  "hideUserName": "скрыть имя пользователя",
+  "ifEmailExistsResetLink": "если этот адрес электронной почты существует, мы отправили ссылку для сброса",
+  "invalidEmailOrPassword": "неверный адрес электронной почты или пароль",
+  "invalidNameTrySomethingElse": "неверное имя – попробуйте что-нибудь другое",
+  "invite": "пригласить",
+  "inviteLinkCopied": "ссылка для приглашения скопирована",
+  "leaderboard": "таблица лидеров",
+  "lifetimeScore": "оценка за всю жизнь",
+  "lifetimeScoreValue": "общий счет {score}",
+  "@lifetimeScoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "locked": "заперто",
+  "macosKeychainNotConfigured": "доступ к связке ключей Macos не настроен",
+  "moreOptions": "больше возможностей",
+  "networkErrorCheckConnection": "ошибка сети - проверьте подключение",
+  "newHere": "новенький здесь?",
+  "noFriendsYet": "ты еще не добавил друзей",
+  "noFriendsLeaderboard": "вы еще не добавили друзей - откройте свой профиль, чтобы пригласить кого-нибудь",
+  "noGlobalScoresYet": "глобальных результатов пока нет",
+  "originalByJohnTantalo": "оригинал Джона Тантало",
+  "password": "пароль",
+  "passwordMinLength": "пароль должен быть не менее 6 символов",
+  "passwordTooWeak": "пароль слишком слабый",
+  "planarity": "planarity",
+  "planarGraphWikipedia": "википедия: планарный граф",
+  "pressAgainToDelete": "нажмите еще раз, чтобы удалить",
+  "profile": "профиль",
+  "profileSubtitle": "обновить то, как ваше имя отображается в вашем профиле",
+  "reason": "причина",
+  "remove": "удалить",
+  "removeFriendQuestion": "удалить {displayName} из списка друзей?",
+  "@removeFriendQuestion": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFriend": "удалить друга",
+  "reportPlayer": "пожаловаться на игрока",
+  "reportSubmitted": "отчет отправлен",
+  "reportSubmittedUnableRemoveFriend": "отчет отправлен – невозможно удалить друга",
+  "resetPassword": "сбросить пароль",
+  "share": "поделиться",
+  "shareInvitePrompt": "поделитесь этим QR-кодом или ссылкой, чтобы пригласить друга",
+  "shareUnavailableBuild": "общий доступ недоступен в этой сборке",
+  "signIn": "войти",
+  "signInAgainBeforeDeleting": "войдите в систему еще раз, прежде чем удалять свою учетную запись",
+  "signInMethodNotEnabled": "этот метод входа не включен",
+  "signInSubtitle": "войдите, используя свой адрес электронной почты и пароль",
+  "signOut": "выйти",
+  "signUp": "зарегистрироваться",
+  "signUpToCompete": " соревноваться с друзьями",
+  "solvedNodes": "решено {nodeCount} узлов",
+  "@solvedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "start": "начать",
+  "submit": "отправить",
+  "thisPlayer": "этот игрок",
+  "tooManyAttempts": "слишком много попыток – повторите попытку позже",
+  "unableAuthenticateRightNow": "сейчас не могу пройти аутентификацию",
+  "unableCreateAccountRightNow": "сейчас не могу создать аккаунт",
+  "unableCreateProfileRightNow": "не могу сейчас создать свой профиль",
+  "unableDeleteAccountRightNow": "не могу удалить свой аккаунт прямо сейчас",
+  "unableDeleteProfileRightNow": "не могу удалить свой профиль прямо сейчас",
+  "unableLoadFriendsLeaderboard": "сейчас невозможно загрузить таблицу лидеров друзей",
+  "unableLoadGlobalLeaderboard": "сейчас невозможно загрузить глобальную таблицу лидеров",
+  "unableSendResetEmailRightNow": "сейчас невозможно отправить электронное письмо для сброса",
+  "unableSubmitReportRightNow": "сейчас невозможно отправить отчет",
+  "unableUpdateHiddenNames": "невозможно обновить скрытые имена",
+  "unableCreateAccountNoUser": "сейчас не могу создать аккаунт",
+  "unhideUserName": "показать имя пользователя",
+  "you": "ты",
+  "youAndYourFriends": "ты и твои друзья",
+  "youAlreadyReportedPlayer": "вы уже пожаловались на этого игрока",
+  "youCantAddYourself": "ты не можешь добавить себя",
+  "yourGlobalPosition": "ваша глобальная позиция",
+  "yourNewFriend": "твой новый друг",
+  "friendAlreadyInList": "этот друг уже в твоем списке",
+  "friendInviteNoLongerValid": "это приглашение в друзья больше не действительно",
+  "about": "о",
+  "goal": "цель",
+  "goalDescription": "решайте как можно больше графиков каждый день, используя как можно меньше ходов",
+  "whyEveryPuzzleIsSolvable": "почему каждая головоломка разрешима",
+  "planarGraphDescription": "любой планарный граф разрешим, потому что это планарный граф. Планарный граф — это граф, который можно нарисовать на плоской поверхности так, чтобы никакие ребра не пересекались, за исключением тех мест, где они встречаются в общих вершинах.",
+  "reportReasonInappropriateDisplayName": "неподходящее отображаемое имя",
+  "reportReasonAbuse": "оскорбления или домогательства",
+  "reportReasonImpersonation": "выдача себя за другого",
+  "reportReasonSpam": "спам или мошенничество",
+  "reportReasonOther": "другое"
+}

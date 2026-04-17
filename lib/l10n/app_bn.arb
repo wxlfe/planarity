@@ -1,0 +1,173 @@
+{
+  "@@locale": "bn",
+  "account": "অ্যাকাউন্ট",
+  "accountDeleted": "অ্যাকাউন্ট মুছে ফেলা হয়েছে",
+  "accountExistsSignInInstead": "অ্যাকাউন্ট আছে - সাইন ইন করুন",
+  "addedFriend": "{friendName} যোগ করা হয়েছে",
+  "@addedFriend": {
+    "placeholders": {
+      "friendName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriendQuestion": "{inviterName} কে আপনার বন্ধু তালিকায় যোগ করবেন?",
+  "@addFriendQuestion": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriend": "বন্ধু যোগ করুন",
+  "alreadySignedUp": "আগেই সাইন আপ করেছেন?",
+  "anonymousPlayer": "বেনামী খেলোয়াড়",
+  "appleSignInUnavailablePlatform": "অ্যাপল সাইন-ইন এই প্ল্যাটফর্মে উপলব্ধ নয়",
+  "appleSignInUnavailableRightNow": "অ্যাপল সাইন-ইন এখন উপলব্ধ নয়",
+  "authConfigurationInvalid": "এই অ্যাপের জন্য প্রমাণীকরণ কনফিগারেশন অবৈধ",
+  "authConfigurationMissing": "প্রমাণ কনফিগারেশন অনুপস্থিত",
+  "back": "ফিরে যান",
+  "cancel": "বাতিল",
+  "continueLabel": "চালিয়ে যান",
+  "continueWithScore": "চালিয়ে যান - {totalScore}",
+  "@continueWithScore": {
+    "placeholders": {
+      "totalScore": {
+        "type": "int"
+      }
+    }
+  },
+  "continueWithApple": "অ্যাপলের সাথে চালিয়ে যান",
+  "continueWithGoogle": "Google এর সাথে চালিয়ে যান",
+  "copyInviteLink": "আমন্ত্রণ লিঙ্ক কপি করুন",
+  "copyrightNateWolfe": "© nate wolfe",
+  "createAccountSubtitle": "আপনার ইমেল এবং পাসওয়ার্ড দিয়ে একটি অ্যাকাউন্ট তৈরি করুন।",
+  "dailyGraphPuzzle": "দৈনিক গ্রাফ ধাঁধা",
+  "dailyScore": "দৈনিক স্কোর",
+  "decline": "হ্রাস",
+  "deleteAccount": "অ্যাকাউন্ট মুছুন",
+  "details": "বিস্তারিত",
+  "detailsTooLong": "বিবরণ 1000 অক্ষর বা তার কম হতে হবে",
+  "displayName": "প্রদর্শনের নাম",
+  "email": "ইমেল",
+  "enterEmailAndPassword": "ইমেইল এবং পাসওয়ার্ড লিখুন",
+  "enterEmailFirst": "প্রথমে আপনার ইমেইল লিখুন",
+  "enterValidEmail": "একটি বৈধ ইমেইল লিখুন",
+  "failedNodes": "{nodeCount} নোড ব্যর্থ",
+  "@failedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "friendInvite": "বন্ধু আমন্ত্রণ",
+  "friends": "বন্ধু",
+  "global": "বিশ্বব্যাপী",
+  "globalSnapshot": "বিশ্বব্যাপী স্ন্যাপশট",
+  "globalTopScore": "বিশ্বব্যাপী শীর্ষ স্কোর",
+  "googleSignInUnavailablePlatform": "এই প্ল্যাটফর্মে google সাইন-ইন উপলব্ধ নেই৷",
+  "googleSignInNotConfigured": "এই অ্যাপের জন্য google সাইন-ইন কনফিগার করা নেই",
+  "googleSignInNotConfiguredIos": "এই iOS অ্যাপের জন্য google সাইন-ইন কনফিগার করা নেই",
+  "home": "হোম",
+  "hideUserName": "ব্যবহারকারীর নাম লুকান",
+  "ifEmailExistsResetLink": "যদি সেই ইমেলটি বিদ্যমান থাকে, আমরা একটি রিসেট লিঙ্ক পাঠিয়েছি",
+  "invalidEmailOrPassword": "অবৈধ ইমেল বা পাসওয়ার্ড",
+  "invalidNameTrySomethingElse": "অবৈধ নাম - অন্য কিছু চেষ্টা করুন",
+  "invite": "আমন্ত্রণ",
+  "inviteLinkCopied": "আমন্ত্রণ লিঙ্ক কপি করা হয়েছে",
+  "leaderboard": "লিডারবোর্ড",
+  "lifetimeScore": "আজীবন স্কোর",
+  "lifetimeScoreValue": "মোট স্কোর {score}",
+  "@lifetimeScoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "locked": "তালাবদ্ধ",
+  "macosKeychainNotConfigured": "macos কীচেন অ্যাক্সেস কনফিগার করা নেই",
+  "moreOptions": "আরও বিকল্প",
+  "networkErrorCheckConnection": "নেটওয়ার্ক ত্রুটি - আপনার সংযোগ পরীক্ষা করুন",
+  "newHere": "এখানে নতুন?",
+  "noFriendsYet": "আপনি এখনও কোনো বন্ধু যোগ করেননি",
+  "noFriendsLeaderboard": "আপনি এখনও কোনো বন্ধু যোগ করেননি - কাউকে আমন্ত্রণ জানাতে আপনার প্রোফাইল খুলুন৷",
+  "noGlobalScoresYet": "এখনও কোনো বিশ্বব্যাপী স্কোর নেই",
+  "originalByJohnTantalo": "জন তান্টালো দ্বারা মূল",
+  "password": "পাসওয়ার্ড",
+  "passwordMinLength": "পাসওয়ার্ড কমপক্ষে 6 অক্ষরের হতে হবে",
+  "passwordTooWeak": "পাসওয়ার্ড খুব দুর্বল",
+  "planarity": "planarity",
+  "planarGraphWikipedia": "উইকিপিডিয়া: প্ল্যানার গ্রাফ",
+  "pressAgainToDelete": "মুছে ফেলার জন্য আবার টিপুন",
+  "profile": "প্রোফাইল",
+  "profileSubtitle": "আপনার প্রোফাইলে আপনার নাম কীভাবে প্রদর্শিত হবে তা আপডেট করুন",
+  "reason": "কারণ",
+  "remove": "সরান",
+  "removeFriendQuestion": "{displayName} কে আপনার বন্ধু তালিকা থেকে সরাবেন?",
+  "@removeFriendQuestion": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFriend": "বন্ধুকে সরিয়ে দাও",
+  "reportPlayer": "রিপোর্ট প্লেয়ার",
+  "reportSubmitted": "প্রতিবেদন জমা",
+  "reportSubmittedUnableRemoveFriend": "রিপোর্ট জমা - বন্ধু অপসারণ করতে অক্ষম",
+  "resetPassword": "পাসওয়ার্ড রিসেট করুন",
+  "share": "শেয়ার",
+  "shareInvitePrompt": "বন্ধুকে আমন্ত্রণ জানাতে এই QR কোড বা লিঙ্কটি শেয়ার করুন",
+  "shareUnavailableBuild": "শেয়ার এই বিল্ডে অনুপলব্ধ",
+  "signIn": "সাইন ইন",
+  "signInAgainBeforeDeleting": "আপনার অ্যাকাউন্ট মুছে ফেলার আগে আবার সাইন ইন করুন",
+  "signInMethodNotEnabled": "এই সাইন-ইন পদ্ধতি সক্রিয় করা নেই",
+  "signInSubtitle": "আপনার ইমেইল এবং পাসওয়ার্ড দিয়ে সাইন ইন করুন",
+  "signOut": "সাইন আউট",
+  "signUp": "সাইন আপ",
+  "signUpToCompete": " আপনার বন্ধুদের সাথে প্রতিযোগিতা করতে",
+  "solvedNodes": "{nodeCount} নোড সমাধান হয়েছে",
+  "@solvedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "start": "শুরু",
+  "submit": "জমা দিন",
+  "thisPlayer": "এই খেলোয়াড়",
+  "tooManyAttempts": "অনেক বেশি প্রচেষ্টা - পরে আবার চেষ্টা করুন",
+  "unableAuthenticateRightNow": "এই মুহূর্তে প্রমাণীকরণ করতে অক্ষম",
+  "unableCreateAccountRightNow": "এই মুহূর্তে অ্যাকাউন্ট তৈরি করতে অক্ষম",
+  "unableCreateProfileRightNow": "এই মুহূর্তে আপনার প্রোফাইল তৈরি করতে অক্ষম",
+  "unableDeleteAccountRightNow": "এই মুহূর্তে আপনার অ্যাকাউন্ট মুছে ফেলতে অক্ষম",
+  "unableDeleteProfileRightNow": "এই মুহূর্তে আপনার প্রোফাইল মুছে ফেলতে অক্ষম",
+  "unableLoadFriendsLeaderboard": "এই মুহূর্তে বন্ধুদের লিডারবোর্ড লোড করতে অক্ষম৷",
+  "unableLoadGlobalLeaderboard": "এই মুহূর্তে গ্লোবাল লিডারবোর্ড লোড করতে অক্ষম৷",
+  "unableSendResetEmailRightNow": "এই মুহূর্তে রিসেট ইমেল পাঠাতে অক্ষম",
+  "unableSubmitReportRightNow": "এই মুহূর্তে রিপোর্ট জমা দিতে অক্ষম",
+  "unableUpdateHiddenNames": "লুকানো নাম আপডেট করতে অক্ষম",
+  "unableCreateAccountNoUser": "এই মুহূর্তে অ্যাকাউন্ট তৈরি করতে অক্ষম",
+  "unhideUserName": "ব্যবহারকারীর নাম লুকান",
+  "you": "আপনি",
+  "youAndYourFriends": "আপনি এবং আপনার বন্ধুরা",
+  "youAlreadyReportedPlayer": "আপনি ইতিমধ্যে এই প্লেয়ার রিপোর্ট",
+  "youCantAddYourself": "আপনি নিজেকে যোগ করতে পারবেন না",
+  "yourGlobalPosition": "আপনার বিশ্বব্যাপী অবস্থান",
+  "yourNewFriend": "আপনার নতুন বন্ধু",
+  "friendAlreadyInList": "এই বন্ধু ইতিমধ্যে আপনার তালিকায় আছে",
+  "friendInviteNoLongerValid": "সেই বন্ধুর আমন্ত্রণটি আর বৈধ নয়",
+  "about": "সম্পর্কে",
+  "goal": "লক্ষ্য",
+  "goalDescription": "যতটা সম্ভব কম চাল দিয়ে আপনি প্রতিদিন যত গ্রাফ সমাধান করতে পারেন",
+  "whyEveryPuzzleIsSolvable": "কেন প্রতিটি ধাঁধা সমাধানযোগ্য",
+  "planarGraphDescription": "প্ল্যানারিটির প্রতিটি গ্রাফ সমাধানযোগ্য কারণ এটি একটি প্ল্যানার গ্রাফ। একটি প্ল্যানার গ্রাফ হল একটি গ্রাফ যা একটি সমতল পৃষ্ঠে আঁকা যায় যাতে কোন প্রান্ত অতিক্রম না হয়, যেখানে তারা ভাগ করা শীর্ষে মিলিত হয়।",
+  "reportReasonInappropriateDisplayName": "অনুপযুক্ত প্রদর্শন নাম",
+  "reportReasonAbuse": "অপব্যবহার বা হয়রানি",
+  "reportReasonImpersonation": "ছদ্মবেশ ধারণ",
+  "reportReasonSpam": "স্প্যাম বা প্রতারণা",
+  "reportReasonOther": "অন্যান্য"
+}

@@ -1,0 +1,173 @@
+{
+  "@@locale": "ur",
+  "account": "اکاؤنٹ",
+  "accountDeleted": "اکاؤنٹ حذف کر دیا گیا",
+  "accountExistsSignInInstead": "اکاؤنٹ موجود ہے - اس کے بجائے سائن ان کریں",
+  "addedFriend": "{friendName} کو شامل کر دیا گیا",
+  "@addedFriend": {
+    "placeholders": {
+      "friendName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriendQuestion": "کیا {inviterName} کو اپنی دوستوں کی فہرست میں شامل کریں؟",
+  "@addFriendQuestion": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriend": "دوست کا ا ضافہ کریں",
+  "alreadySignedUp": "پہلے ہی سائن اپ کر چکے ہیں ؟",
+  "anonymousPlayer": "گمنام کھلاڑی",
+  "appleSignInUnavailablePlatform": "ایپل سائن ان اس پلیٹ فارم پر دستیاب نہیں ہے",
+  "appleSignInUnavailableRightNow": "ایپل سائن ان ابھی دستیاب نہیں ہے",
+  "authConfigurationInvalid": "اس ایپ کے لیے AUTH کنفیگریشن غلط ہے",
+  "authConfigurationMissing": "aUTH کنفیگریشن موجود نہیں ہے",
+  "back": "واپس",
+  "cancel": "منسوخ",
+  "continueLabel": "جاری رکھیں",
+  "continueWithScore": "جاری رکھیں - {totalScore}",
+  "@continueWithScore": {
+    "placeholders": {
+      "totalScore": {
+        "type": "int"
+      }
+    }
+  },
+  "continueWithApple": "apple کے ساتھ جاری رکھیں",
+  "continueWithGoogle": "گوگل کے ساتھ جاری رکھیں",
+  "copyInviteLink": "دعوت نامہ کا لنک کاپی کریں",
+  "copyrightNateWolfe": "© nate wolfe",
+  "createAccountSubtitle": "اپنے ای میل اور پاس ورڈ کے ساتھ ایک اکاؤنٹ بنائیں ۔",
+  "dailyGraphPuzzle": "روزانہ گراف پہیلی",
+  "dailyScore": "روزانہ اسکور",
+  "decline": "مسترد کرنا",
+  "deleteAccount": "اکاؤنٹ حذف کریں",
+  "details": "تفصیلات",
+  "detailsTooLong": "تفصیلات 1000 حروف یا اس سے کم ہونی چاہئیں",
+  "displayName": "ڈسپلے نام",
+  "email": "ای میل",
+  "enterEmailAndPassword": "ای میل اور پاس ورڈ درج کریں",
+  "enterEmailFirst": "پہلے اپنا ای میل درج کریں",
+  "enterValidEmail": " مہربانی کریتھ کریو صحیح ای میل درج ۔",
+  "failedNodes": "{nodeCount} نوڈز ناکام ہوئے",
+  "@failedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "friendInvite": "دوست کو مدعو کریں",
+  "friends": "دوست",
+  "global": "عالمی",
+  "globalSnapshot": "عالمی سنیپ شاٹ",
+  "globalTopScore": "عالمی ٹاپ اسکور",
+  "googleSignInUnavailablePlatform": "گوگل سائن ان اس پلیٹ فارم پر دستیاب نہیں ہے",
+  "googleSignInNotConfigured": "گوگل سائن ان اس ایپ کے لیے تشکیل شدہ نہیں ہے",
+  "googleSignInNotConfiguredIos": "گوگل سائن ان اس iOS ایپ کے لیے تشکیل شدہ نہیں ہے",
+  "home": "ہوم",
+  "hideUserName": "صارف کا نام چھپائیں",
+  "ifEmailExistsResetLink": "اگر وہ ای میل موجود ہے تو ہم نے ایک ری سیٹ لنک بھیجا ہے",
+  "invalidEmailOrPassword": "ناکارہ ای میل یا پاس ورڈ",
+  "invalidNameTrySomethingElse": "غلط نام - کچھ اور آزمائیں",
+  "invite": "دعوت دیں",
+  "inviteLinkCopied": "دعوت نامہ کا لنک کاپی ہو گیا",
+  "leaderboard": "لیڈر بورڈ",
+  "lifetimeScore": "لائف ٹائم اسکور",
+  "lifetimeScoreValue": "کل اسکور {score}",
+  "@lifetimeScoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "locked": "لاک",
+  "macosKeychainNotConfigured": "macos کیچین تک رسائی تشکیل شدہ نہیں ہے",
+  "moreOptions": "مزید آپشنز",
+  "networkErrorCheckConnection": "نیٹ ورک کی خرابی - اپنا کنکشن چیک کریں",
+  "newHere": "یہاں نئے ہیں؟",
+  "noFriendsYet": "آپ نے ابھی تک کوئی دوست شامل نہیں کیا ہے",
+  "noFriendsLeaderboard": "آپ نے ابھی تک کوئی دوست شامل نہیں کیا ہے - کسی کو مدعو کرنے کے لیے اپنی پروفائل کھولیں",
+  "noGlobalScoresYet": "ابھی کوئی عالمی اسکور نہیں",
+  "originalByJohnTantalo": "اصل از جان ٹینٹالو",
+  "password": "پاس ورڈ",
+  "passwordMinLength": "پاس ورڈ لازماً کم از کم 6 حروف و علامات پر مشتمل ہو",
+  "passwordTooWeak": "پاس ورڈ بہت کمزور ہے",
+  "planarity": "planarity",
+  "planarGraphWikipedia": "ویکیپیڈیا: پلینار گراف",
+  "pressAgainToDelete": "حذف کرنے کے لیے دوبارہ دبائیں",
+  "profile": "پروفائل",
+  "profileSubtitle": "اپ ڈیٹ کریں کہ آپ کا نام آپ کی پروفائل میں کیسے ظاہر ہوتا ہے",
+  "reason": "وجہ",
+  "remove": "ہٹائیں",
+  "removeFriendQuestion": "کیا {displayName} کو اپنی دوستوں کی فہرست سے ہٹائیں؟",
+  "@removeFriendQuestion": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFriend": "دوست کو ہٹائیں",
+  "reportPlayer": "رپورٹ پلیئر",
+  "reportSubmitted": "رپورٹ جمع کرائی گئی",
+  "reportSubmittedUnableRemoveFriend": "رپورٹ جمع کرائی گئی - دوست کو ہٹانے سے قاصر",
+  "resetPassword": "پاس ورڈ ری سیٹ کریں",
+  "share": "شیئر کریں",
+  "shareInvitePrompt": "کسی دوست کو مدعو کرنے کے لیے یہ QR کوڈ یا لنک شیئر کریں",
+  "shareUnavailableBuild": "اس بلڈ پر شیئر دستیاب نہیں ہے",
+  "signIn": "سائن ان",
+  "signInAgainBeforeDeleting": "اپنا اکاؤنٹ حذف کرنے سے پہلے دوبارہ سائن ان کریں",
+  "signInMethodNotEnabled": "سائن ان کا یہ طریقہ فعال نہیں ہے",
+  "signInSubtitle": "اپنے ای میل اور پاس ورڈ کے ساتھ سائن ان کریں",
+  "signOut": "سائن آؤٹ",
+  "signUp": "سائن اپ",
+  "signUpToCompete": " اپنے دوستوں کے ساتھ مقابلہ کرنے کے لیے",
+  "solvedNodes": "{nodeCount} نوڈز حل ہوئے",
+  "@solvedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "start": "شروع کریں",
+  "submit": "جمع کریں",
+  "thisPlayer": "یہ کھلاڑی",
+  "tooManyAttempts": "بہت زیادہ کوششیں - بعد میں دوبارہ کوشش کریں",
+  "unableAuthenticateRightNow": "ابھی توثیق کرنے سے قاصر",
+  "unableCreateAccountRightNow": "ابھی اکاؤنٹ بنانے سے قاصر",
+  "unableCreateProfileRightNow": "ابھی آپ کی پروفائل بنانے سے قاصر",
+  "unableDeleteAccountRightNow": "ابھی آپ کا اکاؤنٹ حذف کرنے سے قاصر",
+  "unableDeleteProfileRightNow": "ابھی آپ کی پروفائل حذف کرنے سے قاصر",
+  "unableLoadFriendsLeaderboard": "ابھی دوستوں کے لیڈر بورڈ کو لوڈ کرنے سے قاصر",
+  "unableLoadGlobalLeaderboard": "عالمی لیڈر بورڈ کو ابھی لوڈ کرنے سے قاصر",
+  "unableSendResetEmailRightNow": "ابھی ری سیٹ ای میل بھیجنے سے قاصر",
+  "unableSubmitReportRightNow": "ابھی رپورٹ جمع کرانے سے قاصر",
+  "unableUpdateHiddenNames": "پوشیدہ ناموں کو اپ ڈیٹ کرنے سے قاصر",
+  "unableCreateAccountNoUser": "ابھی اکاؤنٹ بنانے سے قاصر",
+  "unhideUserName": "صارف کا نام ظاہر نہ کریں",
+  "you": "آپ",
+  "youAndYourFriends": "آپ اور آپ کے دوست",
+  "youAlreadyReportedPlayer": "آپ پہلے ہی اس کھلاڑی کی اطلاع دے چکے ہیں",
+  "youCantAddYourself": "آپ خود کو شامل نہیں کر سکتے",
+  "yourGlobalPosition": "آپ کی عالمی پوزیشن",
+  "yourNewFriend": "آپ کا نیا دوست",
+  "friendAlreadyInList": "یہ دوست پہلے ہی آپ کی فہرست میں شامل ہے",
+  "friendInviteNoLongerValid": "یہ دوست کا دعوت نامہ اب درست نہیں ہے",
+  "about": "بارے میں",
+  "goal": "ہدف",
+  "goalDescription": "زیادہ سے زیادہ گراف حل کریں جتنا آپ ہر دن کر سکتے ہیں زیادہ سے زیادہ چند چالوں کے ساتھ",
+  "whyEveryPuzzleIsSolvable": "کیوں ہر پہیلی حل کرنے کے قابل ہے",
+  "planarGraphDescription": "پلینارٹی میں ہر گراف حل کرنے کے قابل ہے کیونکہ یہ پلینار گراف ہے ۔ پلینار گراف ایک گراف ہے جسے ایک فلیٹ سطح پر کھینچا جا سکتا ہے تاکہ کوئی کنارہ کراس نہ ہو، سوائے اس کے کہ جہاں وہ مشترکہ چوٹیوں پر ملتے ہیں ۔",
+  "reportReasonInappropriateDisplayName": "نامناسب ڈسپلے کا نام",
+  "reportReasonAbuse": "بدسلوکی یا ہراساں کرنا",
+  "reportReasonImpersonation": "نقالی",
+  "reportReasonSpam": "سپیم یا دھوکہ دہی",
+  "reportReasonOther": "دیگر"
+}

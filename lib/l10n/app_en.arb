@@ -1,0 +1,173 @@
+{
+  "@@locale": "en",
+  "account": "account",
+  "accountDeleted": "account deleted",
+  "accountExistsSignInInstead": "account exists - sign in instead",
+  "addedFriend": "added {friendName}",
+  "@addedFriend": {
+    "placeholders": {
+      "friendName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriendQuestion": "add {inviterName} to your friends list?",
+  "@addFriendQuestion": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriend": "add friend",
+  "alreadySignedUp": "already signed up?",
+  "anonymousPlayer": "anonymous player",
+  "appleSignInUnavailablePlatform": "apple sign-in is not available on this platform",
+  "appleSignInUnavailableRightNow": "apple sign-in is not available right now",
+  "authConfigurationInvalid": "auth configuration is invalid for this app",
+  "authConfigurationMissing": "auth configuration is missing",
+  "back": "back",
+  "cancel": "cancel",
+  "continueLabel": "continue",
+  "continueWithScore": "continue - {totalScore}",
+  "@continueWithScore": {
+    "placeholders": {
+      "totalScore": {
+        "type": "int"
+      }
+    }
+  },
+  "continueWithApple": "continue with Apple",
+  "continueWithGoogle": "continue with Google",
+  "copyInviteLink": "copy invite link",
+  "copyrightNateWolfe": "© nate wolfe",
+  "createAccountSubtitle": "create an account with your email and password.",
+  "dailyGraphPuzzle": "daily graph puzzle",
+  "dailyScore": "daily score",
+  "decline": "decline",
+  "deleteAccount": "delete account",
+  "details": "details",
+  "detailsTooLong": "details must be 1000 characters or less",
+  "displayName": "display name",
+  "email": "email",
+  "enterEmailAndPassword": "enter email and password",
+  "enterEmailFirst": "enter your email first",
+  "enterValidEmail": "enter a valid email",
+  "failedNodes": "failed {nodeCount} nodes",
+  "@failedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "friendInvite": "friend invite",
+  "friends": "friends",
+  "global": "global",
+  "globalSnapshot": "global snapshot",
+  "globalTopScore": "global top score",
+  "googleSignInUnavailablePlatform": "google sign-in is not available on this platform",
+  "googleSignInNotConfigured": "google sign-in is not configured for this app",
+  "googleSignInNotConfiguredIos": "google sign-in is not configured for this iOS app",
+  "home": "home",
+  "hideUserName": "hide user name",
+  "ifEmailExistsResetLink": "if that email exists, we sent a reset link",
+  "invalidEmailOrPassword": "invalid email or password",
+  "invalidNameTrySomethingElse": "invalid name - try something else",
+  "invite": "invite",
+  "inviteLinkCopied": "invite link copied",
+  "leaderboard": "leaderboard",
+  "lifetimeScore": "lifetime score",
+  "lifetimeScoreValue": "lifetime score {score}",
+  "@lifetimeScoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "locked": "locked",
+  "macosKeychainNotConfigured": "macos keychain access is not configured",
+  "moreOptions": "more options",
+  "networkErrorCheckConnection": "network error - check your connection",
+  "newHere": "new here?",
+  "noFriendsYet": "you haven't added any friends yet",
+  "noFriendsLeaderboard": "you haven't added any friends yet - open your profile to invite someone",
+  "noGlobalScoresYet": "no global scores yet",
+  "originalByJohnTantalo": "original by john tantalo",
+  "password": "password",
+  "passwordMinLength": "password must be at least 6 characters",
+  "passwordTooWeak": "password is too weak",
+  "planarity": "planarity",
+  "planarGraphWikipedia": "wikipedia: planar graph",
+  "pressAgainToDelete": "press again to delete",
+  "profile": "profile",
+  "profileSubtitle": "update how your name appears in your profile",
+  "reason": "reason",
+  "remove": "remove",
+  "removeFriendQuestion": "remove {displayName} from your friends list?",
+  "@removeFriendQuestion": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFriend": "remove friend",
+  "reportPlayer": "report player",
+  "reportSubmitted": "report submitted",
+  "reportSubmittedUnableRemoveFriend": "report submitted - unable to remove friend",
+  "resetPassword": "reset password",
+  "share": "share",
+  "shareInvitePrompt": "share this QR code or link to invite a friend",
+  "shareUnavailableBuild": "share is unavailable on this build",
+  "signIn": "sign in",
+  "signInAgainBeforeDeleting": "sign in again before deleting your account",
+  "signInMethodNotEnabled": "this sign-in method is not enabled",
+  "signInSubtitle": "sign in with your email and password",
+  "signOut": "sign out",
+  "signUp": "sign up",
+  "signUpToCompete": " to compete with your friends",
+  "solvedNodes": "solved {nodeCount} nodes",
+  "@solvedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "start": "start",
+  "submit": "submit",
+  "thisPlayer": "this player",
+  "tooManyAttempts": "too many attempts - try again later",
+  "unableAuthenticateRightNow": "unable to authenticate right now",
+  "unableCreateAccountRightNow": "unable to create account right now",
+  "unableCreateProfileRightNow": "unable to create your profile right now",
+  "unableDeleteAccountRightNow": "unable to delete your account right now",
+  "unableDeleteProfileRightNow": "unable to delete your profile right now",
+  "unableLoadFriendsLeaderboard": "unable to load friends leaderboard right now",
+  "unableLoadGlobalLeaderboard": "unable to load global leaderboard right now",
+  "unableSendResetEmailRightNow": "unable to send reset email right now",
+  "unableSubmitReportRightNow": "unable to submit report right now",
+  "unableUpdateHiddenNames": "unable to update hidden names",
+  "unableCreateAccountNoUser": "unable to create account right now",
+  "unhideUserName": "unhide user name",
+  "you": "you",
+  "youAndYourFriends": "you and your friends",
+  "youAlreadyReportedPlayer": "you already reported this player",
+  "youCantAddYourself": "you can't add yourself",
+  "yourGlobalPosition": "your global position",
+  "yourNewFriend": "your new friend",
+  "friendAlreadyInList": "this friend is already in your list",
+  "friendInviteNoLongerValid": "that friend invite is no longer valid",
+  "about": "about",
+  "goal": "goal",
+  "goalDescription": "solve as many graphs as you can each day with as few moves as possible",
+  "whyEveryPuzzleIsSolvable": "why every puzzle is solvable",
+  "planarGraphDescription": "every graph in planarity is solvable because it's a planar graph. a planar graph is a graph that can be drawn on a flat surface so that no edges cross, except where they meet at shared vertices.",
+  "reportReasonInappropriateDisplayName": "inappropriate display name",
+  "reportReasonAbuse": "abuse or harassment",
+  "reportReasonImpersonation": "impersonation",
+  "reportReasonSpam": "spam or scam",
+  "reportReasonOther": "other"
+}
