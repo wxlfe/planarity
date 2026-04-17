@@ -32,6 +32,18 @@ void main() {
     expect(scoreForSolvedLevel(level: 6, movesUsed: 8), 0);
   });
 
+  test('display name validation blocks unsafe personal info and profanity', () {
+    const invalidMessage = 'invalid name - try something else';
+
+    expect(displayNameValidationMessage('Ada Lovelace'), isNull);
+    expect(displayNameValidationMessage('Ada ada@example.com'), invalidMessage);
+    expect(displayNameValidationMessage('Ada 555-867-5309'), invalidMessage);
+    expect(displayNameValidationMessage('Ada example.com'), invalidMessage);
+    expect(displayNameValidationMessage('Ada 123 Main St'), invalidMessage);
+    expect(displayNameValidationMessage('Ada PO Box 123'), invalidMessage);
+    expect(displayNameValidationMessage('Ada f.u.c.k'), invalidMessage);
+  });
+
   test(
     'daily graph generation is deterministic for the same day and node count',
     () {

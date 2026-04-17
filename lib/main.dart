@@ -295,6 +295,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
   String? _pendingFriendInviteUid;
   bool _friendInvitePromptOpen = false;
   bool _friendInviteAuthPromptOpen = false;
+  final Set<String> _reportedUserIdsThisSession = <String>{};
+  final Set<String> _hiddenDisplayNameUserIds = <String>{};
+  final Set<String> _currentFriendIds = <String>{};
   StreamSubscription<Uri>? _appLinkSubscription;
 
   @override
@@ -400,6 +403,12 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       playedToday: playedToday,
     );
     final isLocked = _profileLocked(profileData);
+    final hiddenDisplayNameUserIds = _profileHiddenDisplayNameUserIds(
+      profileData,
+    );
+    final friendIds = user == null
+        ? const <String>[]
+        : _profileFriendIds(profileData);
 
     if (!mounted) {
       return;
@@ -413,6 +422,12 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       _currentLevel = syncedLevel;
       _score = syncedScore;
       _isLoaded = true;
+      _hiddenDisplayNameUserIds
+        ..clear()
+        ..addAll(hiddenDisplayNameUserIds);
+      _currentFriendIds
+        ..clear()
+        ..addAll(friendIds);
       if (_selectedLeaderboardTab == null || signedInChanged) {
         _selectedLeaderboardTab = user != null
             ? _LeaderboardTab.friends
@@ -443,6 +458,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       'displayName': displayName ?? 'anonymous player',
       'currentLevel': _startingLevel,
       'friends': <String>[],
+      'hiddenDisplayNameUserIds': <String>[],
       'lastPlayed': '',
       'locked': false,
       'lifetimeScore': 0,
@@ -1143,6 +1159,15 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           loadFriends: (friendIds) => _loadFriendProfiles(user.uid, friendIds),
           removeFriend: (friendUid) =>
               _removeFriendPair(userId: user.uid, friendUid: friendUid),
+          reportUser: ({required reportedUid, required reportedDisplayName}) =>
+              _showReportUserDialog(
+                reportedUid: reportedUid,
+                reportedDisplayName: reportedDisplayName,
+                source: 'friends',
+              ),
+          hasReportedUser: _reportedUserIdsThisSession.contains,
+          hiddenDisplayNameUserIds: _hiddenDisplayNameUserIds,
+          toggleHiddenDisplayName: _toggleHiddenDisplayName,
           buildInviteLink: () => _friendInvitePath(user.uid),
           shareInvite: (inviteLink, isDark, sharePositionOrigin) =>
               _shareFriendInviteCard(
@@ -1160,7 +1185,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     }
 
     if (result.signOutRequested) {
-      await _saveDisplayName(user: user, displayName: result.displayName);
+      if (_displayNameValidationMessage(result.displayName) == null) {
+        await _saveDisplayName(user: user, displayName: result.displayName);
+      }
       if (!mounted) {
         return;
       }
@@ -1387,6 +1414,21 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     return friends;
   }
 
+  Set<String> _profileHiddenDisplayNameUserIds(
+    Map<String, dynamic>? profileData,
+  ) {
+    final rawHiddenUserIds = profileData?['hiddenDisplayNameUserIds'];
+    if (rawHiddenUserIds is! List) {
+      return <String>{};
+    }
+
+    return rawHiddenUserIds
+        .whereType<String>()
+        .map((uid) => uid.trim())
+        .where((uid) => uid.isNotEmpty)
+        .toSet();
+  }
+
   String? _incomingFriendInviteUid() {
     return kIsWeb ? _friendInviteUidFromUri(Uri.base) : null;
   }
@@ -1414,6 +1456,160 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       path: '/',
       queryParameters: <String, String>{'invite': uid},
     ).toString();
+  }
+
+  Future<void> _submitUserReport({
+    required String reportedUid,
+    required String reportedDisplayName,
+    required String reason,
+    required String details,
+    required String source,
+  }) async {
+    final reporter = FirebaseAuth.instance.currentUser;
+    if (reporter == null) {
+      throw StateError('sign in to report a player');
+    }
+    if (reporter.uid == reportedUid) {
+      throw ArgumentError.value(reportedUid, 'reportedUid', 'self-report');
+    }
+
+    await FirebaseFirestore.instance.collection('reports').add({
+      'reporterUid': reporter.uid,
+      'reportedUid': reportedUid,
+      'reportedDisplayName': reportedDisplayName.trim(),
+      'reason': reason,
+      'details': details.trim(),
+      'source': source,
+      'status': 'open',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<bool> _showReportUserDialog({
+    required String reportedUid,
+    required String reportedDisplayName,
+    required String source,
+  }) async {
+    if (_reportedUserIdsThisSession.contains(reportedUid)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('you already reported this player')),
+      );
+      return false;
+    }
+    final submitted = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return _ReportUserDialog(
+          reportedDisplayName: _displayNameForViewer(
+            uid: reportedUid,
+            displayName: reportedDisplayName,
+            hiddenUserIds: _hiddenDisplayNameUserIds,
+          ),
+          submitReport: ({required reason, required details}) {
+            return _submitUserReport(
+              reportedUid: reportedUid,
+              reportedDisplayName: reportedDisplayName,
+              reason: reason,
+              details: details,
+              source: source,
+            );
+          },
+        );
+      },
+    );
+    if (!mounted || submitted != true) {
+      return false;
+    }
+    await _setHiddenDisplayName(reportedUid, hidden: true);
+    await _removeReportedFriendIfNeeded(reportedUid);
+    if (!mounted) {
+      return false;
+    }
+    setState(() {
+      _reportedUserIdsThisSession.add(reportedUid);
+    });
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('report submitted')));
+    return true;
+  }
+
+  Future<void> _toggleHiddenDisplayName(String uid) async {
+    final hidden = !_hiddenDisplayNameUserIds.contains(uid);
+    await _setHiddenDisplayName(uid, hidden: hidden);
+  }
+
+  Future<bool> _setHiddenDisplayName(
+    String uid, {
+    required bool hidden,
+    bool showError = true,
+  }) async {
+    final user = _currentUser;
+    if (!mounted || user == null || uid == user.uid) {
+      return false;
+    }
+
+    final nextHiddenIds = Set<String>.from(_hiddenDisplayNameUserIds);
+    final changed = hidden ? nextHiddenIds.add(uid) : nextHiddenIds.remove(uid);
+    if (!changed) {
+      return true;
+    }
+    final previousHiddenIds = Set<String>.from(_hiddenDisplayNameUserIds);
+
+    setState(() {
+      _hiddenDisplayNameUserIds
+        ..clear()
+        ..addAll(nextHiddenIds);
+    });
+
+    try {
+      final sortedHiddenIds = nextHiddenIds.toList(growable: false)..sort();
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'hiddenDisplayNameUserIds': sortedHiddenIds,
+      }, SetOptions(merge: true));
+      return true;
+    } catch (_) {
+      if (!mounted) {
+        return false;
+      }
+      setState(() {
+        _hiddenDisplayNameUserIds
+          ..clear()
+          ..addAll(previousHiddenIds);
+      });
+      if (showError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('unable to update hidden names')),
+        );
+      }
+      return false;
+    }
+  }
+
+  Future<void> _removeReportedFriendIfNeeded(String reportedUid) async {
+    final user = _currentUser;
+    if (user == null || !_currentFriendIds.contains(reportedUid)) {
+      return;
+    }
+
+    try {
+      await _removeFriendPair(userId: user.uid, friendUid: reportedUid);
+      if (!mounted) {
+        return;
+      }
+      _refreshLeaderboard();
+    } catch (error, stackTrace) {
+      debugPrint('Unable to remove reported friend: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('report submitted; unable to remove friend'),
+        ),
+      );
+    }
   }
 
   Future<List<_FriendProfile>> _loadFriendProfiles(
@@ -1473,6 +1669,11 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       'friends': FieldValue.arrayRemove([userId]),
     }, SetOptions(merge: true));
     await batch.commit();
+    if (mounted && userId == _currentUser?.uid) {
+      setState(() {
+        _currentFriendIds.remove(friendUid);
+      });
+    }
   }
 
   Future<_FriendAddResult> _addFriendPair({
@@ -1505,6 +1706,11 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       'friends': FieldValue.arrayUnion([userId]),
     }, SetOptions(merge: true));
     await batch.commit();
+    if (mounted && userId == _currentUser?.uid) {
+      setState(() {
+        _currentFriendIds.add(friendUid);
+      });
+    }
 
     final friendName =
         _profileDisplayNameFromData(friendSnapshot.data()) ?? 'your new friend';
@@ -1751,6 +1957,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     required User user,
     required String displayName,
   }) async {
+    final displayNameError = _displayNameValidationMessage(displayName);
+    if (displayNameError != null) {
+      throw ArgumentError.value(displayName, 'displayName', displayNameError);
+    }
     final cleanedDisplayName = displayName.trim().isEmpty
         ? 'anonymous player'
         : displayName.trim();
@@ -1873,6 +2083,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         user: user,
         refreshToken: _leaderboardRefreshTick,
         onSignUpTap: () => _showAuthModal(isSignIn: false),
+        onReportUser: _showReportUserDialog,
+        reportedUserIds: _reportedUserIdsThisSession,
+        hiddenDisplayNameUserIds: _hiddenDisplayNameUserIds,
+        onToggleHiddenDisplayName: _toggleHiddenDisplayName,
         selectedTab: selectedLeaderboardTab,
         onTabSelected: (_LeaderboardTab tab) {
           setState(() {
@@ -1910,6 +2124,12 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
                                   refreshToken: _leaderboardRefreshTick,
                                   onSignUpTap: () =>
                                       _showAuthModal(isSignIn: false),
+                                  onReportUser: _showReportUserDialog,
+                                  reportedUserIds: _reportedUserIdsThisSession,
+                                  hiddenDisplayNameUserIds:
+                                      _hiddenDisplayNameUserIds,
+                                  onToggleHiddenDisplayName:
+                                      _toggleHiddenDisplayName,
                                   selectedTab: selectedLeaderboardTab,
                                   onTabSelected: (_LeaderboardTab tab) {
                                     setState(() {
@@ -2455,6 +2675,10 @@ class _ProfileDialog extends StatefulWidget {
     required this.lifetimeScore,
     required this.loadFriends,
     required this.removeFriend,
+    required this.reportUser,
+    required this.hasReportedUser,
+    required this.hiddenDisplayNameUserIds,
+    required this.toggleHiddenDisplayName,
     required this.buildInviteLink,
     required this.shareInvite,
   });
@@ -2465,6 +2689,14 @@ class _ProfileDialog extends StatefulWidget {
   final Future<List<_FriendProfile>> Function(List<String> friendIds)
   loadFriends;
   final Future<void> Function(String friendUid) removeFriend;
+  final Future<bool> Function({
+    required String reportedUid,
+    required String reportedDisplayName,
+  })
+  reportUser;
+  final bool Function(String uid) hasReportedUser;
+  final Set<String> hiddenDisplayNameUserIds;
+  final ValueChanged<String> toggleHiddenDisplayName;
   final String Function() buildInviteLink;
   final Future<void> Function(
     String inviteLink,
@@ -2511,7 +2743,9 @@ class _ProfileDialogState extends State<_ProfileDialog> {
     required bool signOutRequested,
     required bool deleteAccountRequested,
   }) {
-    final errorText = _displayNameErrorForInput(_displayNameController.text);
+    final errorText = shouldPersist
+        ? _displayNameValidationMessage(_displayNameController.text)
+        : null;
     if (errorText != null) {
       setState(() {
         _displayNameErrorText = errorText;
@@ -2589,6 +2823,11 @@ class _ProfileDialogState extends State<_ProfileDialog> {
   }
 
   Future<void> _removeFriend(_FriendProfile friend) async {
+    final displayName = _displayNameForViewer(
+      uid: friend.uid,
+      displayName: friend.displayName,
+      hiddenUserIds: widget.hiddenDisplayNameUserIds,
+    );
     final shouldRemove = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
@@ -2618,7 +2857,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'remove ${friend.displayName} from your friends list?',
+                    'remove $displayName from your friends list?',
                     style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),
@@ -2784,6 +3023,14 @@ class _ProfileDialogState extends State<_ProfileDialog> {
               else
                 ..._friends.map((friend) {
                   final isRemoving = _removingFriendIds.contains(friend.uid);
+                  final isNameHidden = widget.hiddenDisplayNameUserIds.contains(
+                    friend.uid,
+                  );
+                  final displayName = _displayNameForViewer(
+                    uid: friend.uid,
+                    displayName: friend.displayName,
+                    hiddenUserIds: widget.hiddenDisplayNameUserIds,
+                  );
                   return Container(
                     margin: const EdgeInsets.only(bottom: 10),
                     padding: const EdgeInsets.all(12),
@@ -2799,7 +3046,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                friend.displayName,
+                                displayName,
                                 style: theme.textTheme.bodyLarge?.copyWith(
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -2815,7 +3062,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                             ],
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
                         IconButton(
                           onPressed: isRemoving
                               ? null
@@ -2833,6 +3080,30 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                                   FontAwesomeIcons.userMinus,
                                   size: 14,
                                 ),
+                        ),
+                        _ReportOverflowMenu(
+                          isNameHidden: isNameHidden,
+                          enabled: !widget.hasReportedUser(friend.uid),
+                          onToggleHiddenDisplayName: () =>
+                              widget.toggleHiddenDisplayName(friend.uid),
+                          onReport: () async {
+                            final reported = await widget.reportUser(
+                              reportedUid: friend.uid,
+                              reportedDisplayName: friend.displayName,
+                            );
+                            if (reported && mounted) {
+                              setState(() {
+                                _friendIds = _friendIds
+                                    .where((uid) => uid != friend.uid)
+                                    .toList();
+                                _friends = _friends
+                                    .where(
+                                      (profile) => profile.uid != friend.uid,
+                                    )
+                                    .toList();
+                              });
+                            }
+                          },
                         ),
                       ],
                     ),
@@ -2871,6 +3142,273 @@ class _ProfileDialogState extends State<_ProfileDialog> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ReportReason {
+  const _ReportReason({required this.value, required this.label});
+
+  final String value;
+  final String label;
+}
+
+const List<_ReportReason> _reportReasons = <_ReportReason>[
+  _ReportReason(
+    value: 'inappropriate_display_name',
+    label: 'inappropriate display name',
+  ),
+  _ReportReason(value: 'abuse', label: 'abuse or harassment'),
+  _ReportReason(value: 'impersonation', label: 'impersonation'),
+  _ReportReason(value: 'spam', label: 'spam or scam'),
+  _ReportReason(value: 'other', label: 'other'),
+];
+
+class _ReportUserDialog extends StatefulWidget {
+  const _ReportUserDialog({
+    required this.reportedDisplayName,
+    required this.submitReport,
+  });
+
+  final String reportedDisplayName;
+  final Future<void> Function({required String reason, required String details})
+  submitReport;
+
+  @override
+  State<_ReportUserDialog> createState() => _ReportUserDialogState();
+}
+
+class _ReportUserDialogState extends State<_ReportUserDialog> {
+  final TextEditingController _detailsController = TextEditingController();
+  String _selectedReason = _reportReasons.first.value;
+  String? _errorText;
+  bool _submitting = false;
+
+  @override
+  void dispose() {
+    _detailsController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final details = _detailsController.text.trim();
+    if (details.length > 1000) {
+      setState(() {
+        _errorText = 'details must be 1000 characters or less';
+      });
+      return;
+    }
+
+    setState(() {
+      _submitting = true;
+      _errorText = null;
+    });
+    try {
+      await widget.submitReport(reason: _selectedReason, details: details);
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).pop(true);
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _submitting = false;
+        _errorText = 'unable to submit report right now';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Dialog(
+      backgroundColor: theme.colorScheme.surface,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+        side: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.35)),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 460),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'report player',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                widget.reportedDisplayName,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 14),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedReason,
+                decoration: const InputDecoration(
+                  labelText: 'reason',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                ),
+                items: _reportReasons
+                    .map(
+                      (reason) => DropdownMenuItem<String>(
+                        value: reason.value,
+                        child: Text(reason.label),
+                      ),
+                    )
+                    .toList(growable: false),
+                onChanged: _submitting
+                    ? null
+                    : (value) {
+                        if (value == null) {
+                          return;
+                        }
+                        setState(() {
+                          _selectedReason = value;
+                        });
+                      },
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _detailsController,
+                enabled: !_submitting,
+                maxLength: 1000,
+                minLines: 3,
+                maxLines: 5,
+                decoration: const InputDecoration(
+                  labelText: 'details',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                ),
+              ),
+              if (_errorText != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  _errorText!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Spacer(),
+                  TextButton(
+                    onPressed: _submitting
+                        ? null
+                        : () => Navigator.of(context).pop(false),
+                    child: const Text('cancel'),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: _submitting ? null : _submit,
+                    child: _submitting
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('submit'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReportOverflowMenu extends StatelessWidget {
+  const _ReportOverflowMenu({
+    required this.enabled,
+    required this.isNameHidden,
+    required this.onToggleHiddenDisplayName,
+    required this.onReport,
+  });
+
+  final bool enabled;
+  final bool isNameHidden;
+  final VoidCallback onToggleHiddenDisplayName;
+  final VoidCallback onReport;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final iconColor =
+        IconTheme.of(context).color ?? theme.colorScheme.onSurface;
+    final enabledColor = theme.colorScheme.onSurface;
+    final disabledColor = theme.colorScheme.onSurface.withValues(alpha: 0.42);
+
+    return PopupMenuButton<String>(
+      tooltip: 'more options',
+      color: theme.colorScheme.surface,
+      surfaceTintColor: Colors.transparent,
+      iconColor: iconColor,
+      icon: const FaIcon(FontAwesomeIcons.ellipsisVertical, size: 14),
+      onSelected: (value) {
+        if (value == 'toggleHiddenDisplayName') {
+          onToggleHiddenDisplayName();
+          return;
+        }
+        if (value == 'report') {
+          onReport();
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem<String>(
+          value: 'toggleHiddenDisplayName',
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FaIcon(
+                isNameHidden ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
+                size: 14,
+                color: enabledColor,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                isNameHidden ? 'unhide user name' : 'hide user name',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: enabledColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'report',
+          enabled: enabled,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FaIcon(
+                FontAwesomeIcons.flag,
+                size: 14,
+                color: enabled ? enabledColor : disabledColor,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                enabled ? 'report player' : 'report submitted',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: enabled ? enabledColor : disabledColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -3041,6 +3579,16 @@ class _FriendAddResult {
   final String message;
 }
 
+const String _maskedDisplayName = '••••••••';
+
+String _displayNameForViewer({
+  required String uid,
+  required String displayName,
+  required Set<String> hiddenUserIds,
+}) {
+  return hiddenUserIds.contains(uid) ? _maskedDisplayName : displayName;
+}
+
 String _leaderboardTodayKey() {
   final now = DateTime.now();
   final year = now.year.toString().padLeft(4, '0');
@@ -3058,18 +3606,90 @@ String? _leaderboardDisplayNameFromData(Map<String, dynamic>? profileData) {
 }
 
 final RegExp _displayNameEmailPattern = RegExp(
-  r'^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$',
+  r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b',
   caseSensitive: false,
 );
 
-final RegExp _displayNamePhonePattern = RegExp(
-  r'^(?:\+?\d{1,3}[\s.-]*)?(?:\(\d{3}\)|\d{3})[\s.-]*\d{3}[\s.-]*\d{4}$',
-);
+final RegExp _displayNamePhonePattern = RegExp(r'(?:\+?\d[\d\s().-]{6,}\d)');
 
 final RegExp _displayNameUrlPattern = RegExp(
-  r'^(?:(?:https?:\/\/)|(?:www\.))[^\s/$.?#].[^\s]*$',
+  r'\b(?:(?:https?:\/\/|www\.)[^\s]+|[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.(?:com|org|net|edu|gov|mil|io|co|us|app|dev|gg|me|info|biz|xyz|site|online|link|tv|ai|ly|to|uk|ca|au|de|fr|jp|nl|se|no|es|it)(?:\/[^\s]*)?)\b',
   caseSensitive: false,
 );
+
+final RegExp _displayNamePoBoxPattern = RegExp(
+  r'\b(?:p\.?\s*o\.?\s*box|post office box)\s+\d+\b',
+  caseSensitive: false,
+);
+
+final RegExp _displayNameStreetAddressPattern = RegExp(
+  r"\b\d{1,6}\s+(?:[a-z0-9.'-]+\s+){0,5}(?:street|st\.?|avenue|ave\.?|road|rd\.?|boulevard|blvd\.?|lane|ln\.?|drive|dr\.?|court|ct\.?|circle|cir\.?|place|pl\.?|way|terrace|ter\.?|trail|trl\.?|parkway|pkwy\.?|highway|hwy\.?|route|rte\.?|square|sq\.?)\b",
+  caseSensitive: false,
+);
+
+// Compact deny-list adapted from common LDNOOBW/Google profanity lists.
+// Keep this conservative: terms below are matched after punctuation and common
+// leetspeak are normalized, so short ambiguous words are intentionally omitted.
+const List<String> _displayNameProfanityTerms = <String>[
+  'anal',
+  'anus',
+  'arsehole',
+  'asshole',
+  'bastard',
+  'bitch',
+  'blowjob',
+  'bollock',
+  'boner',
+  'boob',
+  'bullshit',
+  'buttplug',
+  'chink',
+  'clit',
+  'cock',
+  'coon',
+  'cum',
+  'cunt',
+  'dick',
+  'dildo',
+  'douche',
+  'dyke',
+  'fag',
+  'faggot',
+  'fuck',
+  'goddamn',
+  'gook',
+  'handjob',
+  'homo',
+  'jizz',
+  'kike',
+  'masturbat',
+  'motherfuck',
+  'nazi',
+  'nigga',
+  'nigger',
+  'penis',
+  'piss',
+  'porn',
+  'prick',
+  'pussy',
+  'queef',
+  'rape',
+  'retard',
+  'rimjob',
+  'shit',
+  'skank',
+  'slut',
+  'spic',
+  'tit',
+  'twat',
+  'vagina',
+  'wank',
+  'whore',
+];
+
+String? displayNameValidationMessage(String displayName) {
+  return _displayNameValidationMessage(displayName);
+}
 
 String? _displayNameValidationMessage(String displayName) {
   final trimmed = displayName.trim();
@@ -3077,11 +3697,65 @@ String? _displayNameValidationMessage(String displayName) {
     return null;
   }
   if (_displayNameEmailPattern.hasMatch(trimmed) ||
-      _displayNamePhonePattern.hasMatch(trimmed) ||
-      _displayNameUrlPattern.hasMatch(trimmed)) {
+      _containsPhoneNumber(trimmed) ||
+      _displayNameUrlPattern.hasMatch(trimmed) ||
+      _displayNamePoBoxPattern.hasMatch(trimmed) ||
+      _displayNameStreetAddressPattern.hasMatch(trimmed) ||
+      _containsProfanity(trimmed)) {
     return 'invalid name - try something else';
   }
   return null;
+}
+
+bool _containsPhoneNumber(String displayName) {
+  for (final match in _displayNamePhonePattern.allMatches(displayName)) {
+    final digits = match.group(0)?.replaceAll(RegExp(r'\D'), '') ?? '';
+    if (digits.length >= 7 && digits.length <= 15) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool _containsProfanity(String displayName) {
+  final normalized = _normalizeDisplayNameForProfanity(displayName);
+  return _displayNameProfanityTerms.any(normalized.contains);
+}
+
+String _normalizeDisplayNameForProfanity(String displayName) {
+  final buffer = StringBuffer();
+  for (final rune in displayName.toLowerCase().runes) {
+    final char = String.fromCharCode(rune);
+    switch (char) {
+      case '0':
+        buffer.write('o');
+        break;
+      case '1':
+      case '!':
+      case '|':
+        buffer.write('i');
+        break;
+      case '3':
+        buffer.write('e');
+        break;
+      case '4':
+      case '@':
+        buffer.write('a');
+        break;
+      case '5':
+      case r'$':
+        buffer.write('s');
+        break;
+      case '7':
+        buffer.write('t');
+        break;
+      default:
+        if (rune >= 97 && rune <= 122) {
+          buffer.write(char);
+        }
+    }
+  }
+  return buffer.toString();
 }
 
 List<String> _leaderboardFriendIds(Map<String, dynamic>? profileData) {
@@ -3176,6 +3850,10 @@ class _LeaderboardCard extends StatelessWidget {
     this.user,
     required this.refreshToken,
     required this.onSignUpTap,
+    required this.onReportUser,
+    required this.reportedUserIds,
+    required this.hiddenDisplayNameUserIds,
+    required this.onToggleHiddenDisplayName,
     required this.selectedTab,
     required this.onTabSelected,
   });
@@ -3183,6 +3861,15 @@ class _LeaderboardCard extends StatelessWidget {
   final User? user;
   final int refreshToken;
   final VoidCallback onSignUpTap;
+  final Future<bool> Function({
+    required String reportedUid,
+    required String reportedDisplayName,
+    required String source,
+  })
+  onReportUser;
+  final Set<String> reportedUserIds;
+  final Set<String> hiddenDisplayNameUserIds;
+  final ValueChanged<String> onToggleHiddenDisplayName;
   final _LeaderboardTab selectedTab;
   final ValueChanged<_LeaderboardTab> onTabSelected;
 
@@ -3203,6 +3890,10 @@ class _LeaderboardCard extends StatelessWidget {
         user: user,
         refreshToken: refreshToken,
         onSignUpTap: onSignUpTap,
+        onReportUser: onReportUser,
+        reportedUserIds: reportedUserIds,
+        hiddenDisplayNameUserIds: hiddenDisplayNameUserIds,
+        onToggleHiddenDisplayName: onToggleHiddenDisplayName,
         selectedTab: selectedTab,
         onTabSelected: onTabSelected,
       ),
@@ -3215,6 +3906,10 @@ class _LeaderboardCardContents extends StatelessWidget {
     required this.user,
     required this.refreshToken,
     required this.onSignUpTap,
+    required this.onReportUser,
+    required this.reportedUserIds,
+    required this.hiddenDisplayNameUserIds,
+    required this.onToggleHiddenDisplayName,
     required this.selectedTab,
     required this.onTabSelected,
   });
@@ -3222,6 +3917,15 @@ class _LeaderboardCardContents extends StatelessWidget {
   final User? user;
   final int refreshToken;
   final VoidCallback onSignUpTap;
+  final Future<bool> Function({
+    required String reportedUid,
+    required String reportedDisplayName,
+    required String source,
+  })
+  onReportUser;
+  final Set<String> reportedUserIds;
+  final Set<String> hiddenDisplayNameUserIds;
+  final ValueChanged<String> onToggleHiddenDisplayName;
   final _LeaderboardTab selectedTab;
   final ValueChanged<_LeaderboardTab> onTabSelected;
 
@@ -3270,10 +3974,18 @@ class _LeaderboardCardContents extends StatelessWidget {
                   user: user,
                   refreshToken: refreshToken,
                   onSignUpTap: onSignUpTap,
+                  onReportUser: onReportUser,
+                  reportedUserIds: reportedUserIds,
+                  hiddenDisplayNameUserIds: hiddenDisplayNameUserIds,
+                  onToggleHiddenDisplayName: onToggleHiddenDisplayName,
                 )
               : _GlobalLeaderboardView(
                   key: const ValueKey('global'),
                   user: user,
+                  onReportUser: onReportUser,
+                  reportedUserIds: reportedUserIds,
+                  hiddenDisplayNameUserIds: hiddenDisplayNameUserIds,
+                  onToggleHiddenDisplayName: onToggleHiddenDisplayName,
                 ),
         ),
       ],
@@ -3325,11 +4037,24 @@ class _FriendsLeaderboardView extends StatefulWidget {
     required this.user,
     required this.refreshToken,
     required this.onSignUpTap,
+    required this.onReportUser,
+    required this.reportedUserIds,
+    required this.hiddenDisplayNameUserIds,
+    required this.onToggleHiddenDisplayName,
   });
 
   final User? user;
   final int refreshToken;
   final VoidCallback onSignUpTap;
+  final Future<bool> Function({
+    required String reportedUid,
+    required String reportedDisplayName,
+    required String source,
+  })
+  onReportUser;
+  final Set<String> reportedUserIds;
+  final Set<String> hiddenDisplayNameUserIds;
+  final ValueChanged<String> onToggleHiddenDisplayName;
 
   @override
   State<_FriendsLeaderboardView> createState() =>
@@ -3560,6 +4285,14 @@ class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
     return _LeaderboardTable(
       entries: entries,
       subtitle: 'you and your friends',
+      reportedUserIds: widget.reportedUserIds,
+      hiddenDisplayNameUserIds: widget.hiddenDisplayNameUserIds,
+      onToggleHiddenDisplayName: widget.onToggleHiddenDisplayName,
+      onReport: (entry) => widget.onReportUser(
+        reportedUid: entry.uid,
+        reportedDisplayName: entry.name,
+        source: 'friends_leaderboard',
+      ),
     );
   }
 }
@@ -3617,6 +4350,7 @@ List<_LeaderboardEntry> _buildFriendsLeaderboardEntries({
   return [
     for (var index = 0; index < standings.length; index += 1)
       _LeaderboardEntry(
+        uid: standings[index].uid,
         rank: index + 1,
         name: standings[index].name,
         score: standings[index].score,
@@ -3627,9 +4361,25 @@ List<_LeaderboardEntry> _buildFriendsLeaderboardEntries({
 }
 
 class _GlobalLeaderboardView extends StatefulWidget {
-  const _GlobalLeaderboardView({super.key, required this.user});
+  const _GlobalLeaderboardView({
+    super.key,
+    required this.user,
+    required this.onReportUser,
+    required this.reportedUserIds,
+    required this.hiddenDisplayNameUserIds,
+    required this.onToggleHiddenDisplayName,
+  });
 
   final User? user;
+  final Future<bool> Function({
+    required String reportedUid,
+    required String reportedDisplayName,
+    required String source,
+  })
+  onReportUser;
+  final Set<String> reportedUserIds;
+  final Set<String> hiddenDisplayNameUserIds;
+  final ValueChanged<String> onToggleHiddenDisplayName;
 
   @override
   State<_GlobalLeaderboardView> createState() => _GlobalLeaderboardViewState();
@@ -3980,6 +4730,7 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
     final entries = standings
         .map(
           (standing) => _LeaderboardEntry(
+            uid: standing.uid,
             rank: _globalRanks[standing.uid] ?? 0,
             name: standing.name,
             score: standing.score,
@@ -4040,12 +4791,26 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
         _LeaderboardMetric(
           label: 'global top score',
           value: '${topStanding.score}',
-          detail: topStanding.name,
+          detail: _displayNameForViewer(
+            uid: topStanding.uid,
+            displayName: topStanding.name,
+            hiddenUserIds: widget.hiddenDisplayNameUserIds,
+          ),
         ),
         const SizedBox(height: 14),
         _LeaderboardTable(
           entries: entries,
           subtitle: _user == null ? 'global snapshot' : 'your global position',
+          reportedUserIds: widget.reportedUserIds,
+          hiddenDisplayNameUserIds: widget.hiddenDisplayNameUserIds,
+          onToggleHiddenDisplayName: widget.onToggleHiddenDisplayName,
+          onReport: _user == null
+              ? null
+              : (entry) => widget.onReportUser(
+                  reportedUid: entry.uid,
+                  reportedDisplayName: entry.name,
+                  source: 'global_leaderboard',
+                ),
         ),
       ],
     );
@@ -4095,10 +4860,21 @@ class _LeaderboardMetric extends StatelessWidget {
 }
 
 class _LeaderboardTable extends StatelessWidget {
-  const _LeaderboardTable({required this.entries, required this.subtitle});
+  const _LeaderboardTable({
+    required this.entries,
+    required this.subtitle,
+    required this.reportedUserIds,
+    required this.hiddenDisplayNameUserIds,
+    required this.onToggleHiddenDisplayName,
+    this.onReport,
+  });
 
   final List<_LeaderboardEntry> entries;
   final String subtitle;
+  final Set<String> reportedUserIds;
+  final Set<String> hiddenDisplayNameUserIds;
+  final ValueChanged<String> onToggleHiddenDisplayName;
+  final ValueChanged<_LeaderboardEntry>? onReport;
 
   @override
   Widget build(BuildContext context) {
@@ -4123,6 +4899,14 @@ class _LeaderboardTable extends StatelessWidget {
           final rowForeground = isCurrentUser
               ? theme.colorScheme.surface
               : theme.colorScheme.onSurface;
+          final canReport = !isCurrentUser && onReport != null;
+          final alreadyReported = reportedUserIds.contains(entry.uid);
+          final isNameHidden = hiddenDisplayNameUserIds.contains(entry.uid);
+          final displayName = _displayNameForViewer(
+            uid: entry.uid,
+            displayName: entry.name,
+            hiddenUserIds: hiddenDisplayNameUserIds,
+          );
 
           return Container(
             margin: const EdgeInsets.only(bottom: 10),
@@ -4153,7 +4937,7 @@ class _LeaderboardTable extends StatelessWidget {
                 ),
                 Expanded(
                   child: Text(
-                    entry.name,
+                    displayName,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w700,
@@ -4182,6 +4966,19 @@ class _LeaderboardTable extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (canReport) ...[
+                  const SizedBox(width: 6),
+                  IconTheme(
+                    data: IconThemeData(color: rowForeground),
+                    child: _ReportOverflowMenu(
+                      enabled: !alreadyReported,
+                      isNameHidden: isNameHidden,
+                      onToggleHiddenDisplayName: () =>
+                          onToggleHiddenDisplayName(entry.uid),
+                      onReport: () => onReport!(entry),
+                    ),
+                  ),
+                ],
               ],
             ),
           );
@@ -4193,6 +4990,7 @@ class _LeaderboardTable extends StatelessWidget {
 
 class _LeaderboardEntry {
   const _LeaderboardEntry({
+    required this.uid,
     required this.rank,
     required this.name,
     required this.score,
@@ -4200,6 +4998,7 @@ class _LeaderboardEntry {
     this.isCurrentUser = false,
   });
 
+  final String uid;
   final int rank;
   final String name;
   final int score;
@@ -4226,6 +5025,7 @@ class _LeaderboardStanding {
 List<_LeaderboardEntry> _friendsEntriesFor(User user) {
   return [
     _LeaderboardEntry(
+      uid: user.uid,
       rank: 1,
       name: _displayNameForUser(user),
       score: 0,
