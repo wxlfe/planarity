@@ -1,0 +1,173 @@
+{
+  "@@locale": "it",
+  "account": "account",
+  "accountDeleted": "account eliminato",
+  "accountExistsSignInInstead": "account esistente - accedi",
+  "addedFriend": "{friendName} aggiunto",
+  "@addedFriend": {
+    "placeholders": {
+      "friendName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriendQuestion": "aggiungere {inviterName} alla tua lista amici?",
+  "@addFriendQuestion": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriend": "aggiungi amico",
+  "alreadySignedUp": "già registrato?",
+  "anonymousPlayer": "giocatore anonimo",
+  "appleSignInUnavailablePlatform": "l'accesso Apple non è disponibile su questa piattaforma",
+  "appleSignInUnavailableRightNow": "l'accesso ad Apple non è disponibile al momento",
+  "authConfigurationInvalid": "la configurazione di autenticazione non è valida per questa app",
+  "authConfigurationMissing": "manca la configurazione di autenticazione",
+  "back": "indietro",
+  "cancel": "annulla",
+  "continueLabel": "continua",
+  "continueWithScore": "continua - {totalScore}",
+  "@continueWithScore": {
+    "placeholders": {
+      "totalScore": {
+        "type": "int"
+      }
+    }
+  },
+  "continueWithApple": "continuare con Apple",
+  "continueWithGoogle": "continuare con Google",
+  "copyInviteLink": "copiare il collegamento di invito",
+  "copyrightNateWolfe": "© nate wolfe",
+  "createAccountSubtitle": "crea un account con la tua email e password.",
+  "dailyGraphPuzzle": "rompicapo grafico quotidiano",
+  "dailyScore": "punteggio giornaliero",
+  "decline": "declino",
+  "deleteAccount": "elimina account",
+  "details": "dettagli",
+  "detailsTooLong": "i dettagli devono contenere 1000 caratteri o meno",
+  "displayName": "nome da visualizzare",
+  "email": "email",
+  "enterEmailAndPassword": "inserisci email e password",
+  "enterEmailFirst": "inserisci prima la tua email",
+  "enterValidEmail": "inserisci una email valida",
+  "failedNodes": "falliti {nodeCount} nodi",
+  "@failedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "friendInvite": "invito ad un amico",
+  "friends": "amici",
+  "global": "globale",
+  "globalSnapshot": "istantanea globale",
+  "globalTopScore": "punteggio massimo mondiale",
+  "googleSignInUnavailablePlatform": "L'accesso a Google non è disponibile su questa piattaforma",
+  "googleSignInNotConfigured": "L'accesso a Google non è configurato per questa app",
+  "googleSignInNotConfiguredIos": "l'accesso a Google non è configurato per questa app iOS",
+  "home": "home",
+  "hideUserName": "nascondere il nome utente",
+  "ifEmailExistsResetLink": "se l'e-mail esiste, abbiamo inviato un collegamento di reimpostazione",
+  "invalidEmailOrPassword": "email o password non valide",
+  "invalidNameTrySomethingElse": "nome non valido: prova qualcos'altro",
+  "invite": "invita",
+  "inviteLinkCopied": "link di invito copiato",
+  "leaderboard": "classifica",
+  "lifetimeScore": "punteggio a vita",
+  "lifetimeScoreValue": "punteggio totale {score}",
+  "@lifetimeScoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "locked": "bloccato",
+  "macosKeychainNotConfigured": "L'accesso al portachiavi macos non è configurato",
+  "moreOptions": "più opzioni",
+  "networkErrorCheckConnection": "errore di rete: controlla la connessione",
+  "newHere": "nuovo qui?",
+  "noFriendsYet": "non hai ancora aggiunto nessun amico",
+  "noFriendsLeaderboard": "non hai ancora aggiunto nessun amico: apri il tuo profilo per invitare qualcuno",
+  "noGlobalScoresYet": "nessun punteggio globale ancora",
+  "originalByJohnTantalo": "originale di John Tantalo",
+  "password": "password",
+  "passwordMinLength": "la password deve contenere almeno 6 caratteri",
+  "passwordTooWeak": "la password è troppo debole",
+  "planarity": "planarity",
+  "planarGraphWikipedia": "wikipedia: grafico planare",
+  "pressAgainToDelete": "premere nuovamente per eliminare",
+  "profile": "profilo",
+  "profileSubtitle": "aggiorna come appare il tuo nome nel tuo profilo",
+  "reason": "motivo",
+  "remove": "rimuovi",
+  "removeFriendQuestion": "rimuovere {displayName} dalla tua lista amici?",
+  "@removeFriendQuestion": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFriend": "rimuovi amico",
+  "reportPlayer": "segnala giocatore",
+  "reportSubmitted": "relazione presentata",
+  "reportSubmittedUnableRemoveFriend": "segnalazione inviata: impossibile rimuovere l'amico",
+  "resetPassword": "reimpostare la password",
+  "share": "condividi",
+  "shareInvitePrompt": "condividi questo codice QR o link per invitare un amico",
+  "shareUnavailableBuild": "la condivisione non è disponibile su questa build",
+  "signIn": "accedi",
+  "signInAgainBeforeDeleting": "accedi nuovamente prima di eliminare il tuo account",
+  "signInMethodNotEnabled": "questo metodo di accesso non è abilitato",
+  "signInSubtitle": "accedi con la tua email e password",
+  "signOut": "esci",
+  "signUp": "registrati",
+  "signUpToCompete": " per competere con i tuoi amici",
+  "solvedNodes": "risolti {nodeCount} nodi",
+  "@solvedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "start": "inizia",
+  "submit": "invia",
+  "thisPlayer": "questo giocatore",
+  "tooManyAttempts": "troppi tentativi: riprova più tardi",
+  "unableAuthenticateRightNow": "impossibile autenticarsi in questo momento",
+  "unableCreateAccountRightNow": "impossibile creare un account in questo momento",
+  "unableCreateProfileRightNow": "impossibile creare il tuo profilo in questo momento",
+  "unableDeleteAccountRightNow": "impossibile eliminare il tuo account in questo momento",
+  "unableDeleteProfileRightNow": "impossibile eliminare il tuo profilo in questo momento",
+  "unableLoadFriendsLeaderboard": "impossibile caricare la classifica degli amici in questo momento",
+  "unableLoadGlobalLeaderboard": "impossibile caricare la classifica globale in questo momento",
+  "unableSendResetEmailRightNow": "impossibile inviare e-mail di reimpostazione in questo momento",
+  "unableSubmitReportRightNow": "impossibile inviare la segnalazione in questo momento",
+  "unableUpdateHiddenNames": "impossibile aggiornare i nomi nascosti",
+  "unableCreateAccountNoUser": "impossibile creare un account in questo momento",
+  "unhideUserName": "mostrare il nome utente",
+  "you": "Voi",
+  "youAndYourFriends": "tu e i tuoi amici",
+  "youAlreadyReportedPlayer": "hai già segnalato questo giocatore",
+  "youCantAddYourself": "non puoi aggiungere te stesso",
+  "yourGlobalPosition": "la tua posizione globale",
+  "yourNewFriend": "il tuo nuovo amico",
+  "friendAlreadyInList": "questo amico è già nella tua lista",
+  "friendInviteNoLongerValid": "quell'invito di amicizia non è più valido",
+  "about": "Di",
+  "goal": "obiettivo",
+  "goalDescription": "risolvi quanti più grafici puoi ogni giorno con il minor numero di mosse possibile",
+  "whyEveryPuzzleIsSolvable": "perché ogni enigma è risolvibile",
+  "planarGraphDescription": "ogni grafo in planarità è risolvibile perché è un grafo planare. un grafo planare è un grafo che può essere disegnato su una superficie piana in modo che nessun bordo si intersechi, tranne dove si incontrano nei vertici condivisi.",
+  "reportReasonInappropriateDisplayName": "nome visualizzato inappropriato",
+  "reportReasonAbuse": "abuso o molestie",
+  "reportReasonImpersonation": "impersonificazione",
+  "reportReasonSpam": "spam o truffa",
+  "reportReasonOther": "altro"
+}

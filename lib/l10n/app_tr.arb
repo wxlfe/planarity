@@ -1,0 +1,173 @@
+{
+  "@@locale": "tr",
+  "account": "hesap",
+  "accountDeleted": "Hesap Silindi",
+  "accountExistsSignInInstead": "hesap mevcut - bunun yerine oturum açın",
+  "addedFriend": "{friendName} eklendi",
+  "@addedFriend": {
+    "placeholders": {
+      "friendName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriendQuestion": "{inviterName} arkadaş listenize eklensin mi?",
+  "@addFriendQuestion": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriend": "Arkadaş Ekle",
+  "alreadySignedUp": "Zaten kaydoldunuz mu?",
+  "anonymousPlayer": "anonim oyuncu",
+  "appleSignInUnavailablePlatform": "apple oturumu bu platformda mevcut değil",
+  "appleSignInUnavailableRightNow": "apple oturum açma özelliği şu anda kullanılamıyor",
+  "authConfigurationInvalid": "auth yapılandırması bu uygulama için geçersiz",
+  "authConfigurationMissing": "auth yapılandırması eksik",
+  "back": "geri",
+  "cancel": "iptal",
+  "continueLabel": "devam et",
+  "continueWithScore": "devam et - {totalScore}",
+  "@continueWithScore": {
+    "placeholders": {
+      "totalScore": {
+        "type": "int"
+      }
+    }
+  },
+  "continueWithApple": "Apple ile devam edin",
+  "continueWithGoogle": "Google ile devam edin",
+  "copyInviteLink": "Davet Linki Kopyala",
+  "copyrightNateWolfe": "© nate wolfe",
+  "createAccountSubtitle": "e - posta adresiniz ve şifrenizle bir hesap oluşturun.",
+  "dailyGraphPuzzle": "günlük grafik bulmacası",
+  "dailyScore": "günlük skor",
+  "decline": "reddetmek",
+  "deleteAccount": "hesabı sil",
+  "details": "detaylar",
+  "detailsTooLong": "ayrıntılar 1000 karakter veya daha kısa olmalıdır",
+  "displayName": "görünen ad",
+  "email": "e-posta",
+  "enterEmailAndPassword": "Lütfen e-posta ve şifre girin.",
+  "enterEmailFirst": "önce e - postanızı girin",
+  "enterValidEmail": "Geçerli bir e-posta adresi girin",
+  "failedNodes": "{nodeCount} düğüm başarısız",
+  "@failedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "friendInvite": "arkadaş daveti",
+  "friends": "arkadaşlar",
+  "global": "global",
+  "globalSnapshot": "genel anlık görüntü",
+  "globalTopScore": "global en yüksek puan",
+  "googleSignInUnavailablePlatform": "google oturum açma özelliği bu platformda kullanılamıyor",
+  "googleSignInNotConfigured": "google oturum açma bu uygulama için yapılandırılmamış",
+  "googleSignInNotConfiguredIos": "google oturumu bu iOS uygulaması için yapılandırılmamış",
+  "home": "ana sayfa",
+  "hideUserName": "Kullanıcı Adını gizle",
+  "ifEmailExistsResetLink": "bu e - posta mevcutsa, bir sıfırlama bağlantısı gönderdik",
+  "invalidEmailOrPassword": "Geçersiz e-posta veya şifre",
+  "invalidNameTrySomethingElse": "geçersiz ad - başka bir şey deneyin",
+  "invite": "davet et",
+  "inviteLinkCopied": "davet bağlantısı kopyalandı",
+  "leaderboard": "liderlik tablosu",
+  "lifetimeScore": "yaşam boyu puanı",
+  "lifetimeScoreValue": "toplam skor {score}",
+  "@lifetimeScoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "locked": "kilitli",
+  "macosKeychainNotConfigured": "macos anahtarlık erişimi yapılandırılmadı",
+  "moreOptions": "daha fazla seçenek",
+  "networkErrorCheckConnection": "ağ hatası - bağlantınızı kontrol edin",
+  "newHere": "Burada yeni misiniz?",
+  "noFriendsYet": "Henüz hiç arkadaş eklemediniz.",
+  "noFriendsLeaderboard": "henüz hiç arkadaş eklemediniz - birini davet etmek için profilinizi açın",
+  "noGlobalScoresYet": "henüz global skor yok",
+  "originalByJohnTantalo": "orijinal: John Tantalo",
+  "password": "şifre",
+  "passwordMinLength": "şifreniz en az 6 karakter uzunluğunda olmalıdır",
+  "passwordTooWeak": "Şifre çok zayıf",
+  "planarity": "planarity",
+  "planarGraphWikipedia": "wikipedia: düzlemsel grafik",
+  "pressAgainToDelete": "silmek için tekrar basın",
+  "profile": "profil",
+  "profileSubtitle": "adınızın profilinizde nasıl göründüğünü güncelleyin",
+  "reason": "sebep",
+  "remove": "kaldır",
+  "removeFriendQuestion": "{displayName} arkadaş listenizden kaldırılsın mı?",
+  "@removeFriendQuestion": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFriend": "Arkadaşı kaldır",
+  "reportPlayer": "oyuncuyu şikayet et",
+  "reportSubmitted": "Raporu Ekleyen",
+  "reportSubmittedUnableRemoveFriend": "rapor gönderildi - arkadaş kaldırılamıyor",
+  "resetPassword": "şifreyi yenile",
+  "share": "paylaş",
+  "shareInvitePrompt": "bir arkadaşınızı davet etmek için bu QR kodunu veya bağlantıyı paylaşın",
+  "shareUnavailableBuild": "paylaşım bu derlemede kullanılamıyor",
+  "signIn": "giriş yap",
+  "signInAgainBeforeDeleting": "hesabınızı silmeden önce tekrar oturum açın",
+  "signInMethodNotEnabled": "bu oturum açma yöntemi etkinleştirilmedi",
+  "signInSubtitle": "e - posta adresiniz ve şifrenizle oturum açın",
+  "signOut": "çıkış yap",
+  "signUp": "kaydol",
+  "signUpToCompete": " arkadaşlarınızla rekabet etmek için",
+  "solvedNodes": "{nodeCount} düğüm çözüldü",
+  "@solvedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "start": "başla",
+  "submit": "gönder",
+  "thisPlayer": "bu oyuncu",
+  "tooManyAttempts": "Çok fazla deneme, lütfen daha sonra tekrar deneyin",
+  "unableAuthenticateRightNow": "şu anda kimlik doğrulaması yapılamıyor",
+  "unableCreateAccountRightNow": "şu anda hesap oluşturulamıyor",
+  "unableCreateProfileRightNow": "şu anda profiliniz oluşturulamıyor",
+  "unableDeleteAccountRightNow": "hesabınız şu anda silinemiyor",
+  "unableDeleteProfileRightNow": "şu anda profiliniz silinemiyor",
+  "unableLoadFriendsLeaderboard": "şu anda arkadaş liderlik tablosu yüklenemiyor",
+  "unableLoadGlobalLeaderboard": "şu anda küresel liderlik tablosu yüklenemiyor",
+  "unableSendResetEmailRightNow": "şu anda sıfırlama e - postası gönderilemiyor",
+  "unableSubmitReportRightNow": "şu anda rapor gönderilemiyor",
+  "unableUpdateHiddenNames": "gizli adlar güncellenemiyor",
+  "unableCreateAccountNoUser": "şu anda hesap oluşturulamıyor",
+  "unhideUserName": "kullanıcı adını göster",
+  "you": "sen",
+  "youAndYourFriends": "Siz ve arkadaşlarınızTimeline Name",
+  "youAlreadyReportedPlayer": "bu oyuncuyu zaten şikayet ettiniz",
+  "youCantAddYourself": "Üzgünüz, kendinizi ekleyemezsiniz!",
+  "yourGlobalPosition": "küresel konumunuz",
+  "yourNewFriend": "Yeni arkadaş",
+  "friendAlreadyInList": "bu arkadaş zaten listenizde var",
+  "friendInviteNoLongerValid": "bu arkadaş daveti artık geçerli değil",
+  "about": "hakkında",
+  "goal": "hedef",
+  "goalDescription": "mümkün olduğunca az hamle ile her gün mümkün olduğunca çok grafik çözün",
+  "whyEveryPuzzleIsSolvable": "neden her bulmaca çözülebilir",
+  "planarGraphDescription": "düzlemsellikteki her grafik çözülebilir çünkü düzlemsel bir grafiktir. Düzlemsel bir grafik, paylaşılan köşelerde buluştukları yerler dışında hiçbir kenarın kesişmemesi için düz bir yüzeye çizilebilen bir grafiktir.",
+  "reportReasonInappropriateDisplayName": "uygunsuz görünen ad",
+  "reportReasonAbuse": "istismar veya taciz",
+  "reportReasonImpersonation": "kimliğe bürünme",
+  "reportReasonSpam": "istenmeyen e - posta veya dolandırıcılık",
+  "reportReasonOther": "bağımsız"
+}

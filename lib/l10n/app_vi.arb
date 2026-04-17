@@ -1,0 +1,173 @@
+{
+  "@@locale": "vi",
+  "account": "tài khoản",
+  "accountDeleted": "tài khoản đã bị xóa",
+  "accountExistsSignInInstead": "tài khoản đã tồn tại - hãy đăng nhập",
+  "addedFriend": "đã thêm {friendName}",
+  "@addedFriend": {
+    "placeholders": {
+      "friendName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriendQuestion": "thêm {inviterName} vào danh sách bạn bè?",
+  "@addFriendQuestion": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriend": "thêm bạn",
+  "alreadySignedUp": "đã đăng ký?",
+  "anonymousPlayer": "người chơi ẩn danh",
+  "appleSignInUnavailablePlatform": "Đăng nhập Apple không khả dụng trên nền tảng này",
+  "appleSignInUnavailableRightNow": "Đăng nhập Apple hiện không khả dụng",
+  "authConfigurationInvalid": "cấu hình xác thực không hợp lệ cho ứng dụng này",
+  "authConfigurationMissing": "thiếu cấu hình xác thực",
+  "back": "quay lại",
+  "cancel": "hủy",
+  "continueLabel": "tiếp tục",
+  "continueWithScore": "tiếp tục - {totalScore}",
+  "@continueWithScore": {
+    "placeholders": {
+      "totalScore": {
+        "type": "int"
+      }
+    }
+  },
+  "continueWithApple": "tiếp tục với Apple",
+  "continueWithGoogle": "tiếp tục với Google",
+  "copyInviteLink": "sao chép liên kết mời",
+  "copyrightNateWolfe": "© nate wolfe",
+  "createAccountSubtitle": "tạo một tài khoản với email và mật khẩu của bạn.",
+  "dailyGraphPuzzle": "câu đố đồ thị hằng ngày",
+  "dailyScore": "điểm hằng ngày",
+  "decline": "sự suy sụp",
+  "deleteAccount": "xóa tài khoản",
+  "details": "chi tiết",
+  "detailsTooLong": "chi tiết phải có 1000 ký tự trở xuống",
+  "displayName": "tên hiển thị",
+  "email": "email",
+  "enterEmailAndPassword": "nhập email và mật khẩu",
+  "enterEmailFirst": "nhập email của bạn trước",
+  "enterValidEmail": "nhập một email hợp lệ",
+  "failedNodes": "thất bại {nodeCount} nút",
+  "@failedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "friendInvite": "lời mời kết bạn",
+  "friends": "bạn bè",
+  "global": "toàn cầu",
+  "globalSnapshot": "ảnh chụp nhanh toàn cầu",
+  "globalTopScore": "điểm số cao nhất toàn cầu",
+  "googleSignInUnavailablePlatform": "đăng nhập bằng google không khả dụng trên nền tảng này",
+  "googleSignInNotConfigured": "đăng nhập bằng google không được định cấu hình cho ứng dụng này",
+  "googleSignInNotConfiguredIos": "đăng nhập bằng google không được định cấu hình cho ứng dụng iOS này",
+  "home": "trang chủ",
+  "hideUserName": "ẩn tên người dùng",
+  "ifEmailExistsResetLink": "nếu email đó tồn tại, chúng tôi đã gửi liên kết đặt lại",
+  "invalidEmailOrPassword": "email hoặc mật khẩu không hợp lệ",
+  "invalidNameTrySomethingElse": "tên không hợp lệ - hãy thử tên khác",
+  "invite": "mời",
+  "inviteLinkCopied": "đã sao chép liên kết mời",
+  "leaderboard": "bảng xếp hạng",
+  "lifetimeScore": "điểm trọn đời",
+  "lifetimeScoreValue": "tổng điểm {score}",
+  "@lifetimeScoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "locked": "bị khóa",
+  "macosKeychainNotConfigured": "quyền truy cập móc khóa macos không được định cấu hình",
+  "moreOptions": "nhiều lựa chọn hơn",
+  "networkErrorCheckConnection": "lỗi mạng - kiểm tra kết nối của bạn",
+  "newHere": "mới ở đây à?",
+  "noFriendsYet": "bạn chưa thêm bạn bè nào",
+  "noFriendsLeaderboard": "bạn chưa thêm bạn bè nào - hãy mở hồ sơ của bạn để mời ai đó",
+  "noGlobalScoresYet": "chưa có điểm toàn cầu",
+  "originalByJohnTantalo": "nguyên văn bởi John Tantalo",
+  "password": "mật khẩu",
+  "passwordMinLength": "mật khẩu phải có ít nhất 6 ký tự",
+  "passwordTooWeak": "mật khẩu quá yếu",
+  "planarity": "planarity",
+  "planarGraphWikipedia": "wikipedia: đồ thị phẳng",
+  "pressAgainToDelete": "nhấn lại để xóa",
+  "profile": "hồ sơ",
+  "profileSubtitle": "cập nhật cách tên của bạn xuất hiện trong hồ sơ của bạn",
+  "reason": "lý do",
+  "remove": "xóa",
+  "removeFriendQuestion": "xóa {displayName} khỏi danh sách bạn bè?",
+  "@removeFriendQuestion": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFriend": "xóa bạn bè",
+  "reportPlayer": "trình phát báo cáo",
+  "reportSubmitted": "báo cáo đã gửi",
+  "reportSubmittedUnableRemoveFriend": "đã gửi báo cáo - không thể xóa bạn bè",
+  "resetPassword": "đặt lại mật khẩu",
+  "share": "chia sẻ",
+  "shareInvitePrompt": "chia sẻ mã QR hoặc liên kết này để mời bạn bè",
+  "shareUnavailableBuild": "chia sẻ không có sẵn trên bản dựng này",
+  "signIn": "đăng nhập",
+  "signInAgainBeforeDeleting": "đăng nhập lại trước khi xóa tài khoản của bạn",
+  "signInMethodNotEnabled": "phương thức đăng nhập này chưa được bật",
+  "signInSubtitle": "đăng nhập bằng email và mật khẩu của bạn",
+  "signOut": "đăng xuất",
+  "signUp": "đăng ký",
+  "signUpToCompete": " để cạnh tranh với bạn bè của bạn",
+  "solvedNodes": "đã giải {nodeCount} nút",
+  "@solvedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "start": "bắt đầu",
+  "submit": "gửi",
+  "thisPlayer": "người chơi này",
+  "tooManyAttempts": "quá nhiều lần thử - hãy thử lại sau",
+  "unableAuthenticateRightNow": "không thể xác thực ngay bây giờ",
+  "unableCreateAccountRightNow": "không thể tạo tài khoản ngay bây giờ",
+  "unableCreateProfileRightNow": "không thể tạo hồ sơ của bạn ngay bây giờ",
+  "unableDeleteAccountRightNow": "không thể xóa tài khoản của bạn ngay bây giờ",
+  "unableDeleteProfileRightNow": "không thể xóa hồ sơ của bạn ngay bây giờ",
+  "unableLoadFriendsLeaderboard": "không thể tải bảng xếp hạng bạn bè ngay bây giờ",
+  "unableLoadGlobalLeaderboard": "không thể tải bảng xếp hạng toàn cầu ngay bây giờ",
+  "unableSendResetEmailRightNow": "không thể gửi email đặt lại ngay bây giờ",
+  "unableSubmitReportRightNow": "không thể gửi báo cáo ngay bây giờ",
+  "unableUpdateHiddenNames": "không thể cập nhật tên ẩn",
+  "unableCreateAccountNoUser": "không thể tạo tài khoản ngay bây giờ",
+  "unhideUserName": "hiện tên người dùng",
+  "you": "Bạn",
+  "youAndYourFriends": "bạn và bạn bè của bạn",
+  "youAlreadyReportedPlayer": "bạn đã báo cáo người chơi này",
+  "youCantAddYourself": "bạn không thể thêm chính mình",
+  "yourGlobalPosition": "vị trí toàn cầu của bạn",
+  "yourNewFriend": "người bạn mới của bạn",
+  "friendAlreadyInList": "người bạn này đã có trong danh sách của bạn",
+  "friendInviteNoLongerValid": "lời mời kết bạn đó không còn hiệu lực",
+  "about": "Về",
+  "goal": "mục tiêu",
+  "goalDescription": "giải càng nhiều đồ thị càng tốt mỗi ngày với càng ít bước di chuyển càng tốt",
+  "whyEveryPuzzleIsSolvable": "tại sao mọi câu đố đều có thể giải được",
+  "planarGraphDescription": "mọi đồ thị trong mặt phẳng đều có thể giải được vì nó là đồ thị phẳng. đồ thị phẳng là đồ thị có thể vẽ trên một bề mặt phẳng sao cho không có cạnh nào cắt nhau, trừ khi chúng gặp nhau tại các đỉnh chung.",
+  "reportReasonInappropriateDisplayName": "tên hiển thị không phù hợp",
+  "reportReasonAbuse": "lạm dụng hoặc quấy rối",
+  "reportReasonImpersonation": "mạo danh",
+  "reportReasonSpam": "spam hoặc lừa đảo",
+  "reportReasonOther": "khác"
+}

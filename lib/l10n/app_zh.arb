@@ -1,0 +1,173 @@
+{
+  "@@locale": "zh",
+  "account": "账户",
+  "accountDeleted": "账户已删除",
+  "accountExistsSignInInstead": "账户已存在 - 请登录",
+  "addedFriend": "已添加 {friendName}",
+  "@addedFriend": {
+    "placeholders": {
+      "friendName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriendQuestion": "将 {inviterName} 添加到好友列表？",
+  "@addFriendQuestion": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriend": "添加好友",
+  "alreadySignedUp": "已经注册了？",
+  "anonymousPlayer": "匿名玩家",
+  "appleSignInUnavailablePlatform": "此平台不支持 Apple 登录",
+  "appleSignInUnavailableRightNow": "Apple 登录暂时不可用",
+  "authConfigurationInvalid": "此应用的身份验证配置无效",
+  "authConfigurationMissing": "缺少身份验证配置",
+  "back": "返回",
+  "cancel": "取消",
+  "continueLabel": "继续",
+  "continueWithScore": "继续 - {totalScore}",
+  "@continueWithScore": {
+    "placeholders": {
+      "totalScore": {
+        "type": "int"
+      }
+    }
+  },
+  "continueWithApple": "使用 Apple 继续",
+  "continueWithGoogle": "使用 Google 继续",
+  "copyInviteLink": "复制邀请链接",
+  "copyrightNateWolfe": "© nate wolfe",
+  "createAccountSubtitle": "使用邮箱和密码创建账户",
+  "dailyGraphPuzzle": "每日图形谜题",
+  "dailyScore": "每日得分",
+  "decline": "拒绝",
+  "deleteAccount": "删除账户",
+  "details": "详情",
+  "detailsTooLong": "详情必须不超过 1000 个字符",
+  "displayName": "显示名称",
+  "email": "邮箱",
+  "enterEmailAndPassword": "请输入邮箱和密码",
+  "enterEmailFirst": "请先输入邮箱",
+  "enterValidEmail": "请输入有效邮箱",
+  "failedNodes": "{nodeCount} 个节点失败",
+  "@failedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "friendInvite": "好友邀请",
+  "friends": "好友",
+  "global": "全球",
+  "globalSnapshot": "全球概览",
+  "globalTopScore": "全球最高分",
+  "googleSignInUnavailablePlatform": "此平台不支持 Google 登录",
+  "googleSignInNotConfigured": "此应用未配置 Google 登录",
+  "googleSignInNotConfiguredIos": "此 iOS 应用未配置 Google 登录",
+  "home": "主页",
+  "hideUserName": "隐藏用户名",
+  "ifEmailExistsResetLink": "如果该邮箱存在，我们已发送重置链接",
+  "invalidEmailOrPassword": "邮箱或密码无效",
+  "invalidNameTrySomethingElse": "名称无效 - 请换一个",
+  "invite": "邀请",
+  "inviteLinkCopied": "邀请链接已复制",
+  "leaderboard": "排行榜",
+  "lifetimeScore": "总得分",
+  "lifetimeScoreValue": "总得分 {score}",
+  "@lifetimeScoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "locked": "已锁定",
+  "macosKeychainNotConfigured": "macOS 钥匙串访问未配置",
+  "moreOptions": "更多选项",
+  "networkErrorCheckConnection": "网络错误 - 请检查连接",
+  "newHere": "新用户？",
+  "noFriendsYet": "你还没有添加任何好友",
+  "noFriendsLeaderboard": "你还没有添加任何好友 - 打开个人资料邀请别人",
+  "noGlobalScoresYet": "还没有全球得分",
+  "originalByJohnTantalo": "john tantalo 原作",
+  "password": "密码",
+  "passwordMinLength": "密码至少需要 6 个字符",
+  "passwordTooWeak": "密码太弱",
+  "planarity": "planarity",
+  "planarGraphWikipedia": "维基百科：平面图",
+  "pressAgainToDelete": "再次按下以删除",
+  "profile": "个人资料",
+  "profileSubtitle": "更新你的名字在个人资料中的显示方式",
+  "reason": "原因",
+  "remove": "移除",
+  "removeFriendQuestion": "从好友列表中移除 {displayName}？",
+  "@removeFriendQuestion": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFriend": "移除好友",
+  "reportPlayer": "举报玩家",
+  "reportSubmitted": "举报已提交",
+  "reportSubmittedUnableRemoveFriend": "举报已提交 - 无法移除好友",
+  "resetPassword": "重置密码",
+  "share": "分享",
+  "shareInvitePrompt": "分享此二维码或链接来邀请好友",
+  "shareUnavailableBuild": "此版本无法分享",
+  "signIn": "登录",
+  "signInAgainBeforeDeleting": "删除账户前请重新登录",
+  "signInMethodNotEnabled": "此登录方式未启用",
+  "signInSubtitle": "使用邮箱和密码登录",
+  "signOut": "退出登录",
+  "signUp": "注册",
+  "signUpToCompete": " 来和好友竞争",
+  "solvedNodes": "已解决 {nodeCount} 个节点",
+  "@solvedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "start": "开始",
+  "submit": "提交",
+  "thisPlayer": "这位玩家",
+  "tooManyAttempts": "尝试次数过多 - 请稍后再试",
+  "unableAuthenticateRightNow": "现在无法验证身份",
+  "unableCreateAccountRightNow": "现在无法创建账户",
+  "unableCreateProfileRightNow": "现在无法创建你的个人资料",
+  "unableDeleteAccountRightNow": "现在无法删除你的账户",
+  "unableDeleteProfileRightNow": "现在无法删除你的个人资料",
+  "unableLoadFriendsLeaderboard": "现在无法加载好友排行榜",
+  "unableLoadGlobalLeaderboard": "现在无法加载全球排行榜",
+  "unableSendResetEmailRightNow": "现在无法发送重置邮件",
+  "unableSubmitReportRightNow": "现在无法提交举报",
+  "unableUpdateHiddenNames": "无法更新隐藏名称",
+  "unableCreateAccountNoUser": "现在无法创建账户",
+  "unhideUserName": "显示用户名",
+  "you": "你",
+  "youAndYourFriends": "你和你的好友",
+  "youAlreadyReportedPlayer": "你已经举报过这位玩家",
+  "youCantAddYourself": "你不能添加自己",
+  "yourGlobalPosition": "你的全球排名",
+  "yourNewFriend": "你的新好友",
+  "friendAlreadyInList": "这位好友已在你的列表中",
+  "friendInviteNoLongerValid": "该好友邀请已失效",
+  "about": "关于",
+  "goal": "目标",
+  "goalDescription": "每天用尽可能少的步数解决尽可能多的图形",
+  "whyEveryPuzzleIsSolvable": "为什么每个谜题都有解",
+  "planarGraphDescription": "planarity 中的每个图都有解，因为它是平面图。平面图是可以画在平面上且边不会相交的图，除非它们在共同顶点处相遇。",
+  "reportReasonInappropriateDisplayName": "显示名称不当",
+  "reportReasonAbuse": "辱骂或骚扰",
+  "reportReasonImpersonation": "冒充他人",
+  "reportReasonSpam": "垃圾信息或诈骗",
+  "reportReasonOther": "其他"
+}

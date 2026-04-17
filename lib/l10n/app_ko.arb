@@ -1,0 +1,173 @@
+{
+  "@@locale": "ko",
+  "account": "계정",
+  "accountDeleted": "계정이 삭제되었습니다",
+  "accountExistsSignInInstead": "계정이 있습니다 - 로그인하세요",
+  "addedFriend": "{friendName} 추가됨",
+  "@addedFriend": {
+    "placeholders": {
+      "friendName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriendQuestion": "{inviterName}을 친구 목록에 추가할까요?",
+  "@addFriendQuestion": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriend": "친구 추가",
+  "alreadySignedUp": "이미 가입했나요?",
+  "anonymousPlayer": "익명 플레이어",
+  "appleSignInUnavailablePlatform": "이 플랫폼에서는 Apple 로그인을 사용할 수 없습니다",
+  "appleSignInUnavailableRightNow": "현재 Apple 로그인을 사용할 수 없습니다",
+  "authConfigurationInvalid": "이 앱에 대한 인증 구성이 유효하지 않습니다",
+  "authConfigurationMissing": "인증 구성이 누락되었습니다",
+  "back": "뒤로",
+  "cancel": "취소",
+  "continueLabel": "계속",
+  "continueWithScore": "계속 - {totalScore}",
+  "@continueWithScore": {
+    "placeholders": {
+      "totalScore": {
+        "type": "int"
+      }
+    }
+  },
+  "continueWithApple": "Apple로 계속하기",
+  "continueWithGoogle": "Google로 계속하기",
+  "copyInviteLink": "초대 링크 복사",
+  "copyrightNateWolfe": "© nate wolfe",
+  "createAccountSubtitle": "이메일과 비밀번호로 계정을 만드세요.",
+  "dailyGraphPuzzle": "일일 그래프 퍼즐",
+  "dailyScore": "일일 점수",
+  "decline": "거부",
+  "deleteAccount": "계정 삭제",
+  "details": "상세 정보",
+  "detailsTooLong": "세부 정보는 1000자 이하여야 합니다",
+  "displayName": "표시 이름",
+  "email": "이메일",
+  "enterEmailAndPassword": "이메일과 비밀번호를 입력하세요",
+  "enterEmailFirst": "먼저 이메일을 입력하세요",
+  "enterValidEmail": "올바른 이메일을 입력해 주세요.",
+  "failedNodes": "{nodeCount}개 노드 실패",
+  "@failedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "friendInvite": "친구 초대",
+  "friends": "친구",
+  "global": "글로벌",
+  "globalSnapshot": "글로벌 스냅샷",
+  "globalTopScore": "글로벌 최고 점수",
+  "googleSignInUnavailablePlatform": "이 플랫폼에서는 Google 로그인을 사용할 수 없습니다",
+  "googleSignInNotConfigured": "이 앱에 대해 Google 로그인이 구성되지 않았습니다",
+  "googleSignInNotConfiguredIos": "이 iOS 앱에 대해 Google 로그인이 구성되지 않았습니다",
+  "home": "홈",
+  "hideUserName": "사용자 이름 숨기기",
+  "ifEmailExistsResetLink": "해당 이메일이 있는 경우, 재설정 링크를 보내드렸습니다.",
+  "invalidEmailOrPassword": "유효하지 않은 이메일 또는 비밀번호입니다",
+  "invalidNameTrySomethingElse": "유효하지 않은 이름 - 다른 이름으로 시도하십시오",
+  "invite": "초대",
+  "inviteLinkCopied": "초대 링크 복사 완료",
+  "leaderboard": "순위표",
+  "lifetimeScore": "평생 점수",
+  "lifetimeScoreValue": "총점 {score}",
+  "@lifetimeScoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "locked": "잠김",
+  "macosKeychainNotConfigured": "macos 키체인 액세스가 구성되지 않았습니다",
+  "moreOptions": "추가 옵션",
+  "networkErrorCheckConnection": "네트워크 오류 - 연결 확인",
+  "newHere": "처음이신가요?",
+  "noFriendsYet": "아직 친구를 추가하지 않았습니다",
+  "noFriendsLeaderboard": "아직 친구를 추가하지 않았습니다. 프로필을 열어 친구를 초대하세요.",
+  "noGlobalScoresYet": "아직 글로벌 점수가 없습니다",
+  "originalByJohnTantalo": "원저자명: John Tantalo",
+  "password": "비밀번호",
+  "passwordMinLength": "비밀번호는 최소 6자 이상이어야 합니다",
+  "passwordTooWeak": "안전하지 않은 비밀번호입니다",
+  "planarity": "planarity",
+  "planarGraphWikipedia": "위키백과: 평면 그래프",
+  "pressAgainToDelete": "삭제하려면 다시 누르세요.",
+  "profile": "프로필",
+  "profileSubtitle": "프로필에 회원님의 이름이 어떻게 표시되는지 업데이트하세요.",
+  "reason": "이유",
+  "remove": "삭제",
+  "removeFriendQuestion": "친구 목록에서 {displayName}을 삭제할까요?",
+  "@removeFriendQuestion": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFriend": "친구 삭제",
+  "reportPlayer": "플레이어 신고",
+  "reportSubmitted": "보고서 제출 완료",
+  "reportSubmittedUnableRemoveFriend": "제출된 보고서 - 친구를 제거할 수 없음",
+  "resetPassword": "비밀번호 재설정",
+  "share": "공유",
+  "shareInvitePrompt": "이 QR 코드 또는 링크를 공유하여 친구를 초대하세요",
+  "shareUnavailableBuild": "이 빌드에서는 공유를 사용할 수 없습니다",
+  "signIn": "로그인",
+  "signInAgainBeforeDeleting": "계정을 삭제하기 전에 다시 로그인하세요.",
+  "signInMethodNotEnabled": "이 로그인 방법은 활성화되지 않았습니다",
+  "signInSubtitle": "이메일과 비밀번호로 로그인",
+  "signOut": "로그아웃",
+  "signUp": "가입",
+  "signUpToCompete": " 친구들과 경쟁하기 위해",
+  "solvedNodes": "{nodeCount}개 노드 해결",
+  "@solvedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "start": "시작",
+  "submit": "제출",
+  "thisPlayer": "이 플레이어",
+  "tooManyAttempts": "활성화 시도가 너무 많았습니다. 나중에 다시 시도해 주세요",
+  "unableAuthenticateRightNow": "현재 인증할 수 없습니다",
+  "unableCreateAccountRightNow": "지금 계정을 생성할 수 없습니다",
+  "unableCreateProfileRightNow": "현재 프로필을 생성할 수 없습니다",
+  "unableDeleteAccountRightNow": "지금 계정을 삭제할 수 없습니다",
+  "unableDeleteProfileRightNow": "지금 프로필을 삭제할 수 없습니다",
+  "unableLoadFriendsLeaderboard": "지금 친구 순위표를 로드할 수 없습니다",
+  "unableLoadGlobalLeaderboard": "지금 글로벌 리더보드를 로드할 수 없습니다",
+  "unableSendResetEmailRightNow": "지금 재설정 이메일을 보낼 수 없습니다",
+  "unableSubmitReportRightNow": "현재 보고서를 제출할 수 없습니다",
+  "unableUpdateHiddenNames": "숨겨진 이름을 업데이트할 수 없습니다",
+  "unableCreateAccountNoUser": "지금 계정을 생성할 수 없습니다",
+  "unhideUserName": "사용자 이름 숨기기 취소",
+  "you": "응답자 본인 ",
+  "youAndYourFriends": "당신과 당신의 친구들",
+  "youAlreadyReportedPlayer": "이 플레이어를 이미 신고하셨습니다",
+  "youCantAddYourself": "본인을 추가할 수 없습니다",
+  "yourGlobalPosition": "글로벌 포지션",
+  "yourNewFriend": "새 친구",
+  "friendAlreadyInList": "이 친구는 이미 목록에 있습니다",
+  "friendInviteNoLongerValid": "친구 초대가 더 이상 유효하지 않습니다",
+  "about": "약",
+  "goal": "목표",
+  "goalDescription": "가능한 한 적은 움직임으로 매일 가능한 한 많은 그래프를 풀 수 있습니다.",
+  "whyEveryPuzzleIsSolvable": "모든 퍼즐을 풀 수 있는 이유",
+  "planarGraphDescription": "평면도의 모든 그래프는 평면 그래프이기 때문에 해결할 수 있습니다. 평면 그래프는 평평한 표면에 그릴 수 있는 그래프입니다. 공유된 꼭지점에서 만나는 곳을 제외하고는 가장자리가 교차하지 않습니다.",
+  "reportReasonInappropriateDisplayName": "부적절한 표시 이름",
+  "reportReasonAbuse": "학대 또는 괴롭힘",
+  "reportReasonImpersonation": "사칭",
+  "reportReasonSpam": "스팸 또는 사기",
+  "reportReasonOther": "기타"
+}

@@ -1,0 +1,173 @@
+{
+  "@@locale": "id",
+  "account": "akun",
+  "accountDeleted": "akun dihapus",
+  "accountExistsSignInInstead": "akun sudah ada - masuk saja",
+  "addedFriend": "{friendName} ditambahkan",
+  "@addedFriend": {
+    "placeholders": {
+      "friendName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriendQuestion": "tambahkan {inviterName} ke daftar temanmu?",
+  "@addFriendQuestion": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriend": "tambah teman",
+  "alreadySignedUp": "sudah daftar?",
+  "anonymousPlayer": "pemain anonim",
+  "appleSignInUnavailablePlatform": "masuk apel tidak tersedia di platform ini",
+  "appleSignInUnavailableRightNow": "masuk dengan apple tidak tersedia saat ini",
+  "authConfigurationInvalid": "konfigurasi autentikasi tidak valid untuk aplikasi ini",
+  "authConfigurationMissing": "konfigurasi autentikasi tidak ada",
+  "back": "kembali",
+  "cancel": "batal",
+  "continueLabel": "lanjutkan",
+  "continueWithScore": "lanjutkan - {totalScore}",
+  "@continueWithScore": {
+    "placeholders": {
+      "totalScore": {
+        "type": "int"
+      }
+    }
+  },
+  "continueWithApple": "lanjutkan dengan Apple",
+  "continueWithGoogle": "lanjutkan dengan Google",
+  "copyInviteLink": "salin tautan undangan",
+  "copyrightNateWolfe": "© nate wolfe",
+  "createAccountSubtitle": "buat akun dengan email dan kata sandi Anda.",
+  "dailyGraphPuzzle": "teka-teki graf harian",
+  "dailyScore": "skor harian",
+  "decline": "menolak",
+  "deleteAccount": "hapus akun",
+  "details": "detail",
+  "detailsTooLong": "detailnya harus 1000 karakter atau kurang",
+  "displayName": "nama tampilan",
+  "email": "email",
+  "enterEmailAndPassword": "masukkan email dan kata sandi",
+  "enterEmailFirst": "masukkan emailmu terlebih dahulu",
+  "enterValidEmail": "masukkan email yang valid",
+  "failedNodes": "gagal {nodeCount} node",
+  "@failedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "friendInvite": "undangan teman",
+  "friends": "teman",
+  "global": "global",
+  "globalSnapshot": "gambaran global",
+  "globalTopScore": "skor tertinggi global",
+  "googleSignInUnavailablePlatform": "masuk dengan Google tidak tersedia di platform ini",
+  "googleSignInNotConfigured": "login Google tidak dikonfigurasi untuk aplikasi ini",
+  "googleSignInNotConfiguredIos": "login Google tidak dikonfigurasi untuk aplikasi iOS ini",
+  "home": "beranda",
+  "hideUserName": "sembunyikan nama pengguna",
+  "ifEmailExistsResetLink": "jika email itu ada, kami mengirimkan tautan reset",
+  "invalidEmailOrPassword": "email atau kata sandi tidak valid",
+  "invalidNameTrySomethingElse": "nama tidak valid - coba yang lain",
+  "invite": "undang",
+  "inviteLinkCopied": "tautan undangan disalin",
+  "leaderboard": "papan peringkat",
+  "lifetimeScore": "skor seumur hidup",
+  "lifetimeScoreValue": "skor total {score}",
+  "@lifetimeScoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "locked": "terkunci",
+  "macosKeychainNotConfigured": "akses gantungan kunci macos tidak dikonfigurasi",
+  "moreOptions": "lebih banyak pilihan",
+  "networkErrorCheckConnection": "kesalahan jaringan - periksa koneksi Anda",
+  "newHere": "baru di sini?",
+  "noFriendsYet": "kamu belum menambah teman",
+  "noFriendsLeaderboard": "Anda belum menambahkan teman - buka profil Anda untuk mengundang seseorang",
+  "noGlobalScoresYet": "belum ada skor global",
+  "originalByJohnTantalo": "asli oleh john tantalo",
+  "password": "kata sandi",
+  "passwordMinLength": "kata sandi harus minimal 6 karakter",
+  "passwordTooWeak": "kata sandi terlalu lemah",
+  "planarity": "planarity",
+  "planarGraphWikipedia": "wikipedia: grafik planar",
+  "pressAgainToDelete": "tekan lagi untuk menghapus",
+  "profile": "profil",
+  "profileSubtitle": "perbarui tampilan nama Anda di profil Anda",
+  "reason": "alasan",
+  "remove": "hapus",
+  "removeFriendQuestion": "hapus {displayName} dari daftar temanmu?",
+  "@removeFriendQuestion": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFriend": "hapus teman",
+  "reportPlayer": "pemutar laporan",
+  "reportSubmitted": "laporan diserahkan",
+  "reportSubmittedUnableRemoveFriend": "laporan terkirim - tidak dapat menghapus teman",
+  "resetPassword": "mengatur ulang kata sandi",
+  "share": "bagikan",
+  "shareInvitePrompt": "bagikan kode QR atau tautan ini untuk mengundang teman",
+  "shareUnavailableBuild": "share tidak tersedia pada build ini",
+  "signIn": "masuk",
+  "signInAgainBeforeDeleting": "masuk lagi sebelum menghapus akun Anda",
+  "signInMethodNotEnabled": "metode masuk ini tidak diaktifkan",
+  "signInSubtitle": "masuk dengan email dan kata sandi Anda",
+  "signOut": "keluar",
+  "signUp": "daftar",
+  "signUpToCompete": " untuk bersaing dengan teman-temanmu",
+  "solvedNodes": "menyelesaikan {nodeCount} node",
+  "@solvedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "start": "mulai",
+  "submit": "kirim",
+  "thisPlayer": "pemain ini",
+  "tooManyAttempts": "terlalu banyak upaya - coba lagi nanti",
+  "unableAuthenticateRightNow": "tidak dapat mengautentikasi saat ini",
+  "unableCreateAccountRightNow": "tidak dapat membuat akun saat ini",
+  "unableCreateProfileRightNow": "tidak dapat membuat profil Anda sekarang",
+  "unableDeleteAccountRightNow": "tidak dapat menghapus akun Anda saat ini",
+  "unableDeleteProfileRightNow": "tidak dapat menghapus profil Anda saat ini",
+  "unableLoadFriendsLeaderboard": "tidak dapat memuat papan peringkat teman saat ini",
+  "unableLoadGlobalLeaderboard": "tidak dapat memuat papan peringkat global saat ini",
+  "unableSendResetEmailRightNow": "tidak dapat mengirim email pengaturan ulang saat ini",
+  "unableSubmitReportRightNow": "tidak dapat mengirimkan laporan saat ini",
+  "unableUpdateHiddenNames": "tidak dapat memperbarui nama yang tersembunyi",
+  "unableCreateAccountNoUser": "tidak dapat membuat akun saat ini",
+  "unhideUserName": "sembunyikan nama pengguna",
+  "you": "Anda",
+  "youAndYourFriends": "kamu dan temanmu",
+  "youAlreadyReportedPlayer": "Anda sudah melaporkan pemain ini",
+  "youCantAddYourself": "Anda tidak dapat menambahkan diri Anda sendiri",
+  "yourGlobalPosition": "posisi global Anda",
+  "yourNewFriend": "teman barumu",
+  "friendAlreadyInList": "teman ini sudah ada dalam daftar Anda",
+  "friendInviteNoLongerValid": "undangan pertemanan itu tidak berlaku lagi",
+  "about": "tentang",
+  "goal": "sasaran",
+  "goalDescription": "selesaikan grafik sebanyak yang Anda bisa setiap hari dengan gerakan sesedikit mungkin",
+  "whyEveryPuzzleIsSolvable": "mengapa setiap teka-teki bisa dipecahkan",
+  "planarGraphDescription": "setiap grafik dalam planar dapat dipecahkan karena merupakan grafik planar. graf planar adalah graf yang dapat digambar pada bidang datar sehingga tidak ada sisi yang berpotongan, kecuali sisi-sisi tersebut bertemu pada simpul-simpul yang sama.",
+  "reportReasonInappropriateDisplayName": "nama tampilan tidak pantas",
+  "reportReasonAbuse": "pelecehan atau perundungan",
+  "reportReasonImpersonation": "peniruan identitas",
+  "reportReasonSpam": "spam atau penipuan",
+  "reportReasonOther": "lainnya"
+}

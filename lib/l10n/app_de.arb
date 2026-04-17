@@ -1,0 +1,173 @@
+{
+  "@@locale": "de",
+  "account": "konto",
+  "accountDeleted": "konto gelöscht",
+  "accountExistsSignInInstead": "konto existiert - bitte anmelden",
+  "addedFriend": "{friendName} hinzugefügt",
+  "@addedFriend": {
+    "placeholders": {
+      "friendName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriendQuestion": "{inviterName} zur freundesliste hinzufügen?",
+  "@addFriendQuestion": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriend": "freund hinzufügen",
+  "alreadySignedUp": "schon registriert?",
+  "anonymousPlayer": "anonymer spieler",
+  "appleSignInUnavailablePlatform": "Die Apple-Anmeldung ist auf dieser Plattform nicht verfügbar",
+  "appleSignInUnavailableRightNow": "Die Apple-Anmeldung ist derzeit nicht verfügbar",
+  "authConfigurationInvalid": "Die Authentifizierungskonfiguration ist für diese App ungültig",
+  "authConfigurationMissing": "Authentifizierungskonfiguration fehlt",
+  "back": "zurück",
+  "cancel": "abbrechen",
+  "continueLabel": "weiter",
+  "continueWithScore": "weiter - {totalScore}",
+  "@continueWithScore": {
+    "placeholders": {
+      "totalScore": {
+        "type": "int"
+      }
+    }
+  },
+  "continueWithApple": "weiter mit Apple",
+  "continueWithGoogle": "weiter mit Google",
+  "copyInviteLink": "Einladungslink kopieren",
+  "copyrightNateWolfe": "© nate wolfe",
+  "createAccountSubtitle": "Erstellen Sie ein Konto mit Ihrer E-Mail-Adresse und Ihrem Passwort.",
+  "dailyGraphPuzzle": "tägliches graphenrätsel",
+  "dailyScore": "tagesscore",
+  "decline": "Abfall",
+  "deleteAccount": "konto löschen",
+  "details": "Details",
+  "detailsTooLong": "Details dürfen maximal 1000 Zeichen lang sein",
+  "displayName": "Anzeigename",
+  "email": "e-mail",
+  "enterEmailAndPassword": "Geben Sie E-Mail und Passwort ein",
+  "enterEmailFirst": "Geben Sie zuerst Ihre E-Mail-Adresse ein",
+  "enterValidEmail": "Geben Sie eine gültige E-Mail-Adresse ein",
+  "failedNodes": "{nodeCount} knoten fehlgeschlagen",
+  "@failedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "friendInvite": "Freund einladen",
+  "friends": "freunde",
+  "global": "global",
+  "globalSnapshot": "globale Momentaufnahme",
+  "globalTopScore": "weltweite Bestnote",
+  "googleSignInUnavailablePlatform": "Die Google-Anmeldung ist auf dieser Plattform nicht verfügbar",
+  "googleSignInNotConfigured": "Die Google-Anmeldung ist für diese App nicht konfiguriert",
+  "googleSignInNotConfiguredIos": "Die Google-Anmeldung ist für diese iOS-App nicht konfiguriert",
+  "home": "startseite",
+  "hideUserName": "Benutzernamen ausblenden",
+  "ifEmailExistsResetLink": "Wenn diese E-Mail existiert, haben wir einen Link zum Zurücksetzen gesendet",
+  "invalidEmailOrPassword": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
+  "invalidNameTrySomethingElse": "Ungültiger Name – versuchen Sie es mit etwas anderem",
+  "invite": "einladen",
+  "inviteLinkCopied": "Einladungslink kopiert",
+  "leaderboard": "rangliste",
+  "lifetimeScore": "Lifetime-Score",
+  "lifetimeScoreValue": "gesamtpunktzahl {score}",
+  "@lifetimeScoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "locked": "gesperrt",
+  "macosKeychainNotConfigured": "Der Zugriff auf den macOS-Schlüsselbund ist nicht konfiguriert",
+  "moreOptions": "mehr Optionen",
+  "networkErrorCheckConnection": "Netzwerkfehler – überprüfen Sie Ihre Verbindung",
+  "newHere": "Neu hier?",
+  "noFriendsYet": "Du hast noch keine Freunde hinzugefügt",
+  "noFriendsLeaderboard": "Sie haben noch keine Freunde hinzugefügt – öffnen Sie Ihr Profil, um jemanden einzuladen",
+  "noGlobalScoresYet": "noch keine globalen scores",
+  "originalByJohnTantalo": "Original von John Tantalo",
+  "password": "passwort",
+  "passwordMinLength": "Das Passwort muss mindestens 6 Zeichen lang sein",
+  "passwordTooWeak": "Passwort ist zu schwach",
+  "planarity": "planarity",
+  "planarGraphWikipedia": "Wikipedia: Planarer Graph",
+  "pressAgainToDelete": "Zum Löschen erneut drücken",
+  "profile": "profil",
+  "profileSubtitle": "Aktualisieren Sie die Darstellung Ihres Namens in Ihrem Profil",
+  "reason": "Grund",
+  "remove": "entfernen",
+  "removeFriendQuestion": "{displayName} aus deiner freundesliste entfernen?",
+  "@removeFriendQuestion": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFriend": "Freund entfernen",
+  "reportPlayer": "Spieler melden",
+  "reportSubmitted": "Bericht vorgelegt",
+  "reportSubmittedUnableRemoveFriend": "Bericht eingereicht – Freund konnte nicht entfernt werden",
+  "resetPassword": "Passwort zurücksetzen",
+  "share": "teilen",
+  "shareInvitePrompt": "Teilen Sie diesen QR-Code oder Link, um einen Freund einzuladen",
+  "shareUnavailableBuild": "Die Freigabe ist für diesen Build nicht verfügbar",
+  "signIn": "anmelden",
+  "signInAgainBeforeDeleting": "Melden Sie sich erneut an, bevor Sie Ihr Konto löschen",
+  "signInMethodNotEnabled": "Diese Anmeldemethode ist nicht aktiviert",
+  "signInSubtitle": "Melden Sie sich mit Ihrer E-Mail-Adresse und Ihrem Passwort an",
+  "signOut": "abmelden",
+  "signUp": "registrieren",
+  "signUpToCompete": " um mit deinen Freunden zu konkurrieren",
+  "solvedNodes": "{nodeCount} knoten gelöst",
+  "@solvedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "start": "starten",
+  "submit": "senden",
+  "thisPlayer": "dieser Spieler",
+  "tooManyAttempts": "Zu viele Versuche – versuchen Sie es später noch einmal",
+  "unableAuthenticateRightNow": "Die Authentifizierung ist derzeit nicht möglich",
+  "unableCreateAccountRightNow": "Ich kann derzeit kein Konto erstellen",
+  "unableCreateProfileRightNow": "Ihr Profil kann derzeit nicht erstellt werden",
+  "unableDeleteAccountRightNow": "Ihr Konto kann derzeit nicht gelöscht werden",
+  "unableDeleteProfileRightNow": "Ihr Profil kann derzeit nicht gelöscht werden",
+  "unableLoadFriendsLeaderboard": "Die Bestenliste der Freunde kann derzeit nicht geladen werden",
+  "unableLoadGlobalLeaderboard": "Die globale Bestenliste kann derzeit nicht geladen werden",
+  "unableSendResetEmailRightNow": "Es ist momentan nicht möglich, eine E-Mail zum Zurücksetzen zu senden",
+  "unableSubmitReportRightNow": "Der Bericht kann derzeit nicht eingereicht werden",
+  "unableUpdateHiddenNames": "Ausgeblendete Namen können nicht aktualisiert werden",
+  "unableCreateAccountNoUser": "Ich kann derzeit kein Konto erstellen",
+  "unhideUserName": "Benutzernamen einblenden",
+  "you": "Du",
+  "youAndYourFriends": "Du und deine Freunde",
+  "youAlreadyReportedPlayer": "Du hast diesen Spieler bereits gemeldet",
+  "youCantAddYourself": "Du kannst dich nicht selbst hinzufügen",
+  "yourGlobalPosition": "Ihre globale Position",
+  "yourNewFriend": "Dein neuer Freund",
+  "friendAlreadyInList": "Dieser Freund ist bereits in Ihrer Liste",
+  "friendInviteNoLongerValid": "Diese Freundschaftseinladung ist nicht mehr gültig",
+  "about": "um",
+  "goal": "Ziel",
+  "goalDescription": "Lösen Sie jeden Tag so viele Diagramme wie möglich mit möglichst wenigen Zügen",
+  "whyEveryPuzzleIsSolvable": "warum jedes Rätsel lösbar ist",
+  "planarGraphDescription": "Jeder planare Graph ist lösbar, weil es ein planarer Graph ist. Ein planarer Graph ist ein Graph, der auf einer flachen Oberfläche gezeichnet werden kann, sodass sich keine Kanten kreuzen, außer dort, wo sie sich an gemeinsamen Eckpunkten treffen.",
+  "reportReasonInappropriateDisplayName": "unangemessener anzeigename",
+  "reportReasonAbuse": "missbrauch oder belästigung",
+  "reportReasonImpersonation": "identitätsmissbrauch",
+  "reportReasonSpam": "spam oder betrug",
+  "reportReasonOther": "anderes"
+}

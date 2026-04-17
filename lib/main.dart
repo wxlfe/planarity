@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:math';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:app_links/app_links.dart';
@@ -23,6 +22,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'firebase_options.dart';
+import 'l10n/app_localizations.dart';
 
 bool _firebaseReady = false;
 bool _googleSignInReady = false;
@@ -111,8 +111,10 @@ class PlanarityApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'planarity',
+      onGenerateTitle: (context) => context.l10n.planarity,
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       themeMode: ThemeMode.system,
       theme: _buildTheme(Brightness.light),
       darkTheme: _buildTheme(Brightness.dark),
@@ -300,6 +302,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
   final Set<String> _currentFriendIds = <String>{};
   StreamSubscription<Uri>? _appLinkSubscription;
 
+  AppLocalizations get _l10n => context.l10n;
+
   @override
   void initState() {
     super.initState();
@@ -455,7 +459,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
 
   Map<String, dynamic> _defaultUserDocument({String? displayName}) {
     return <String, dynamic>{
-      'displayName': displayName ?? 'anonymous player',
+      'displayName': displayName ?? _l10n.anonymousPlayer,
       'currentLevel': _startingLevel,
       'friends': <String>[],
       'hiddenDisplayNameUserIds': <String>[],
@@ -690,19 +694,19 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     final cleanedPassword = password.trim();
 
     if (cleanedEmail.isEmpty || cleanedPassword.isEmpty) {
-      return 'enter email and password';
+      return _l10n.enterEmailAndPassword;
     }
     final emailValid = RegExp(
       r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
     ).hasMatch(cleanedEmail);
     if (!emailValid) {
-      return 'enter a valid email';
+      return _l10n.enterValidEmail;
     }
     if (cleanedPassword.length < 6) {
-      return 'password must be at least 6 characters';
+      return _l10n.passwordMinLength;
     }
     if (!_firebaseReady) {
-      return 'auth configuration is missing';
+      return _l10n.authConfigurationMissing;
     }
 
     try {
@@ -720,7 +724,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
             );
         final user = credential.user;
         if (user == null) {
-          return 'unable to create account right now';
+          return _l10n.unableCreateAccountRightNow;
         }
 
         try {
@@ -730,7 +734,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           return _firestoreErrorMessage(error);
         } catch (_) {
           await user.delete().catchError((_) {});
-          return 'unable to create account right now';
+          return _l10n.unableCreateAccountRightNow;
         }
         await _logSignUpEvent('email');
       }
@@ -746,11 +750,11 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         'Firebase auth config failed: code=${error.code}, message=${error.message}',
       );
       debugPrintStack(stackTrace: stackTrace);
-      return 'auth configuration is missing';
+      return _l10n.authConfigurationMissing;
     } catch (error, stackTrace) {
       debugPrint('Unexpected auth failure: $error');
       debugPrintStack(stackTrace: stackTrace);
-      return 'unable to authenticate right now';
+      return _l10n.unableAuthenticateRightNow;
     }
   }
 
@@ -758,16 +762,16 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     final cleanedEmail = email.trim().toLowerCase();
 
     if (cleanedEmail.isEmpty) {
-      return 'enter your email first';
+      return _l10n.enterEmailFirst;
     }
     final emailValid = RegExp(
       r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
     ).hasMatch(cleanedEmail);
     if (!emailValid) {
-      return 'enter a valid email';
+      return _l10n.enterValidEmail;
     }
     if (!_firebaseReady) {
-      return 'auth configuration is missing';
+      return _l10n.authConfigurationMissing;
     }
 
     try {
@@ -784,25 +788,23 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         'Firebase password reset config failed: code=${error.code}, message=${error.message}',
       );
       debugPrintStack(stackTrace: stackTrace);
-      return 'auth configuration is missing';
+      return _l10n.authConfigurationMissing;
     } catch (error, stackTrace) {
       debugPrint('Unexpected password reset failure: $error');
       debugPrintStack(stackTrace: stackTrace);
-      return 'unable to send reset email right now';
+      return _l10n.unableSendResetEmailRightNow;
     }
   }
 
   Future<_AuthSubmissionResult> _submitGoogleAuth() async {
     if (!_firebaseReady) {
-      return const _AuthSubmissionResult(
-        errorText: 'auth configuration is missing',
-      );
+      return _AuthSubmissionResult(errorText: _l10n.authConfigurationMissing);
     }
     if (!kIsWeb &&
         (!_googleSignInReady ||
             !GoogleSignIn.instance.supportsAuthenticate())) {
-      return const _AuthSubmissionResult(
-        errorText: 'google sign-in is not available on this platform',
+      return _AuthSubmissionResult(
+        errorText: _l10n.googleSignInUnavailablePlatform,
       );
     }
 
@@ -810,8 +812,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       final credential = await _signInWithGoogle();
       final user = credential.user;
       if (user == null) {
-        return const _AuthSubmissionResult(
-          errorText: 'unable to authenticate right now',
+        return _AuthSubmissionResult(
+          errorText: _l10n.unableAuthenticateRightNow,
         );
       }
 
@@ -858,21 +860,17 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     } catch (error, stackTrace) {
       debugPrint('Unexpected Google auth failure: $error');
       debugPrintStack(stackTrace: stackTrace);
-      return const _AuthSubmissionResult(
-        errorText: 'unable to authenticate right now',
-      );
+      return _AuthSubmissionResult(errorText: _l10n.unableAuthenticateRightNow);
     }
   }
 
   Future<_AuthSubmissionResult> _submitAppleAuth() async {
     if (!_firebaseReady) {
-      return const _AuthSubmissionResult(
-        errorText: 'auth configuration is missing',
-      );
+      return _AuthSubmissionResult(errorText: _l10n.authConfigurationMissing);
     }
     if (!_supportsAppleSignIn) {
-      return const _AuthSubmissionResult(
-        errorText: 'apple sign-in is not available on this platform',
+      return _AuthSubmissionResult(
+        errorText: _l10n.appleSignInUnavailablePlatform,
       );
     }
 
@@ -880,8 +878,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       final credential = await _signInWithApple();
       final user = credential.user;
       if (user == null) {
-        return const _AuthSubmissionResult(
-          errorText: 'unable to authenticate right now',
+        return _AuthSubmissionResult(
+          errorText: _l10n.unableAuthenticateRightNow,
         );
       }
 
@@ -908,8 +906,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     } on SignInWithAppleNotSupportedException catch (error, stackTrace) {
       debugPrint('Apple sign-in is not supported: $error');
       debugPrintStack(stackTrace: stackTrace);
-      return const _AuthSubmissionResult(
-        errorText: 'apple sign-in is not available on this platform',
+      return _AuthSubmissionResult(
+        errorText: _l10n.appleSignInUnavailablePlatform,
       );
     } on PlatformException catch (error, stackTrace) {
       debugPrint(
@@ -934,9 +932,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     } catch (error, stackTrace) {
       debugPrint('Unexpected Apple auth failure: $error');
       debugPrintStack(stackTrace: stackTrace);
-      return const _AuthSubmissionResult(
-        errorText: 'unable to authenticate right now',
-      );
+      return _AuthSubmissionResult(errorText: _l10n.unableAuthenticateRightNow);
     }
   }
 
@@ -1011,34 +1007,34 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     if (authDisplayName != null && authDisplayName.isNotEmpty) {
       return authDisplayName;
     }
-    return 'anonymous player';
+    return _l10n.anonymousPlayer;
   }
 
   String _authErrorMessage(FirebaseAuthException error) {
     switch (error.code) {
       case 'email-already-in-use':
-        return 'account exists. sign in instead';
+        return _l10n.accountExistsSignInInstead;
       case 'invalid-email':
-        return 'enter a valid email';
+        return _l10n.enterValidEmail;
       case 'weak-password':
-        return 'password is too weak';
+        return _l10n.passwordTooWeak;
       case 'user-not-found':
       case 'wrong-password':
       case 'invalid-credential':
-        return 'invalid email or password';
+        return _l10n.invalidEmailOrPassword;
       case 'too-many-requests':
-        return 'too many attempts. try again later';
+        return _l10n.tooManyAttempts;
       case 'operation-not-allowed':
-        return 'this sign-in method is not enabled';
+        return _l10n.signInMethodNotEnabled;
       case 'app-not-authorized':
       case 'invalid-api-key':
-        return 'auth configuration is invalid for this app';
+        return _l10n.authConfigurationInvalid;
       case 'keychain-error':
-        return 'macos keychain access is not configured';
+        return _l10n.macosKeychainNotConfigured;
       case 'network-request-failed':
-        return 'network error. check your connection';
+        return _l10n.networkErrorCheckConnection;
       default:
-        return 'unable to authenticate right now';
+        return _l10n.unableAuthenticateRightNow;
     }
   }
 
@@ -1047,12 +1043,12 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       case GoogleSignInExceptionCode.canceled:
         return '';
       case GoogleSignInExceptionCode.clientConfigurationError:
-        return 'google sign-in is not configured for this app';
+        return _l10n.googleSignInNotConfigured;
       default:
         if (error.description != null && error.description!.isNotEmpty) {
           return error.description;
         }
-        return 'unable to authenticate right now';
+        return _l10n.unableAuthenticateRightNow;
     }
   }
 
@@ -1060,12 +1056,12 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     final message = error.message;
     if (message != null &&
         message.contains('missing support for the following URL schemes')) {
-      return 'google sign-in is not configured for this iOS app';
+      return _l10n.googleSignInNotConfiguredIos;
     }
     if (message != null && message.isNotEmpty) {
       return message;
     }
-    return 'unable to authenticate right now';
+    return _l10n.unableAuthenticateRightNow;
   }
 
   String? _appleAuthErrorMessage(SignInWithAppleAuthorizationException error) {
@@ -1074,12 +1070,12 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         return '';
       case AuthorizationErrorCode.notHandled:
       case AuthorizationErrorCode.notInteractive:
-        return 'apple sign-in is not available right now';
+        return _l10n.appleSignInUnavailableRightNow;
       default:
         if (error.message.isNotEmpty) {
           return error.message;
         }
-        return 'unable to authenticate right now';
+        return _l10n.unableAuthenticateRightNow;
     }
   }
 
@@ -1088,18 +1084,18 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     if (message != null && message.isNotEmpty) {
       return message;
     }
-    return 'unable to authenticate right now';
+    return _l10n.unableAuthenticateRightNow;
   }
 
   String _firestoreErrorMessage(FirebaseException error) {
     switch (error.code) {
       case 'permission-denied':
-        return 'unable to create your profile right now';
+        return _l10n.unableCreateProfileRightNow;
       case 'network-request-failed':
       case 'unavailable':
-        return 'network error. check your connection';
+        return _l10n.networkErrorCheckConnection;
       default:
-        return 'unable to create account right now';
+        return _l10n.unableCreateAccountRightNow;
     }
   }
 
@@ -1209,9 +1205,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(errorText ?? 'account deleted')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorText ?? _l10n.accountDeleted)),
+      );
       _refreshLeaderboard();
       return;
     }
@@ -1275,30 +1271,30 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       debugPrint('Unexpected account deletion failure: $error');
       debugPrintStack(stackTrace: stackTrace);
       await restoreUserDocumentIfNeeded();
-      return 'unable to delete your account right now';
+      return _l10n.unableDeleteAccountRightNow;
     }
   }
 
   String _deleteAccountAuthErrorMessage(FirebaseAuthException error) {
     switch (error.code) {
       case 'requires-recent-login':
-        return 'sign in again before deleting your account';
+        return _l10n.signInAgainBeforeDeleting;
       case 'network-request-failed':
-        return 'network error. check your connection';
+        return _l10n.networkErrorCheckConnection;
       default:
-        return 'unable to delete your account right now';
+        return _l10n.unableDeleteAccountRightNow;
     }
   }
 
   String _deleteAccountFirestoreErrorMessage(FirebaseException error) {
     switch (error.code) {
       case 'permission-denied':
-        return 'unable to delete your profile right now';
+        return _l10n.unableDeleteProfileRightNow;
       case 'network-request-failed':
       case 'unavailable':
-        return 'network error. check your connection';
+        return _l10n.networkErrorCheckConnection;
       default:
-        return 'unable to delete your account right now';
+        return _l10n.unableDeleteAccountRightNow;
     }
   }
 
@@ -1321,7 +1317,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       return authDisplayName;
     }
 
-    return 'anonymous player';
+    return _l10n.anonymousPlayer;
   }
 
   int _profileLifetimeScore(Map<String, dynamic>? profileData) {
@@ -1491,9 +1487,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     required String source,
   }) async {
     if (_reportedUserIdsThisSession.contains(reportedUid)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('you already reported this player')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_l10n.youAlreadyReportedPlayer)));
       return false;
     }
     final submitted = await showDialog<bool>(
@@ -1530,7 +1526,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     });
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('report submitted')));
+    ).showSnackBar(SnackBar(content: Text(_l10n.reportSubmitted)));
     return true;
   }
 
@@ -1578,9 +1574,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           ..addAll(previousHiddenIds);
       });
       if (showError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('unable to update hidden names')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(_l10n.unableUpdateHiddenNames)));
       }
       return false;
     }
@@ -1605,9 +1601,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('report submitted; unable to remove friend'),
-        ),
+        SnackBar(content: Text(_l10n.reportSubmittedUnableRemoveFriend)),
       );
     }
   }
@@ -1631,7 +1625,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       final data = snapshot.data();
       return _FriendProfile(
         uid: uid,
-        displayName: _profileDisplayNameFromData(data) ?? 'anonymous player',
+        displayName: _profileDisplayNameFromData(data) ?? _l10n.anonymousPlayer,
         lifetimeScore: _profileLifetimeScore(data),
       );
     });
@@ -1682,20 +1676,16 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     required List<String> existingFriendIds,
   }) async {
     if (userId == friendUid) {
-      return const _FriendAddResult(message: "you can't add yourself");
+      return _FriendAddResult(message: _l10n.youCantAddYourself);
     }
     if (existingFriendIds.contains(friendUid)) {
-      return const _FriendAddResult(
-        message: 'this friend is already in your list',
-      );
+      return _FriendAddResult(message: _l10n.friendAlreadyInList);
     }
 
     final users = FirebaseFirestore.instance.collection('users');
     final friendSnapshot = await users.doc(friendUid).get();
     if (!friendSnapshot.exists) {
-      return const _FriendAddResult(
-        message: 'that friend invite is no longer valid',
-      );
+      return _FriendAddResult(message: _l10n.friendInviteNoLongerValid);
     }
 
     final batch = FirebaseFirestore.instance.batch();
@@ -1713,9 +1703,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     }
 
     final friendName =
-        _profileDisplayNameFromData(friendSnapshot.data()) ?? 'your new friend';
+        _profileDisplayNameFromData(friendSnapshot.data()) ??
+        _l10n.yourNewFriend;
     await _logJoinGroupEvent('friends');
-    return _FriendAddResult(message: 'added $friendName');
+    return _FriendAddResult(message: _l10n.addedFriend(friendName));
   }
 
   void _maybePromptToAddIncomingFriend({
@@ -1739,7 +1730,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final inviterData = await _loadUserDocument(friendUid);
       final inviterName =
-          _profileDisplayNameFromData(inviterData) ?? 'this player';
+          _profileDisplayNameFromData(inviterData) ?? _l10n.thisPlayer;
       if (!mounted) {
         _friendInvitePromptOpen = false;
         return;
@@ -1767,14 +1758,14 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'friend invite',
+                      _l10n.friendInvite,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'add $inviterName to your friends list?',
+                      _l10n.addFriendQuestion(inviterName),
                       style: theme.textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 16),
@@ -1784,13 +1775,13 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
                         TextButton(
                           onPressed: () =>
                               Navigator.of(dialogContext).pop(false),
-                          child: const Text('decline'),
+                          child: Text(_l10n.decline),
                         ),
                         const SizedBox(width: 8),
                         FilledButton(
                           onPressed: () =>
                               Navigator.of(dialogContext).pop(true),
-                          child: const Text('add friend'),
+                          child: Text(_l10n.addFriend),
                         ),
                       ],
                     ),
@@ -1878,9 +1869,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Share is unavailable on this build.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_l10n.shareUnavailableBuild)));
     }
   }
 
@@ -1904,7 +1895,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
 
     final title = TextPainter(
       text: TextSpan(
-        text: 'planarity',
+        text: _l10n.planarity,
         style: TextStyle(
           color: fgColor,
           fontSize: 62,
@@ -1962,7 +1953,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       throw ArgumentError.value(displayName, 'displayName', displayNameError);
     }
     final cleanedDisplayName = displayName.trim().isEmpty
-        ? 'anonymous player'
+        ? _l10n.anonymousPlayer
         : displayName.trim();
     await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
       'displayName': cleanedDisplayName,
@@ -1995,33 +1986,33 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'about',
+                    _l10n.about,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 14),
                   Text(
-                    'goal',
+                    _l10n.goal,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'solve as many graphs as you can each day with as few moves as possible.',
+                    _l10n.goalDescription,
                     style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'why every puzzle is solvable',
+                    _l10n.whyEveryPuzzleIsSolvable,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    "every graph in planarity is solvable because it's a planar graph. a planar graph is a graph that can be drawn on a flat surface so that no edges cross, except where they meet at shared vertices.",
+                    _l10n.planarGraphDescription,
                     style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 12),
@@ -2033,7 +2024,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
                       );
                     },
                     child: Text(
-                      'wikipedia: planar graph',
+                      _l10n.planarGraphWikipedia,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         decoration: TextDecoration.underline,
                       ),
@@ -2062,9 +2053,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     final isLocked = _status == DailyPlayStatus.locked;
     final isWide = MediaQuery.of(context).size.width >= 900;
     final buttonLabel = switch (_status) {
-      DailyPlayStatus.ready => 'start',
-      DailyPlayStatus.inProgress => 'continue',
-      DailyPlayStatus.locked => 'locked',
+      DailyPlayStatus.ready => _l10n.start,
+      DailyPlayStatus.inProgress => _l10n.continueLabel,
+      DailyPlayStatus.locked => _l10n.locked,
     };
     final leaderboardKey = ValueKey(
       'leaderboard-${user?.uid ?? 'guest'}-$_leaderboardRefreshTick',
@@ -2151,7 +2142,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
                       FontAwesomeIcons.circleQuestion,
                       size: 22,
                     ),
-                    tooltip: 'about',
+                    tooltip: _l10n.about,
                   ),
                 ),
                 Align(
@@ -2165,7 +2156,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
                       _showProfileModal(user: user);
                     },
                     icon: const FaIcon(FontAwesomeIcons.circleUser, size: 22),
-                    tooltip: 'account',
+                    tooltip: _l10n.account,
                   ),
                 ),
               ],
@@ -2216,6 +2207,7 @@ class _HomeHeroContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return LayoutBuilder(
       builder: (context, constraints) {
         final hasBoundedHeight = constraints.hasBoundedHeight;
@@ -2232,7 +2224,7 @@ class _HomeHeroContent extends StatelessWidget {
             const _AnimatedHomeIcon(),
             const SizedBox(height: 20),
             Text(
-              'planarity',
+              l10n.planarity,
               style: theme.textTheme.displayMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.8,
@@ -2240,14 +2232,14 @@ class _HomeHeroContent extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'daily graph puzzle',
+              l10n.dailyGraphPuzzle,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w400,
               ),
             ),
             const SizedBox(height: 21),
             Text(
-              'daily score',
+              l10n.dailyScore,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.7),
               ),
@@ -2298,7 +2290,7 @@ class _HomeHeroContent extends StatelessWidget {
                 InkWell(
                   onTap: onPortfolioTap,
                   child: Text(
-                    '© nate wolfe',
+                    l10n.copyrightNateWolfe,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface.withOpacity(0.55),
                       decoration: TextDecoration.underline,
@@ -2309,7 +2301,7 @@ class _HomeHeroContent extends StatelessWidget {
                 InkWell(
                   onTap: onOriginalGameTap,
                   child: Text(
-                    'original by john tantalo',
+                    l10n.originalByJohnTantalo,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface.withOpacity(0.55),
                       decoration: TextDecoration.underline,
@@ -2462,7 +2454,7 @@ class _AuthDialogState extends State<_AuthDialog> {
     setState(() {
       _isSubmitting = false;
       if (submitError == null) {
-        _infoText = 'if that email exists, we sent a reset link';
+        _infoText = context.l10n.ifEmailExistsResetLink;
       } else {
         _errorText = submitError;
       }
@@ -2508,12 +2500,13 @@ class _AuthDialogState extends State<_AuthDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final actionLabel = widget.isSignIn ? 'sign in' : 'sign up';
+    final l10n = context.l10n;
+    final actionLabel = widget.isSignIn ? l10n.signIn : l10n.signUp;
     final subtitle = widget.isSignIn
-        ? 'sign in with your email and password.'
-        : 'create an account with your email and password.';
-    final switchPrompt = widget.isSignIn ? 'new here?' : 'already signed up?';
-    final switchAction = widget.isSignIn ? 'sign up' : 'sign in';
+        ? l10n.signInSubtitle
+        : l10n.createAccountSubtitle;
+    final switchPrompt = widget.isSignIn ? l10n.newHere : l10n.alreadySignedUp;
+    final switchAction = widget.isSignIn ? l10n.signUp : l10n.signIn;
 
     return Dialog(
       backgroundColor: theme.colorScheme.surface,
@@ -2547,18 +2540,22 @@ class _AuthDialogState extends State<_AuthDialog> {
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'email',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                decoration: InputDecoration(
+                  labelText: l10n.email,
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
               TextField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'password',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                decoration: InputDecoration(
+                  labelText: l10n.password,
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
                 ),
                 onSubmitted: _isSubmitting ? null : (_) async => _submit(),
               ),
@@ -2575,7 +2572,7 @@ class _AuthDialogState extends State<_AuthDialog> {
                       visualDensity: VisualDensity.compact,
                     ),
                     child: Text(
-                      'reset password',
+                      l10n.resetPassword,
                       style: theme.textTheme.bodySmall,
                     ),
                   ),
@@ -2626,13 +2623,13 @@ class _AuthDialogState extends State<_AuthDialog> {
                   children: [
                     IconButton.outlined(
                       onPressed: _isSubmitting ? null : _submitGoogle,
-                      tooltip: 'continue with Google',
+                      tooltip: l10n.continueWithGoogle,
                       icon: const FaIcon(FontAwesomeIcons.google, size: 18),
                     ),
                     const SizedBox(width: 8),
                     IconButton.outlined(
                       onPressed: _isSubmitting ? null : _submitApple,
-                      tooltip: 'continue with Apple',
+                      tooltip: l10n.continueWithApple,
                       icon: const FaIcon(FontAwesomeIcons.apple, size: 20),
                     ),
                   ],
@@ -2725,7 +2722,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
     if (value.trim() == _initialDisplayNameTrimmed) {
       return null;
     }
-    return _displayNameValidationMessage(value);
+    return _localizedDisplayNameValidationMessage(value, context.l10n);
   }
 
   void _updateDisplayNameValidation(String value) {
@@ -2744,7 +2741,10 @@ class _ProfileDialogState extends State<_ProfileDialog> {
     required bool deleteAccountRequested,
   }) {
     final errorText = shouldPersist
-        ? _displayNameValidationMessage(_displayNameController.text)
+        ? _localizedDisplayNameValidationMessage(
+            _displayNameController.text,
+            context.l10n,
+          )
         : null;
     if (errorText != null) {
       setState(() {
@@ -2832,6 +2832,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
       context: context,
       builder: (dialogContext) {
         final theme = Theme.of(dialogContext);
+        final l10n = dialogContext.l10n;
         return Dialog(
           backgroundColor: theme.colorScheme.surface,
           surfaceTintColor: Colors.transparent,
@@ -2850,14 +2851,14 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'remove friend',
+                    l10n.removeFriend,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'remove $displayName from your friends list?',
+                    l10n.removeFriendQuestion(displayName),
                     style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),
@@ -2866,12 +2867,12 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                       const Spacer(),
                       TextButton(
                         onPressed: () => Navigator.of(dialogContext).pop(false),
-                        child: const Text('cancel'),
+                        child: Text(l10n.cancel),
                       ),
                       const SizedBox(width: 8),
                       FilledButton(
                         onPressed: () => Navigator.of(dialogContext).pop(true),
-                        child: const Text('remove'),
+                        child: Text(l10n.remove),
                       ),
                     ],
                   ),
@@ -2921,6 +2922,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Dialog(
       backgroundColor: theme.colorScheme.surface,
@@ -2938,14 +2940,14 @@ class _ProfileDialogState extends State<_ProfileDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'profile',
+                l10n.profile,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'update how your name appears in your profile.',
+                l10n.profileSubtitle,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurface.withOpacity(0.72),
                 ),
@@ -2955,7 +2957,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                 controller: _displayNameController,
                 textInputAction: TextInputAction.done,
                 decoration: InputDecoration(
-                  labelText: 'display name',
+                  labelText: l10n.displayName,
                   border: const OutlineInputBorder(
                     borderRadius: BorderRadius.zero,
                   ),
@@ -2970,7 +2972,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
               ),
               const SizedBox(height: 14),
               Text(
-                'lifetime score',
+                l10n.lifetimeScore,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurface.withOpacity(0.7),
                 ),
@@ -2987,7 +2989,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                 children: [
                   Expanded(
                     child: Text(
-                      'friends',
+                      l10n.friends,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -2996,7 +2998,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                   OutlinedButton.icon(
                     onPressed: _showInviteDialog,
                     icon: const FaIcon(FontAwesomeIcons.userPlus, size: 14),
-                    label: const Text('invite'),
+                    label: Text(l10n.invite),
                   ),
                 ],
               ),
@@ -3016,7 +3018,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                     ),
                   ),
                   child: Text(
-                    "you haven't added any friends yet.",
+                    l10n.noFriendsYet,
                     style: theme.textTheme.bodyMedium,
                   ),
                 )
@@ -3053,7 +3055,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'lifetime score ${friend.lifetimeScore}',
+                                l10n.lifetimeScoreValue(friend.lifetimeScore),
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurface
                                       .withOpacity(0.7),
@@ -3067,7 +3069,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                           onPressed: isRemoving
                               ? null
                               : () => _removeFriend(friend),
-                          tooltip: 'remove friend',
+                          tooltip: l10n.removeFriend,
                           icon: isRemoving
                               ? const SizedBox(
                                   width: 16,
@@ -3118,7 +3120,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                     signOutRequested: true,
                     deleteAccountRequested: false,
                   ),
-                  child: const Text('sign out'),
+                  child: Text(l10n.signOut),
                 ),
               ),
               const SizedBox(height: 8),
@@ -3133,8 +3135,8 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                   onPressed: _handleDeleteAccountPressed,
                   child: Text(
                     _deleteAccountConfirming
-                        ? 'press again to delete'
-                        : 'delete account',
+                        ? l10n.pressAgainToDelete
+                        : l10n.deleteAccount,
                   ),
                 ),
               ),
@@ -3147,21 +3149,17 @@ class _ProfileDialogState extends State<_ProfileDialog> {
 }
 
 class _ReportReason {
-  const _ReportReason({required this.value, required this.label});
+  const _ReportReason({required this.value});
 
   final String value;
-  final String label;
 }
 
 const List<_ReportReason> _reportReasons = <_ReportReason>[
-  _ReportReason(
-    value: 'inappropriate_display_name',
-    label: 'inappropriate display name',
-  ),
-  _ReportReason(value: 'abuse', label: 'abuse or harassment'),
-  _ReportReason(value: 'impersonation', label: 'impersonation'),
-  _ReportReason(value: 'spam', label: 'spam or scam'),
-  _ReportReason(value: 'other', label: 'other'),
+  _ReportReason(value: 'inappropriate_display_name'),
+  _ReportReason(value: 'abuse'),
+  _ReportReason(value: 'impersonation'),
+  _ReportReason(value: 'spam'),
+  _ReportReason(value: 'other'),
 ];
 
 class _ReportUserDialog extends StatefulWidget {
@@ -3194,7 +3192,7 @@ class _ReportUserDialogState extends State<_ReportUserDialog> {
     final details = _detailsController.text.trim();
     if (details.length > 1000) {
       setState(() {
-        _errorText = 'details must be 1000 characters or less';
+        _errorText = context.l10n.detailsTooLong;
       });
       return;
     }
@@ -3215,7 +3213,7 @@ class _ReportUserDialogState extends State<_ReportUserDialog> {
       }
       setState(() {
         _submitting = false;
-        _errorText = 'unable to submit report right now';
+        _errorText = context.l10n.unableSubmitReportRightNow;
       });
     }
   }
@@ -3223,6 +3221,7 @@ class _ReportUserDialogState extends State<_ReportUserDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Dialog(
       backgroundColor: theme.colorScheme.surface,
@@ -3240,7 +3239,7 @@ class _ReportUserDialogState extends State<_ReportUserDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'report player',
+                l10n.reportPlayer,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -3255,15 +3254,17 @@ class _ReportUserDialogState extends State<_ReportUserDialog> {
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
                 initialValue: _selectedReason,
-                decoration: const InputDecoration(
-                  labelText: 'reason',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                decoration: InputDecoration(
+                  labelText: l10n.reason,
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
                 ),
                 items: _reportReasons
                     .map(
                       (reason) => DropdownMenuItem<String>(
                         value: reason.value,
-                        child: Text(reason.label),
+                        child: Text(l10n.reportReasonLabel(reason.value)),
                       ),
                     )
                     .toList(growable: false),
@@ -3285,9 +3286,11 @@ class _ReportUserDialogState extends State<_ReportUserDialog> {
                 maxLength: 1000,
                 minLines: 3,
                 maxLines: 5,
-                decoration: const InputDecoration(
-                  labelText: 'details',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                decoration: InputDecoration(
+                  labelText: l10n.details,
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
                 ),
               ),
               if (_errorText != null) ...[
@@ -3307,7 +3310,7 @@ class _ReportUserDialogState extends State<_ReportUserDialog> {
                     onPressed: _submitting
                         ? null
                         : () => Navigator.of(context).pop(false),
-                    child: const Text('cancel'),
+                    child: Text(l10n.cancel),
                   ),
                   const SizedBox(width: 8),
                   FilledButton(
@@ -3318,7 +3321,7 @@ class _ReportUserDialogState extends State<_ReportUserDialog> {
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('submit'),
+                        : Text(l10n.submit),
                   ),
                 ],
               ),
@@ -3352,7 +3355,7 @@ class _ReportOverflowMenu extends StatelessWidget {
     final disabledColor = theme.colorScheme.onSurface.withValues(alpha: 0.42);
 
     return PopupMenuButton<String>(
-      tooltip: 'more options',
+      tooltip: context.l10n.moreOptions,
       color: theme.colorScheme.surface,
       surfaceTintColor: Colors.transparent,
       iconColor: iconColor,
@@ -3379,7 +3382,9 @@ class _ReportOverflowMenu extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Text(
-                isNameHidden ? 'unhide user name' : 'hide user name',
+                isNameHidden
+                    ? context.l10n.unhideUserName
+                    : context.l10n.hideUserName,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: enabledColor,
                 ),
@@ -3400,7 +3405,9 @@ class _ReportOverflowMenu extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Text(
-                enabled ? 'report player' : 'report submitted',
+                enabled
+                    ? context.l10n.reportPlayer
+                    : context.l10n.reportSubmitted,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: enabled ? enabledColor : disabledColor,
                 ),
@@ -3434,12 +3441,13 @@ class _FriendInviteDialog extends StatelessWidget {
     }
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Invite link copied')));
+    ).showSnackBar(SnackBar(content: Text(context.l10n.inviteLinkCopied)));
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Dialog(
       backgroundColor: theme.colorScheme.surface,
@@ -3460,7 +3468,7 @@ class _FriendInviteDialog extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'invite',
+                      l10n.invite,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -3476,7 +3484,7 @@ class _FriendInviteDialog extends StatelessWidget {
                             _sharePositionOriginForContext(buttonContext),
                           );
                         },
-                        tooltip: 'share',
+                        tooltip: l10n.share,
                         icon: const FaIcon(
                           FontAwesomeIcons.shareNodes,
                           size: 18,
@@ -3488,7 +3496,7 @@ class _FriendInviteDialog extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'share this QR code or link to invite a friend',
+                l10n.shareInvitePrompt,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurface.withOpacity(0.72),
                 ),
@@ -3541,7 +3549,7 @@ class _FriendInviteDialog extends StatelessWidget {
                     const SizedBox(width: 8),
                     IconButton(
                       onPressed: () => _copyInviteLink(context),
-                      tooltip: 'copy invite link',
+                      tooltip: l10n.copyInviteLink,
                       icon: const FaIcon(FontAwesomeIcons.copy, size: 16),
                     ),
                   ],
@@ -3705,6 +3713,15 @@ String? _displayNameValidationMessage(String displayName) {
     return 'invalid name - try something else';
   }
   return null;
+}
+
+String? _localizedDisplayNameValidationMessage(
+  String displayName,
+  AppLocalizations l10n,
+) {
+  return _displayNameValidationMessage(displayName) == null
+      ? null
+      : l10n.invalidNameTrySomethingElse;
 }
 
 bool _containsPhoneNumber(String displayName) {
@@ -3938,7 +3955,7 @@ class _LeaderboardCardContents extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'leaderboard',
+          context.l10n.leaderboard,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
           ),
@@ -3948,7 +3965,7 @@ class _LeaderboardCardContents extends StatelessWidget {
           children: [
             Expanded(
               child: _LeaderboardTabButton(
-                label: 'friends',
+                label: context.l10n.friends,
                 selected: selectedTab == _LeaderboardTab.friends,
                 enabled: true,
                 onPressed: () => onTabSelected(_LeaderboardTab.friends),
@@ -3957,7 +3974,7 @@ class _LeaderboardCardContents extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: _LeaderboardTabButton(
-                label: 'global',
+                label: context.l10n.global,
                 selected: selectedTab == _LeaderboardTab.global,
                 enabled: true,
                 onPressed: () => onTabSelected(_LeaderboardTab.global),
@@ -4121,9 +4138,11 @@ class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
     }
 
     final user = _user;
-    if (user == null) {
+    if (!_firebaseReady || user == null) {
       if (mounted) {
-        setState(() {});
+        setState(() {
+          _isLoading = false;
+        });
       }
       return;
     }
@@ -4152,6 +4171,15 @@ class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
   }
 
   void _syncFriendSubscriptions(List<String> friendIds) {
+    if (!_firebaseReady) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      return;
+    }
+
     final users = FirebaseFirestore.instance.collection('users');
     final friendChunks = _chunkedLeaderboardFriendIds(friendIds);
     final nextChunkKeys = friendChunks
@@ -4244,14 +4272,14 @@ class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
           InkWell(
             onTap: widget.onSignUpTap,
             child: Text(
-              'sign up',
+              context.l10n.signUp,
               style: messageStyle?.copyWith(
                 decoration: TextDecoration.underline,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
-          Text(' to compete with your friends', style: messageStyle),
+          Text(context.l10n.signUpToCompete, style: messageStyle),
         ],
       );
     }
@@ -4265,7 +4293,7 @@ class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
 
     if (_loadError != null) {
       return Text(
-        'unable to load friends leaderboard right now',
+        context.l10n.unableLoadFriendsLeaderboard,
         style: theme.textTheme.bodyMedium,
       );
     }
@@ -4274,17 +4302,18 @@ class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
       user: signedInUser,
       userProfileData: _userProfileData,
       friendProfileData: _friendProfileData,
+      l10n: context.l10n,
     );
     if (entries.length <= 1) {
       return Text(
-        "you haven't added any friends yet. open your profile to invite someone.",
+        context.l10n.noFriendsLeaderboard,
         style: theme.textTheme.bodyMedium,
       );
     }
 
     return _LeaderboardTable(
       entries: entries,
-      subtitle: 'you and your friends',
+      subtitle: context.l10n.youAndYourFriends,
       reportedUserIds: widget.reportedUserIds,
       hiddenDisplayNameUserIds: widget.hiddenDisplayNameUserIds,
       onToggleHiddenDisplayName: widget.onToggleHiddenDisplayName,
@@ -4301,10 +4330,11 @@ List<_LeaderboardEntry> _buildFriendsLeaderboardEntries({
   required User user,
   required Map<String, dynamic>? userProfileData,
   required Map<String, Map<String, dynamic>?> friendProfileData,
+  required AppLocalizations l10n,
 }) {
   final friendIds = _leaderboardFriendIds(userProfileData);
   if (friendIds.isEmpty) {
-    return _friendsEntriesFor(user);
+    return _friendsEntriesFor(user, l10n: l10n);
   }
 
   final standings = <_LeaderboardStanding>[
@@ -4312,7 +4342,7 @@ List<_LeaderboardEntry> _buildFriendsLeaderboardEntries({
       uid: user.uid,
       name:
           _leaderboardDisplayNameFromData(userProfileData) ??
-          _displayNameForUser(user),
+          _displayNameForUser(user, l10n: l10n),
       score: _leaderboardScoreFromData(userProfileData),
       isLocked: _leaderboardLockedFromData(userProfileData),
       isCurrentUser: true,
@@ -4327,7 +4357,8 @@ List<_LeaderboardEntry> _buildFriendsLeaderboardEntries({
     standings.add(
       _LeaderboardStanding(
         uid: friendId,
-        name: _leaderboardDisplayNameFromData(friendData) ?? 'anonymous player',
+        name:
+            _leaderboardDisplayNameFromData(friendData) ?? l10n.anonymousPlayer,
         score: _leaderboardScoreFromData(friendData),
         isLocked: _leaderboardLockedFromData(friendData),
         isCurrentUser: false,
@@ -4455,6 +4486,15 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
       _globalRanks.clear();
       _loadError = null;
       _isLoading = true;
+    }
+
+    if (!_firebaseReady) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      return;
     }
 
     final users = FirebaseFirestore.instance.collection('users');
@@ -4587,6 +4627,7 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
   }
 
   List<_LeaderboardStanding> _selectedStandings() {
+    final l10n = context.l10n;
     final standingsByUid = <String, _LeaderboardStanding>{};
 
     for (final uid in _topUserIds) {
@@ -4597,7 +4638,8 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
       standingsByUid[uid] = _LeaderboardStanding(
         uid: uid,
         name:
-            _leaderboardDisplayNameFromData(profileData) ?? 'anonymous player',
+            _leaderboardDisplayNameFromData(profileData) ??
+            l10n.anonymousPlayer,
         score: _leaderboardScoreFromData(profileData),
         isLocked: _leaderboardLockedFromData(profileData),
         isCurrentUser: uid == _user?.uid,
@@ -4610,7 +4652,7 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
         uid: user.uid,
         name:
             _leaderboardDisplayNameFromData(_userProfileData) ??
-            _displayNameForUser(user),
+            _displayNameForUser(user, l10n: l10n),
         score: _leaderboardScoreFromData(_userProfileData),
         isLocked: _leaderboardLockedFromData(_userProfileData),
         isCurrentUser: true,
@@ -4624,7 +4666,8 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
         standingsByUid[friendId] = _LeaderboardStanding(
           uid: friendId,
           name:
-              _leaderboardDisplayNameFromData(friendData) ?? 'anonymous player',
+              _leaderboardDisplayNameFromData(friendData) ??
+              l10n.anonymousPlayer,
           score: _leaderboardScoreFromData(friendData),
           isLocked: _leaderboardLockedFromData(friendData),
           isCurrentUser: false,
@@ -4726,6 +4769,7 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final standings = _selectedStandings();
     final entries = standings
         .map(
@@ -4764,7 +4808,7 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'unable to load global leaderboard right now',
+            l10n.unableLoadGlobalLeaderboard,
             style: theme.textTheme.bodyMedium,
           ),
           if (errorDetail.isNotEmpty) ...[
@@ -4781,7 +4825,7 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
     }
 
     if (topStanding == null || entries.isEmpty) {
-      return Text('no global scores yet.', style: theme.textTheme.bodyMedium);
+      return Text(l10n.noGlobalScoresYet, style: theme.textTheme.bodyMedium);
     }
 
     return Column(
@@ -4789,7 +4833,7 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
       mainAxisSize: MainAxisSize.min,
       children: [
         _LeaderboardMetric(
-          label: 'global top score',
+          label: l10n.globalTopScore,
           value: '${topStanding.score}',
           detail: _displayNameForViewer(
             uid: topStanding.uid,
@@ -4800,7 +4844,9 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
         const SizedBox(height: 14),
         _LeaderboardTable(
           entries: entries,
-          subtitle: _user == null ? 'global snapshot' : 'your global position',
+          subtitle: _user == null
+              ? l10n.globalSnapshot
+              : l10n.yourGlobalPosition,
           reportedUserIds: widget.reportedUserIds,
           hiddenDisplayNameUserIds: widget.hiddenDisplayNameUserIds,
           onToggleHiddenDisplayName: widget.onToggleHiddenDisplayName,
@@ -5022,12 +5068,15 @@ class _LeaderboardStanding {
   final bool isCurrentUser;
 }
 
-List<_LeaderboardEntry> _friendsEntriesFor(User user) {
+List<_LeaderboardEntry> _friendsEntriesFor(
+  User user, {
+  required AppLocalizations l10n,
+}) {
   return [
     _LeaderboardEntry(
       uid: user.uid,
       rank: 1,
-      name: _displayNameForUser(user),
+      name: _displayNameForUser(user, l10n: l10n),
       score: 0,
       isLocked: false,
       isCurrentUser: true,
@@ -5035,7 +5084,7 @@ List<_LeaderboardEntry> _friendsEntriesFor(User user) {
   ];
 }
 
-String _displayNameForUser(User user) {
+String _displayNameForUser(User user, {required AppLocalizations l10n}) {
   final displayName = user.displayName?.trim();
   if (displayName != null && displayName.isNotEmpty) {
     return displayName.toLowerCase();
@@ -5044,7 +5093,7 @@ String _displayNameForUser(User user) {
   if (email != null && email.isNotEmpty) {
     return email.split('@').first;
   }
-  return 'you';
+  return l10n.you;
 }
 
 class PlanarityGamePage extends StatefulWidget {
@@ -5085,6 +5134,8 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
   bool _recenterScheduled = false;
   InterstitialAd? _interstitialAd;
   bool _interstitialAdLoading = false;
+
+  AppLocalizations get _l10n => context.l10n;
 
   @override
   void initState() {
@@ -5359,11 +5410,11 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                           FontAwesomeIcons.arrowLeft,
                           size: 18,
                         ),
-                        tooltip: 'back',
+                        tooltip: _l10n.back,
                       ),
                     ),
                     Text(
-                      'planarity',
+                      _l10n.planarity,
                       style: Theme.of(context).textTheme.headlineMedium
                           ?.copyWith(
                             fontWeight: FontWeight.bold,
@@ -5386,7 +5437,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'daily graph puzzle',
+                _l10n.dailyGraphPuzzle,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: Theme.of(
                     context,
@@ -5565,8 +5616,8 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                       Expanded(
                         child: Text(
                           solved
-                              ? 'solved ${nodes.length} nodes'
-                              : 'failed ${nodes.length} nodes',
+                              ? _l10n.solvedNodes(nodes.length)
+                              : _l10n.failedNodes(nodes.length),
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(fontWeight: FontWeight.w700),
                         ),
@@ -5595,7 +5646,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                               FontAwesomeIcons.shareNodes,
                               size: 18,
                             ),
-                            tooltip: 'share',
+                            tooltip: _l10n.share,
                           );
                         },
                       ),
@@ -5643,12 +5694,12 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                       const Spacer(),
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('home'),
+                        child: Text(_l10n.home),
                       ),
                       if (solved)
                         FilledButton(
                           onPressed: () => Navigator.of(context).pop(true),
-                          child: Text('continue - $totalScore'),
+                          child: Text(_l10n.continueWithScore(totalScore)),
                         ),
                     ],
                   ),
@@ -5700,9 +5751,9 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Share is unavailable on this build.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_l10n.shareUnavailableBuild)));
     }
   }
 
@@ -5733,7 +5784,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
 
     final title = TextPainter(
       text: TextSpan(
-        text: 'planarity',
+        text: _l10n.planarity,
         style: TextStyle(
           color: fgColor,
           fontSize: 62,
@@ -5758,7 +5809,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
 
     final subtitle = TextPainter(
       text: TextSpan(
-        text: 'daily graph puzzle',
+        text: _l10n.dailyGraphPuzzle,
         style: TextStyle(
           color: fgColor.withOpacity(0.75),
           fontSize: 34,

@@ -1,0 +1,173 @@
+{
+  "@@locale": "ja",
+  "account": "アカウント",
+  "accountDeleted": "アカウントを削除しました",
+  "accountExistsSignInInstead": "アカウントは存在します - ログインしてください",
+  "addedFriend": "{friendName} を追加しました",
+  "@addedFriend": {
+    "placeholders": {
+      "friendName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriendQuestion": "{inviterName} を友達リストに追加しますか？",
+  "@addFriendQuestion": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "addFriend": "友達を追加",
+  "alreadySignedUp": "登録済みですか？",
+  "anonymousPlayer": "匿名プレイヤー",
+  "appleSignInUnavailablePlatform": "appleサインインはこのプラットフォームでは利用できません",
+  "appleSignInUnavailableRightNow": "appleサインインは現在利用できません",
+  "authConfigurationInvalid": "このアプリでは認証設定が無効です",
+  "authConfigurationMissing": "認証設定がありません",
+  "back": "戻る",
+  "cancel": "キャンセル",
+  "continueLabel": "続ける",
+  "continueWithScore": "続ける - {totalScore}",
+  "@continueWithScore": {
+    "placeholders": {
+      "totalScore": {
+        "type": "int"
+      }
+    }
+  },
+  "continueWithApple": "Appleで続行",
+  "continueWithGoogle": "Googleで続行",
+  "copyInviteLink": "招待リンク",
+  "copyrightNateWolfe": "© nate wolfe",
+  "createAccountSubtitle": "メールアドレスとパスワードでアカウントを作成します。",
+  "dailyGraphPuzzle": "デイリーグラフパズル",
+  "dailyScore": "デイリースコア",
+  "decline": "",
+  "deleteAccount": "アカウントを削除",
+  "details": "詳細",
+  "detailsTooLong": "詳細は1000文字以内で入力してください",
+  "displayName": "表示名",
+  "email": "メール",
+  "enterEmailAndPassword": "あなたのメールアドレスとパスワードを入力してください",
+  "enterEmailFirst": "最初にメールアドレスを入力してください",
+  "enterValidEmail": "有効なメールアドレスを入力してください",
+  "failedNodes": "{nodeCount} ノード失敗",
+  "@failedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "friendInvite": "友達の招待",
+  "friends": "友達",
+  "global": "グローバル",
+  "globalSnapshot": "グローバルスナップショット",
+  "globalTopScore": "グローバルトップスコア",
+  "googleSignInUnavailablePlatform": "googleサインインはこのプラットフォームでは利用できません",
+  "googleSignInNotConfigured": "このアプリにはgoogleサインインが設定されていません",
+  "googleSignInNotConfiguredIos": "このiOSアプリにはgoogleサインインが設定されていません",
+  "home": "ホーム",
+  "hideUserName": "ユーザー名を非表示にする",
+  "ifEmailExistsResetLink": "そのメールが存在する場合、リセットリンクを送信しました",
+  "invalidEmailOrPassword": "無効なメールアドレスまたはパスワードです",
+  "invalidNameTrySomethingElse": "名前が無効です-他のものをお試しください",
+  "invite": "招待",
+  "inviteLinkCopied": "招待リンクをコピーしました",
+  "leaderboard": "ランキング",
+  "lifetimeScore": "生涯スコア",
+  "lifetimeScoreValue": "合計スコア {score}",
+  "@lifetimeScoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "locked": "ロックされています",
+  "macosKeychainNotConfigured": "macosキーチェーンアクセスが設定されていません",
+  "moreOptions": "更なるオプション",
+  "networkErrorCheckConnection": "ネットワークエラー-接続を確認してください",
+  "newHere": "はじめてですか？",
+  "noFriendsYet": "まだ友達を追加していません",
+  "noFriendsLeaderboard": "まだ友達を追加していません。プロフィールを開いて誰かを招待してください",
+  "noGlobalScoresYet": "グローバルスコアはまだありません",
+  "originalByJohnTantalo": "オリジナル： John Tantalo",
+  "password": "パスワード",
+  "passwordMinLength": "パスワードは6文字以上なければなりません",
+  "passwordTooWeak": "パスワードが弱すぎます",
+  "planarity": "planarity",
+  "planarGraphWikipedia": "wikipedia:平面グラフ",
+  "pressAgainToDelete": "もう一度押すと削除されます",
+  "profile": "プロフィール",
+  "profileSubtitle": "プロフィールに表示される名前を更新する",
+  "reason": "Reason",
+  "remove": "削除",
+  "removeFriendQuestion": "{displayName} を友達リストから削除しますか？",
+  "@removeFriendQuestion": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFriend": "友達を削除",
+  "reportPlayer": "プレイヤーを通報",
+  "reportSubmitted": "新規レポートの提出",
+  "reportSubmittedUnableRemoveFriend": "レポートが送信されました-友達を削除できません",
+  "resetPassword": "パスワードのリセット",
+  "share": "共有",
+  "shareInvitePrompt": "このQRコードまたはリンクをシェアして友達を招待しましょう",
+  "shareUnavailableBuild": "共有はこのビルドでは利用できません",
+  "signIn": "ログイン",
+  "signInAgainBeforeDeleting": "アカウントを削除する前に再度サインインしてください",
+  "signInMethodNotEnabled": "このサインイン方法は有効ではありません",
+  "signInSubtitle": "メールアドレスとパスワードでサインイン",
+  "signOut": "ログアウト",
+  "signUp": "登録",
+  "signUpToCompete": " 友達と競い合うために",
+  "solvedNodes": "{nodeCount} ノード解決",
+  "@solvedNodes": {
+    "placeholders": {
+      "nodeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "start": "開始",
+  "submit": "送信",
+  "thisPlayer": "このプレイヤー",
+  "tooManyAttempts": "試行回数が多すぎます。しばらくしてからもう一度お試",
+  "unableAuthenticateRightNow": "現在認証できません",
+  "unableCreateAccountRightNow": "現在アカウントを作成できません",
+  "unableCreateProfileRightNow": "現在プロフィールを作成できません",
+  "unableDeleteAccountRightNow": "現在アカウントを削除できません",
+  "unableDeleteProfileRightNow": "現在プロフィールを削除できません",
+  "unableLoadFriendsLeaderboard": "現在フレンドリーリーダーボードを読み込めません",
+  "unableLoadGlobalLeaderboard": "現在グローバルリーダーボードを読み込めません",
+  "unableSendResetEmailRightNow": "現在リセットメールを送信できません",
+  "unableSubmitReportRightNow": "現在レポートを送信できません",
+  "unableUpdateHiddenNames": "非表示の名前を更新できません",
+  "unableCreateAccountNoUser": "現在アカウントを作成できません",
+  "unhideUserName": "ユーザー名の非表示を解除",
+  "you": "問い合わせ",
+  "youAndYourFriends": "あなたとあなたの友達Timeline Name",
+  "youAlreadyReportedPlayer": "通報済みのプレイヤーです",
+  "youCantAddYourself": "自分自身を追加することはできません",
+  "yourGlobalPosition": "あなたのグローバルポジション",
+  "yourNewFriend": "新規のお友達",
+  "friendAlreadyInList": "この友達は既にあなたのリストにあります",
+  "friendInviteNoLongerValid": "その友達の招待は無効になりました",
+  "about": "説明",
+  "goal": "目標",
+  "goalDescription": "できるだけ少ない動きで毎日できるだけ多くのグラフを解く",
+  "whyEveryPuzzleIsSolvable": "すべてのパズルが解決可能な理由",
+  "planarGraphDescription": "平面性のすべてのグラフは、平面グラフであるため解決可能です。平面グラフは、共有頂点で会う場合を除き、エッジが交差しないように平面上に描画できるグラフです。",
+  "reportReasonInappropriateDisplayName": "不適切な表示名",
+  "reportReasonAbuse": "虐待または嫌がらせ",
+  "reportReasonImpersonation": "なりすまし",
+  "reportReasonSpam": "スパムまたは詐欺",
+  "reportReasonOther": "その他"
+}
