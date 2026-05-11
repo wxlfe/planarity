@@ -99,6 +99,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get displayName => '显示名称';
 
   @override
+  String get downloadOnAppStore => '在 App Store 下载';
+
+  @override
   String get email => '邮箱';
 
   @override
@@ -112,7 +115,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return '$nodeCount 个节点失败';
+    return '图 $nodeCount 失败';
   }
 
   @override
@@ -280,7 +283,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return '已解决 $nodeCount 个节点';
+    return '图 $nodeCount 已解决';
   }
 
   @override

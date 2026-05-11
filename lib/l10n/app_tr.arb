@@ -49,11 +49,12 @@
   "details": "detaylar",
   "detailsTooLong": "ayrıntılar 1000 karakter veya daha kısa olmalıdır",
   "displayName": "görünen ad",
+  "downloadOnAppStore": "App Store'dan indir",
   "email": "e-posta",
   "enterEmailAndPassword": "Lütfen e-posta ve şifre girin.",
   "enterEmailFirst": "önce e - postanızı girin",
   "enterValidEmail": "Geçerli bir e-posta adresi girin",
-  "failedNodes": "{nodeCount} düğüm başarısız",
+  "failedNodes": "graf {nodeCount} başarısız",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -128,7 +129,7 @@
   "signOut": "çıkış yap",
   "signUp": "kaydol",
   "signUpToCompete": " arkadaşlarınızla rekabet etmek için",
-  "solvedNodes": "{nodeCount} düğüm çözüldü",
+  "solvedNodes": "graf {nodeCount} çözüldü",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

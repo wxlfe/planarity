@@ -49,11 +49,12 @@
   "details": "상세 정보",
   "detailsTooLong": "세부 정보는 1000자 이하여야 합니다",
   "displayName": "표시 이름",
+  "downloadOnAppStore": "App Store에서 다운로드",
   "email": "이메일",
   "enterEmailAndPassword": "이메일과 비밀번호를 입력하세요",
   "enterEmailFirst": "먼저 이메일을 입력하세요",
   "enterValidEmail": "올바른 이메일을 입력해 주세요.",
-  "failedNodes": "{nodeCount}개 노드 실패",
+  "failedNodes": "그래프 {nodeCount} 실패",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -128,7 +129,7 @@
   "signOut": "로그아웃",
   "signUp": "가입",
   "signUpToCompete": " 친구들과 경쟁하기 위해",
-  "solvedNodes": "{nodeCount}개 노드 해결",
+  "solvedNodes": "그래프 {nodeCount} 해결",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

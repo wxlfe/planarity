@@ -104,6 +104,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get displayName => 'tên hiển thị';
 
   @override
+  String get downloadOnAppStore => 'tải về trên App Store';
+
+  @override
   String get email => 'email';
 
   @override
@@ -117,7 +120,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return 'thất bại $nodeCount nút';
+    return 'đồ thị $nodeCount thất bại';
   }
 
   @override
@@ -298,7 +301,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return 'đã giải $nodeCount nút';
+    return 'đồ thị $nodeCount đã giải';
   }
 
   @override

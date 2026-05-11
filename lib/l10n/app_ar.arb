@@ -49,11 +49,12 @@
   "details": "التفاصيل",
   "detailsTooLong": "يجب أن تكون التفاصيل 1000 حرف أو أقل",
   "displayName": "اسم العرض",
+  "downloadOnAppStore": "تنزيل من App Store",
   "email": "البريد الإلكتروني",
   "enterEmailAndPassword": "أدخل البريد الإلكتروني وكلمة المرور",
   "enterEmailFirst": "أدخل بريدك الإلكتروني أولًا",
   "enterValidEmail": "أدخل بريدًا إلكترونيًا صالحًا",
-  "failedNodes": "فشل {nodeCount} عقد",
+  "failedNodes": "فشل الرسم البياني {nodeCount}",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -128,7 +129,7 @@
   "signOut": "تسجيل الخروج",
   "signUp": "إنشاء حساب",
   "signUpToCompete": " للمنافسة مع أصدقائك",
-  "solvedNodes": "تم حل {nodeCount} عقد",
+  "solvedNodes": "تم حل الرسم البياني {nodeCount}",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

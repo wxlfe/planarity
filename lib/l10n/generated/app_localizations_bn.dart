@@ -102,6 +102,9 @@ class AppLocalizationsBn extends AppLocalizations {
   String get displayName => 'প্রদর্শনের নাম';
 
   @override
+  String get downloadOnAppStore => 'App Store থেকে ডাউনলোড করুন';
+
+  @override
   String get email => 'ইমেল';
 
   @override
@@ -115,7 +118,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return '$nodeCount নোড ব্যর্থ';
+    return 'গ্রাফ $nodeCount ব্যর্থ';
   }
 
   @override
@@ -294,7 +297,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return '$nodeCount নোড সমাধান হয়েছে';
+    return 'গ্রাফ $nodeCount সমাধান হয়েছে';
   }
 
   @override

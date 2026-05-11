@@ -105,6 +105,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get displayName => 'görünen ad';
 
   @override
+  String get downloadOnAppStore => 'App Store\'dan indir';
+
+  @override
   String get email => 'e-posta';
 
   @override
@@ -118,7 +121,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return '$nodeCount düğüm başarısız';
+    return 'graf $nodeCount başarısız';
   }
 
   @override
@@ -300,7 +303,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return '$nodeCount düğüm çözüldü';
+    return 'graf $nodeCount çözüldü';
   }
 
   @override

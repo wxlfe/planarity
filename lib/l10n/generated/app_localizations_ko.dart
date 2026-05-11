@@ -99,6 +99,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get displayName => '표시 이름';
 
   @override
+  String get downloadOnAppStore => 'App Store에서 다운로드';
+
+  @override
   String get email => '이메일';
 
   @override
@@ -112,7 +115,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return '$nodeCount개 노드 실패';
+    return '그래프 $nodeCount 실패';
   }
 
   @override
@@ -282,7 +285,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return '$nodeCount개 노드 해결';
+    return '그래프 $nodeCount 해결';
   }
 
   @override

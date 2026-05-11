@@ -29,6 +29,9 @@ bool _googleSignInReady = false;
 FirebaseAnalytics? _analytics;
 FirebaseAnalyticsObserver? _analyticsObserver;
 
+@visibleForTesting
+bool debugShowAppStoreDownloadButton = false;
+
 bool get _supportsMobileAds {
   if (kIsWeb) {
     return false;
@@ -279,6 +282,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     'https://wxlfe.dev/?utm_source=planarity&utm_medium=app&utm_campaign=internal_referral&utm_content=footer_portfolio_link',
   );
   static final Uri _originalGameUri = Uri.parse('http://johntantalo.com/');
+  static final Uri _appStoreUri = Uri.parse(
+    'https://apps.apple.com/us/app/planarity-daily-graph-puzzle/id6762309242',
+  );
   static final Uri _planarGraphInfoUri = Uri.parse(
     'https://en.wikipedia.org/wiki/Planar_graph',
   );
@@ -2068,6 +2074,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       scoreLabel: '$_score',
       isLocked: isLocked,
       onPlayPressed: _openChallenge,
+      showAppStoreDownloadButton: kIsWeb || debugShowAppStoreDownloadButton,
+      onAppStoreTap: () async {
+        await launchUrl(_appStoreUri, mode: LaunchMode.externalApplication);
+      },
       showLeaderboardBelowButton: !isWide,
       leaderboard: _LeaderboardCard(
         key: leaderboardKey,
@@ -2189,6 +2199,8 @@ class _HomeHeroContent extends StatelessWidget {
     required this.scoreLabel,
     required this.isLocked,
     required this.onPlayPressed,
+    required this.showAppStoreDownloadButton,
+    required this.onAppStoreTap,
     required this.showLeaderboardBelowButton,
     required this.leaderboard,
     required this.onPortfolioTap,
@@ -2199,6 +2211,8 @@ class _HomeHeroContent extends StatelessWidget {
   final String scoreLabel;
   final bool isLocked;
   final VoidCallback onPlayPressed;
+  final bool showAppStoreDownloadButton;
+  final VoidCallback onAppStoreTap;
   final bool showLeaderboardBelowButton;
   final Widget leaderboard;
   final VoidCallback onPortfolioTap;
@@ -2208,6 +2222,22 @@ class _HomeHeroContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
+    final outlineButtonStyle = ButtonStyle(
+      side: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return BorderSide(
+            color: theme.colorScheme.onSurface.withOpacity(0.3),
+          );
+        }
+        return BorderSide(color: theme.colorScheme.onSurface);
+      }),
+      foregroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return theme.colorScheme.onSurface.withOpacity(0.3);
+        }
+        return theme.colorScheme.onSurface;
+      }),
+    );
     return LayoutBuilder(
       builder: (context, constraints) {
         final hasBoundedHeight = constraints.hasBoundedHeight;
@@ -2254,22 +2284,7 @@ class _HomeHeroContent extends StatelessWidget {
             const SizedBox(height: 21),
             OutlinedButton(
               onPressed: isLocked ? null : onPlayPressed,
-              style: ButtonStyle(
-                side: MaterialStateProperty.resolveWith((states) {
-                  if (states.contains(MaterialState.disabled)) {
-                    return BorderSide(
-                      color: theme.colorScheme.onSurface.withOpacity(0.3),
-                    );
-                  }
-                  return BorderSide(color: theme.colorScheme.onSurface);
-                }),
-                foregroundColor: MaterialStateProperty.resolveWith((states) {
-                  if (states.contains(MaterialState.disabled)) {
-                    return theme.colorScheme.onSurface.withOpacity(0.3);
-                  }
-                  return theme.colorScheme.onSurface;
-                }),
-              ),
+              style: outlineButtonStyle,
               child: Text(
                 buttonLabel,
                 style: theme.textTheme.bodyLarge?.copyWith(
@@ -2277,6 +2292,20 @@ class _HomeHeroContent extends StatelessWidget {
                 ),
               ),
             ),
+            if (showAppStoreDownloadButton) ...[
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: onAppStoreTap,
+                style: outlineButtonStyle,
+                icon: const FaIcon(FontAwesomeIcons.apple, size: 18),
+                label: Text(
+                  l10n.downloadOnAppStore,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
             if (showLeaderboardBelowButton) ...[
               const SizedBox(height: 28),
               leaderboard,
@@ -3852,6 +3881,10 @@ int _leaderboardRawScoreFromData(Map<String, dynamic>? profileData) {
 }
 
 bool _leaderboardLockedFromData(Map<String, dynamic>? profileData) {
+  final playedToday = profileData?['lastPlayed'] == _leaderboardTodayKey();
+  if (!playedToday) {
+    return false;
+  }
   final locked = profileData?['locked'];
   if (locked is bool) {
     return locked;

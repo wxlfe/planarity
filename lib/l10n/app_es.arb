@@ -49,11 +49,12 @@
   "details": "detalles",
   "detailsTooLong": "los detalles deben tener 1000 caracteres o menos",
   "displayName": "nombre visible",
+  "downloadOnAppStore": "descargar en App Store",
   "email": "correo",
   "enterEmailAndPassword": "ingresa correo y contraseña",
   "enterEmailFirst": "ingresa tu correo primero",
   "enterValidEmail": "ingresa un correo válido",
-  "failedNodes": "fallaste {nodeCount} nodos",
+  "failedNodes": "grafo {nodeCount} fallido",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -128,7 +129,7 @@
   "signOut": "cerrar sesión",
   "signUp": "registrarse",
   "signUpToCompete": " para competir con tus amigos",
-  "solvedNodes": "resolviste {nodeCount} nodos",
+  "solvedNodes": "grafo {nodeCount} resuelto",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {
