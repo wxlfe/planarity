@@ -112,7 +112,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return '$nodeCount 个节点失败';
+    return '图 $nodeCount 失败';
   }
 
   @override
@@ -280,7 +280,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return '已解决 $nodeCount 个节点';
+    return '图 $nodeCount 已解决';
   }
 
   @override

@@ -53,7 +53,7 @@
   "enterEmailAndPassword": "masukkan email dan kata sandi",
   "enterEmailFirst": "masukkan emailmu terlebih dahulu",
   "enterValidEmail": "masukkan email yang valid",
-  "failedNodes": "gagal {nodeCount} node",
+  "failedNodes": "graf {nodeCount} gagal",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -128,7 +128,7 @@
   "signOut": "keluar",
   "signUp": "daftar",
   "signUpToCompete": " untuk bersaing dengan teman-temanmu",
-  "solvedNodes": "menyelesaikan {nodeCount} node",
+  "solvedNodes": "graf {nodeCount} selesai",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

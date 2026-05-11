@@ -116,7 +116,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return 'gagal $nodeCount node';
+    return 'graf $nodeCount gagal';
   }
 
   @override
@@ -294,7 +294,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return 'menyelesaikan $nodeCount node';
+    return 'graf $nodeCount selesai';
   }
 
   @override

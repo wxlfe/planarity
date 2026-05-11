@@ -53,7 +53,7 @@
   "enterEmailAndPassword": "Introduza o seu e-mail e palavra-passe",
   "enterEmailFirst": "introduza o seu e-mail primeiro",
   "enterValidEmail": "Digite um e-mail válido",
-  "failedNodes": "falhou {nodeCount} nós",
+  "failedNodes": "grafo {nodeCount} falhou",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -128,7 +128,7 @@
   "signOut": "sair",
   "signUp": "cadastrar",
   "signUpToCompete": " para competir com os seus amigos",
-  "solvedNodes": "resolveu {nodeCount} nós",
+  "solvedNodes": "grafo {nodeCount} resolvido",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

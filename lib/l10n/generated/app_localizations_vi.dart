@@ -117,7 +117,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return 'thất bại $nodeCount nút';
+    return 'đồ thị $nodeCount thất bại';
   }
 
   @override
@@ -298,7 +298,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return 'đã giải $nodeCount nút';
+    return 'đồ thị $nodeCount đã giải';
   }
 
   @override

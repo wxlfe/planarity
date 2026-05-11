@@ -112,7 +112,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return '$nodeCount개 노드 실패';
+    return '그래프 $nodeCount 실패';
   }
 
   @override
@@ -282,7 +282,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return '$nodeCount개 노드 해결';
+    return '그래프 $nodeCount 해결';
   }
 
   @override
