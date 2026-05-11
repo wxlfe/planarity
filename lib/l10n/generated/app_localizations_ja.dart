@@ -99,6 +99,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get displayName => '表示名';
 
   @override
+  String get downloadOnAppStore => 'App Storeでダウンロード';
+
+  @override
   String get email => 'メール';
 
   @override

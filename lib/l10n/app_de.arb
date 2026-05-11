@@ -49,6 +49,7 @@
   "details": "Details",
   "detailsTooLong": "Details dürfen maximal 1000 Zeichen lang sein",
   "displayName": "Anzeigename",
+  "downloadOnAppStore": "im App Store laden",
   "email": "e-mail",
   "enterEmailAndPassword": "Geben Sie E-Mail und Passwort ein",
   "enterEmailFirst": "Geben Sie zuerst Ihre E-Mail-Adresse ein",

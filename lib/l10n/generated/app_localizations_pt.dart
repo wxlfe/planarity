@@ -103,6 +103,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get displayName => 'Nome a apresentar';
 
   @override
+  String get downloadOnAppStore => 'baixar na App Store';
+
+  @override
   String get email => 'email';
 
   @override

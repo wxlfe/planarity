@@ -103,6 +103,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get displayName => 'nama tampilan';
 
   @override
+  String get downloadOnAppStore => 'unduh di App Store';
+
+  @override
   String get email => 'email';
 
   @override

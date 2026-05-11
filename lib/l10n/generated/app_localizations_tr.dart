@@ -105,6 +105,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get displayName => 'görünen ad';
 
   @override
+  String get downloadOnAppStore => 'App Store\'dan indir';
+
+  @override
   String get email => 'e-posta';
 
   @override

@@ -105,6 +105,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get displayName => 'nom d\'affichage';
 
   @override
+  String get downloadOnAppStore => 'télécharger sur l\'App Store';
+
+  @override
   String get email => 'e-mail';
 
   @override

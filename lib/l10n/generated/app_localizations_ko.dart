@@ -99,6 +99,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get displayName => '표시 이름';
 
   @override
+  String get downloadOnAppStore => 'App Store에서 다운로드';
+
+  @override
   String get email => '이메일';
 
   @override

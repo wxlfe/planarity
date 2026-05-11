@@ -104,6 +104,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get displayName => 'tên hiển thị';
 
   @override
+  String get downloadOnAppStore => 'tải về trên App Store';
+
+  @override
   String get email => 'email';
 
   @override

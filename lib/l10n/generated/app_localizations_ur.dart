@@ -103,6 +103,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get displayName => 'ڈسپلے نام';
 
   @override
+  String get downloadOnAppStore => 'App Store سے ڈاؤن لوڈ کریں';
+
+  @override
   String get email => 'ای میل';
 
   @override

@@ -49,6 +49,7 @@
   "details": "dettagli",
   "detailsTooLong": "i dettagli devono contenere 1000 caratteri o meno",
   "displayName": "nome da visualizzare",
+  "downloadOnAppStore": "scarica su App Store",
   "email": "email",
   "enterEmailAndPassword": "inserisci email e password",
   "enterEmailFirst": "inserisci prima la tua email",
