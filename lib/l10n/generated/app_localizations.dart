@@ -320,6 +320,12 @@ abstract class AppLocalizations {
   /// **'display name'**
   String get displayName;
 
+  /// No description provided for @downloadOnAppStore.
+  ///
+  /// In en, this message translates to:
+  /// **'download on the App Store'**
+  String get downloadOnAppStore;
+
   /// No description provided for @email.
   ///
   /// In en, this message translates to:
@@ -347,7 +353,7 @@ abstract class AppLocalizations {
   /// No description provided for @failedNodes.
   ///
   /// In en, this message translates to:
-  /// **'failed {nodeCount} nodes'**
+  /// **'graph {nodeCount} failed'**
   String failedNodes(int nodeCount);
 
   /// No description provided for @friendInvite.
@@ -671,7 +677,7 @@ abstract class AppLocalizations {
   /// No description provided for @solvedNodes.
   ///
   /// In en, this message translates to:
-  /// **'solved {nodeCount} nodes'**
+  /// **'graph {nodeCount} solved'**
   String solvedNodes(int nodeCount);
 
   /// No description provided for @start.

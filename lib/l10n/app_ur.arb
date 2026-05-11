@@ -60,11 +60,12 @@
   "details": "تفصیلات",
   "detailsTooLong": "تفصیلات 1000 حروف یا اس سے کم ہونی چاہئیں",
   "displayName": "ڈسپلے نام",
+  "downloadOnAppStore": "App Store سے ڈاؤن لوڈ کریں",
   "email": "ای میل",
   "enterEmailAndPassword": "ای میل اور پاس ورڈ درج کریں",
   "enterEmailFirst": "پہلے اپنا ای میل درج کریں",
   "enterValidEmail": " مہربانی کریتھ کریو صحیح ای میل درج ۔",
-  "failedNodes": "{nodeCount} نوڈز ناکام ہوئے",
+  "failedNodes": "گراف {nodeCount} ناکام ہوا",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -139,7 +140,7 @@
   "signOut": "سائن آؤٹ",
   "signUp": "سائن اپ",
   "signUpToCompete": " اپنے دوستوں کے ساتھ مقابلہ کرنے کے لیے",
-  "solvedNodes": "{nodeCount} نوڈز حل ہوئے",
+  "solvedNodes": "گراف {nodeCount} حل ہوا",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

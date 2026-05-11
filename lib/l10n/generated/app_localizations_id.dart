@@ -117,6 +117,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get displayName => 'nama tampilan';
 
   @override
+  String get downloadOnAppStore => 'unduh di App Store';
+
+  @override
   String get email => 'email';
 
   @override
@@ -130,7 +133,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return 'gagal $nodeCount node';
+    return 'graf $nodeCount gagal';
   }
 
   @override
@@ -308,7 +311,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return 'menyelesaikan $nodeCount node';
+    return 'graf $nodeCount selesai';
   }
 
   @override

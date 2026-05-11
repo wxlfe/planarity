@@ -127,6 +127,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get displayName => 'اسم العرض';
 
   @override
+  String get downloadOnAppStore => 'تنزيل من App Store';
+
+  @override
   String get email => 'البريد الإلكتروني';
 
   @override
@@ -140,7 +143,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return 'فشل $nodeCount عقد';
+    return 'فشل الرسم البياني $nodeCount';
   }
 
   @override
@@ -316,7 +319,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return 'تم حل $nodeCount عقد';
+    return 'تم حل الرسم البياني $nodeCount';
   }
 
   @override

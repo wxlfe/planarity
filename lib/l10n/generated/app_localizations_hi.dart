@@ -117,6 +117,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get displayName => 'प्रदर्शित नाम';
 
   @override
+  String get downloadOnAppStore => 'App Store से डाउनलोड करें';
+
+  @override
   String get email => 'ईमेल';
 
   @override
@@ -130,7 +133,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return '$nodeCount नोड विफल';
+    return 'ग्राफ $nodeCount विफल';
   }
 
   @override
@@ -309,7 +312,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return '$nodeCount नोड हल किए';
+    return 'ग्राफ $nodeCount हल हुआ';
   }
 
   @override

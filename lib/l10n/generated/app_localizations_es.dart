@@ -119,6 +119,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get displayName => 'nombre visible';
 
   @override
+  String get downloadOnAppStore => 'descargar en App Store';
+
+  @override
   String get email => 'correo';
 
   @override
@@ -132,7 +135,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return 'fallaste $nodeCount nodos';
+    return 'grafo $nodeCount fallido';
   }
 
   @override
@@ -313,7 +316,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return 'resolviste $nodeCount nodos';
+    return 'grafo $nodeCount resuelto';
   }
 
   @override

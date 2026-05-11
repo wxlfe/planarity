@@ -60,11 +60,12 @@
   "details": "chi tiết",
   "detailsTooLong": "chi tiết phải có 1000 ký tự trở xuống",
   "displayName": "tên hiển thị",
+  "downloadOnAppStore": "tải về trên App Store",
   "email": "email",
   "enterEmailAndPassword": "nhập email và mật khẩu",
   "enterEmailFirst": "nhập email của bạn trước",
   "enterValidEmail": "nhập một email hợp lệ",
-  "failedNodes": "thất bại {nodeCount} nút",
+  "failedNodes": "đồ thị {nodeCount} thất bại",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -139,7 +140,7 @@
   "signOut": "đăng xuất",
   "signUp": "đăng ký",
   "signUpToCompete": " để cạnh tranh với bạn bè của bạn",
-  "solvedNodes": "đã giải {nodeCount} nút",
+  "solvedNodes": "đồ thị {nodeCount} đã giải",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

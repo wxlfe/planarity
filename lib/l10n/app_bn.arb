@@ -60,11 +60,12 @@
   "details": "বিস্তারিত",
   "detailsTooLong": "বিবরণ 1000 অক্ষর বা তার কম হতে হবে",
   "displayName": "প্রদর্শনের নাম",
+  "downloadOnAppStore": "App Store থেকে ডাউনলোড করুন",
   "email": "ইমেল",
   "enterEmailAndPassword": "ইমেইল এবং পাসওয়ার্ড লিখুন",
   "enterEmailFirst": "প্রথমে আপনার ইমেইল লিখুন",
   "enterValidEmail": "একটি বৈধ ইমেইল লিখুন",
-  "failedNodes": "{nodeCount} নোড ব্যর্থ",
+  "failedNodes": "গ্রাফ {nodeCount} ব্যর্থ",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -139,7 +140,7 @@
   "signOut": "সাইন আউট",
   "signUp": "সাইন আপ",
   "signUpToCompete": " আপনার বন্ধুদের সাথে প্রতিযোগিতা করতে",
-  "solvedNodes": "{nodeCount} নোড সমাধান হয়েছে",
+  "solvedNodes": "গ্রাফ {nodeCount} সমাধান হয়েছে",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

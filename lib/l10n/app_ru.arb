@@ -60,11 +60,12 @@
   "details": "подробности",
   "detailsTooLong": "Подробности должны содержать не более 1000 символов.",
   "displayName": "отображаемое имя",
+  "downloadOnAppStore": "скачать в App Store",
   "email": "эл. почта",
   "enterEmailAndPassword": "введите адрес электронной почты и пароль",
   "enterEmailFirst": "сначала введите свой адрес электронной почты",
   "enterValidEmail": "введите действительный адрес электронной почты",
-  "failedNodes": "не удалось {nodeCount} узлов",
+  "failedNodes": "граф {nodeCount} не пройден",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -139,7 +140,7 @@
   "signOut": "выйти",
   "signUp": "зарегистрироваться",
   "signUpToCompete": " соревноваться с друзьями",
-  "solvedNodes": "решено {nodeCount} узлов",
+  "solvedNodes": "граф {nodeCount} решен",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {
