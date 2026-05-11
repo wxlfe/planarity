@@ -81,6 +81,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dailyGraphPuzzle => '每日图形谜题';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return '在 $moveCount 步内解开图形';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => '消除所有交叉';
+
+  @override
+  String get levelSubtitleKeepStreak => '延续连胜';
+
+  @override
+  String get levelSubtitlePerfectSolve => '追求完美解法';
+
+  @override
   String get dailyScore => '每日得分';
 
   @override
@@ -99,6 +113,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get displayName => '显示名称';
 
   @override
+  String get downloadOnAppStore => '在 App Store 下载';
+
+  @override
   String get email => '邮箱';
 
   @override
@@ -112,7 +129,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return '$nodeCount 个节点失败';
+    return '图 $nodeCount 失败';
   }
 
   @override
@@ -211,6 +228,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => '隐私选项';
+
+  @override
   String get planarGraphWikipedia => '维基百科：平面图';
 
   @override
@@ -280,7 +300,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return '已解决 $nodeCount 个节点';
+    return '图 $nodeCount 已解决';
   }
 
   @override

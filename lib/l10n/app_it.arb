@@ -43,17 +43,29 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "crea un account con la tua email e password.",
   "dailyGraphPuzzle": "rompicapo grafico quotidiano",
+  "levelSubtitleUntangleMoves": "districa il grafo in {moveCount} mosse",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "elimina tutti gli incroci",
+  "levelSubtitleKeepStreak": "continua la serie",
+  "levelSubtitlePerfectSolve": "punta a una soluzione perfetta",
   "dailyScore": "punteggio giornaliero",
   "decline": "declino",
   "deleteAccount": "elimina account",
   "details": "dettagli",
   "detailsTooLong": "i dettagli devono contenere 1000 caratteri o meno",
   "displayName": "nome da visualizzare",
+  "downloadOnAppStore": "scarica su App Store",
   "email": "email",
   "enterEmailAndPassword": "inserisci email e password",
   "enterEmailFirst": "inserisci prima la tua email",
   "enterValidEmail": "inserisci una email valida",
-  "failedNodes": "falliti {nodeCount} nodi",
+  "failedNodes": "grafo {nodeCount} fallito",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -99,6 +111,7 @@
   "passwordMinLength": "la password deve contenere almeno 6 caratteri",
   "passwordTooWeak": "la password è troppo debole",
   "planarity": "planarity",
+  "privacyOptions": "opzioni privacy",
   "planarGraphWikipedia": "wikipedia: grafico planare",
   "pressAgainToDelete": "premere nuovamente per eliminare",
   "profile": "profilo",
@@ -128,7 +141,7 @@
   "signOut": "esci",
   "signUp": "registrati",
   "signUpToCompete": " per competere con i tuoi amici",
-  "solvedNodes": "risolti {nodeCount} nodi",
+  "solvedNodes": "grafo {nodeCount} risolto",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

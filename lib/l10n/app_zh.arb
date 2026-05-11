@@ -43,17 +43,29 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "使用邮箱和密码创建账户",
   "dailyGraphPuzzle": "每日图形谜题",
+  "levelSubtitleUntangleMoves": "在 {moveCount} 步内解开图形",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "消除所有交叉",
+  "levelSubtitleKeepStreak": "延续连胜",
+  "levelSubtitlePerfectSolve": "追求完美解法",
   "dailyScore": "每日得分",
   "decline": "拒绝",
   "deleteAccount": "删除账户",
   "details": "详情",
   "detailsTooLong": "详情必须不超过 1000 个字符",
   "displayName": "显示名称",
+  "downloadOnAppStore": "在 App Store 下载",
   "email": "邮箱",
   "enterEmailAndPassword": "请输入邮箱和密码",
   "enterEmailFirst": "请先输入邮箱",
   "enterValidEmail": "请输入有效邮箱",
-  "failedNodes": "{nodeCount} 个节点失败",
+  "failedNodes": "图 {nodeCount} 失败",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -99,6 +111,7 @@
   "passwordMinLength": "密码至少需要 6 个字符",
   "passwordTooWeak": "密码太弱",
   "planarity": "planarity",
+  "privacyOptions": "隐私选项",
   "planarGraphWikipedia": "维基百科：平面图",
   "pressAgainToDelete": "再次按下以删除",
   "profile": "个人资料",
@@ -128,7 +141,7 @@
   "signOut": "退出登录",
   "signUp": "注册",
   "signUpToCompete": " 来和好友竞争",
-  "solvedNodes": "已解决 {nodeCount} 个节点",
+  "solvedNodes": "图 {nodeCount} 已解决",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

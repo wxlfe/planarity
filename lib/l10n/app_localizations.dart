@@ -20,3 +20,18 @@ extension AppLocalizationsReportReason on AppLocalizations {
     };
   }
 }
+
+extension AppLocalizationsLevelSubtitle on AppLocalizations {
+  String levelSubtitle({required int score, required int moveCount}) {
+    if (score >= 30) {
+      return levelSubtitlePerfectSolve;
+    }
+    if (score >= 15) {
+      return levelSubtitleKeepStreak;
+    }
+    if (score >= 5) {
+      return levelSubtitleNoCrossings;
+    }
+    return levelSubtitleUntangleMoves(moveCount);
+  }
+}

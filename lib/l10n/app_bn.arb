@@ -43,17 +43,29 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "আপনার ইমেল এবং পাসওয়ার্ড দিয়ে একটি অ্যাকাউন্ট তৈরি করুন।",
   "dailyGraphPuzzle": "দৈনিক গ্রাফ ধাঁধা",
+  "levelSubtitleUntangleMoves": "{moveCount} চালে গ্রাফটি খুলুন",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "সব ক্রসিং সরিয়ে দিন",
+  "levelSubtitleKeepStreak": "ধারাবাহিকতা চালিয়ে যান",
+  "levelSubtitlePerfectSolve": "নিখুঁত সমাধানের চেষ্টা করুন",
   "dailyScore": "দৈনিক স্কোর",
   "decline": "হ্রাস",
   "deleteAccount": "অ্যাকাউন্ট মুছুন",
   "details": "বিস্তারিত",
   "detailsTooLong": "বিবরণ 1000 অক্ষর বা তার কম হতে হবে",
   "displayName": "প্রদর্শনের নাম",
+  "downloadOnAppStore": "App Store থেকে ডাউনলোড করুন",
   "email": "ইমেল",
   "enterEmailAndPassword": "ইমেইল এবং পাসওয়ার্ড লিখুন",
   "enterEmailFirst": "প্রথমে আপনার ইমেইল লিখুন",
   "enterValidEmail": "একটি বৈধ ইমেইল লিখুন",
-  "failedNodes": "{nodeCount} নোড ব্যর্থ",
+  "failedNodes": "গ্রাফ {nodeCount} ব্যর্থ",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -99,6 +111,7 @@
   "passwordMinLength": "পাসওয়ার্ড কমপক্ষে 6 অক্ষরের হতে হবে",
   "passwordTooWeak": "পাসওয়ার্ড খুব দুর্বল",
   "planarity": "planarity",
+  "privacyOptions": "গোপনীয়তার বিকল্প",
   "planarGraphWikipedia": "উইকিপিডিয়া: প্ল্যানার গ্রাফ",
   "pressAgainToDelete": "মুছে ফেলার জন্য আবার টিপুন",
   "profile": "প্রোফাইল",
@@ -128,7 +141,7 @@
   "signOut": "সাইন আউট",
   "signUp": "সাইন আপ",
   "signUpToCompete": " আপনার বন্ধুদের সাথে প্রতিযোগিতা করতে",
-  "solvedNodes": "{nodeCount} নোড সমাধান হয়েছে",
+  "solvedNodes": "গ্রাফ {nodeCount} সমাধান হয়েছে",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

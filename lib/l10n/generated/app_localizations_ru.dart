@@ -85,6 +85,20 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dailyGraphPuzzle => 'ежедневная головоломка с графами';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return 'распутайте граф за $moveCount ходов';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'уберите все пересечения';
+
+  @override
+  String get levelSubtitleKeepStreak => 'продолжайте серию';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'стремитесь к идеальному решению';
+
+  @override
   String get dailyScore => 'дневной счет';
 
   @override
@@ -104,6 +118,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get displayName => 'отображаемое имя';
 
   @override
+  String get downloadOnAppStore => 'скачать в App Store';
+
+  @override
   String get email => 'эл. почта';
 
   @override
@@ -119,7 +136,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return 'не удалось $nodeCount узлов';
+    return 'граф $nodeCount не пройден';
   }
 
   @override
@@ -227,6 +244,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'настройки конфиденциальности';
+
+  @override
   String get planarGraphWikipedia => 'википедия: планарный граф';
 
   @override
@@ -301,7 +321,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return 'решено $nodeCount узлов';
+    return 'граф $nodeCount решен';
   }
 
   @override

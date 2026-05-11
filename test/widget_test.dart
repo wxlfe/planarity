@@ -1,10 +1,12 @@
-import 'dart:ui';
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:planarity/l10n/app_localizations.dart';
+import 'package:planarity/l10n/generated/app_localizations_en.dart';
 import 'package:planarity/main.dart';
 
 String _todayKey() {
@@ -32,6 +34,13 @@ void main() {
     expect(scoreForSolvedLevel(level: 6, movesUsed: 2), 4);
     expect(scoreForSolvedLevel(level: 6, movesUsed: 6), 0);
     expect(scoreForSolvedLevel(level: 6, movesUsed: 8), 0);
+  });
+
+  test('completion modal titles identify the graph result', () {
+    final l10n = AppLocalizationsEn();
+
+    expect(l10n.solvedNodes(8), 'graph 8 solved');
+    expect(l10n.failedNodes(8), 'graph 8 failed');
   });
 
   test('display name validation blocks unsafe personal info and profanity', () {
@@ -123,6 +132,36 @@ void main() {
     expect(find.text('leaderboard'), findsOneWidget);
     expect(find.text('start'), findsOneWidget);
     expect(find.text('daily score'), findsOneWidget);
+  });
+
+  testWidgets('Web home page shows App Store download button', (
+    WidgetTester tester,
+  ) async {
+    debugShowAppStoreDownloadButton = true;
+    addTearDown(() {
+      debugShowAppStoreDownloadButton = false;
+    });
+
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(const PlanarityApp());
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.bySemanticsLabel('download on the App Store'), findsOneWidget);
+  });
+
+  testWidgets('Home page can show privacy options button', (
+    WidgetTester tester,
+  ) async {
+    debugShowPrivacyOptionsButton = true;
+    addTearDown(() {
+      debugShowPrivacyOptionsButton = false;
+    });
+
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(const PlanarityApp());
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byTooltip('privacy options'), findsOneWidget);
   });
 
   testWidgets('Home page follows a Spanish system locale', (
@@ -309,6 +348,41 @@ void main() {
     expect(find.text('continue'), findsOneWidget);
   });
 
+  testWidgets('Level page subtitle changes with current score', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) =>
+              Text(context.l10n.levelSubtitle(score: 0, moveCount: 6)),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('untangle the graph in 6 moves'), findsOneWidget);
+    expect(find.text('daily graph puzzle'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) =>
+              Text(context.l10n.levelSubtitle(score: 30, moveCount: 6)),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('chase a perfect solve'), findsOneWidget);
+  });
+
   testWidgets('Home page resets expired daily score to zero', (
     WidgetTester tester,
   ) async {
@@ -326,6 +400,7 @@ void main() {
 
     expect(find.text('daily score'), findsOneWidget);
     expect(find.text('0'), findsOneWidget);
+    expect(find.byIcon(FontAwesomeIcons.lock), findsNothing);
     expect(find.text('start'), findsOneWidget);
   });
 }

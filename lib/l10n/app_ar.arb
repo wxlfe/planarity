@@ -43,17 +43,29 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "أنشئ حسابًا باستخدام بريدك الإلكتروني وكلمة المرور",
   "dailyGraphPuzzle": "لغز الرسم البياني اليومي",
+  "levelSubtitleUntangleMoves": "{moveCount, plural, one {فك الرسم البياني في حركة واحدة} two {فك الرسم البياني في حركتين} few {فك الرسم البياني في {moveCount} حركات} many {فك الرسم البياني في {moveCount} حركة} other {فك الرسم البياني في {moveCount} حركة}}",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "تخلص من كل التقاطعات",
+  "levelSubtitleKeepStreak": "واصل السلسلة",
+  "levelSubtitlePerfectSolve": "اسع إلى حل مثالي",
   "dailyScore": "نتيجة اليوم",
   "decline": "رفض",
   "deleteAccount": "حذف الحساب",
   "details": "التفاصيل",
   "detailsTooLong": "يجب أن تكون التفاصيل 1000 حرف أو أقل",
   "displayName": "اسم العرض",
+  "downloadOnAppStore": "تنزيل من App Store",
   "email": "البريد الإلكتروني",
   "enterEmailAndPassword": "أدخل البريد الإلكتروني وكلمة المرور",
   "enterEmailFirst": "أدخل بريدك الإلكتروني أولًا",
   "enterValidEmail": "أدخل بريدًا إلكترونيًا صالحًا",
-  "failedNodes": "فشل {nodeCount} عقد",
+  "failedNodes": "فشل الرسم البياني {nodeCount}",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -99,6 +111,7 @@
   "passwordMinLength": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
   "passwordTooWeak": "كلمة المرور ضعيفة جدًا",
   "planarity": "planarity",
+  "privacyOptions": "خيارات الخصوصية",
   "planarGraphWikipedia": "ويكيبيديا: رسم بياني مستوٍ",
   "pressAgainToDelete": "اضغط مرة أخرى للحذف",
   "profile": "الملف الشخصي",
@@ -128,7 +141,7 @@
   "signOut": "تسجيل الخروج",
   "signUp": "إنشاء حساب",
   "signUpToCompete": " للمنافسة مع أصدقائك",
-  "solvedNodes": "تم حل {nodeCount} عقد",
+  "solvedNodes": "تم حل الرسم البياني {nodeCount}",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

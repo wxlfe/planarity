@@ -81,6 +81,20 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dailyGraphPuzzle => '일일 그래프 퍼즐';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return '$moveCount번 안에 그래프를 풀어보세요';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => '모든 교차를 없애세요';
+
+  @override
+  String get levelSubtitleKeepStreak => '연속 기록을 이어가세요';
+
+  @override
+  String get levelSubtitlePerfectSolve => '완벽한 풀이에 도전하세요';
+
+  @override
   String get dailyScore => '일일 점수';
 
   @override
@@ -99,6 +113,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get displayName => '표시 이름';
 
   @override
+  String get downloadOnAppStore => 'App Store에서 다운로드';
+
+  @override
   String get email => '이메일';
 
   @override
@@ -112,7 +129,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return '$nodeCount개 노드 실패';
+    return '그래프 $nodeCount 실패';
   }
 
   @override
@@ -213,6 +230,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => '개인정보 옵션';
+
+  @override
   String get planarGraphWikipedia => '위키백과: 평면 그래프';
 
   @override
@@ -282,7 +302,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return '$nodeCount개 노드 해결';
+    return '그래프 $nodeCount 해결';
   }
 
   @override

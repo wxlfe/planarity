@@ -43,17 +43,29 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "tạo một tài khoản với email và mật khẩu của bạn.",
   "dailyGraphPuzzle": "câu đố đồ thị hằng ngày",
+  "levelSubtitleUntangleMoves": "gỡ đồ thị trong {moveCount} nước đi",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "loại bỏ mọi giao cắt",
+  "levelSubtitleKeepStreak": "giữ chuỗi tiếp tục",
+  "levelSubtitlePerfectSolve": "nhắm đến lời giải hoàn hảo",
   "dailyScore": "điểm hằng ngày",
   "decline": "sự suy sụp",
   "deleteAccount": "xóa tài khoản",
   "details": "chi tiết",
   "detailsTooLong": "chi tiết phải có 1000 ký tự trở xuống",
   "displayName": "tên hiển thị",
+  "downloadOnAppStore": "tải về trên App Store",
   "email": "email",
   "enterEmailAndPassword": "nhập email và mật khẩu",
   "enterEmailFirst": "nhập email của bạn trước",
   "enterValidEmail": "nhập một email hợp lệ",
-  "failedNodes": "thất bại {nodeCount} nút",
+  "failedNodes": "đồ thị {nodeCount} thất bại",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -99,6 +111,7 @@
   "passwordMinLength": "mật khẩu phải có ít nhất 6 ký tự",
   "passwordTooWeak": "mật khẩu quá yếu",
   "planarity": "planarity",
+  "privacyOptions": "tùy chọn quyền riêng tư",
   "planarGraphWikipedia": "wikipedia: đồ thị phẳng",
   "pressAgainToDelete": "nhấn lại để xóa",
   "profile": "hồ sơ",
@@ -128,7 +141,7 @@
   "signOut": "đăng xuất",
   "signUp": "đăng ký",
   "signUpToCompete": " để cạnh tranh với bạn bè của bạn",
-  "solvedNodes": "đã giải {nodeCount} nút",
+  "solvedNodes": "đồ thị {nodeCount} đã giải",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

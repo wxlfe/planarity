@@ -85,6 +85,20 @@ class AppLocalizationsUr extends AppLocalizations {
   String get dailyGraphPuzzle => 'روزانہ گراف پہیلی';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return 'گراف کو $moveCount چالوں میں سلجھائیں';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'تمام کراسنگ ختم کریں';
+
+  @override
+  String get levelSubtitleKeepStreak => 'سلسلہ جاری رکھیں';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'بہترین حل کی کوشش کریں';
+
+  @override
   String get dailyScore => 'روزانہ اسکور';
 
   @override
@@ -103,6 +117,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get displayName => 'ڈسپلے نام';
 
   @override
+  String get downloadOnAppStore => 'App Store سے ڈاؤن لوڈ کریں';
+
+  @override
   String get email => 'ای میل';
 
   @override
@@ -116,7 +133,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return '$nodeCount نوڈز ناکام ہوئے';
+    return 'گراف $nodeCount ناکام ہوا';
   }
 
   @override
@@ -223,6 +240,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'رازداری کے اختیارات';
+
+  @override
   String get planarGraphWikipedia => 'ویکیپیڈیا: پلینار گراف';
 
   @override
@@ -296,7 +316,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return '$nodeCount نوڈز حل ہوئے';
+    return 'گراف $nodeCount حل ہوا';
   }
 
   @override

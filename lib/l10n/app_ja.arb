@@ -43,17 +43,29 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "メールアドレスとパスワードでアカウントを作成します。",
   "dailyGraphPuzzle": "デイリーグラフパズル",
+  "levelSubtitleUntangleMoves": "{moveCount}手でグラフをほどこう",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "すべての交差をなくそう",
+  "levelSubtitleKeepStreak": "連勝を続けよう",
+  "levelSubtitlePerfectSolve": "完璧な解法を狙おう",
   "dailyScore": "デイリースコア",
   "decline": "",
   "deleteAccount": "アカウントを削除",
   "details": "詳細",
   "detailsTooLong": "詳細は1000文字以内で入力してください",
   "displayName": "表示名",
+  "downloadOnAppStore": "App Storeでダウンロード",
   "email": "メール",
   "enterEmailAndPassword": "あなたのメールアドレスとパスワードを入力してください",
   "enterEmailFirst": "最初にメールアドレスを入力してください",
   "enterValidEmail": "有効なメールアドレスを入力してください",
-  "failedNodes": "{nodeCount} ノード失敗",
+  "failedNodes": "グラフ {nodeCount} 失敗",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -99,6 +111,7 @@
   "passwordMinLength": "パスワードは6文字以上なければなりません",
   "passwordTooWeak": "パスワードが弱すぎます",
   "planarity": "planarity",
+  "privacyOptions": "プライバシー設定",
   "planarGraphWikipedia": "wikipedia:平面グラフ",
   "pressAgainToDelete": "もう一度押すと削除されます",
   "profile": "プロフィール",
@@ -128,7 +141,7 @@
   "signOut": "ログアウト",
   "signUp": "登録",
   "signUpToCompete": " 友達と競い合うために",
-  "solvedNodes": "{nodeCount} ノード解決",
+  "solvedNodes": "グラフ {nodeCount} 解決",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

@@ -43,17 +43,29 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "créez un compte avec votre email et votre mot de passe.",
   "dailyGraphPuzzle": "casse-tête graphique quotidien",
+  "levelSubtitleUntangleMoves": "démêle le graphe en {moveCount} coups",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "supprime tous les croisements",
+  "levelSubtitleKeepStreak": "continue sur ta lancée",
+  "levelSubtitlePerfectSolve": "vise une résolution parfaite",
   "dailyScore": "score du jour",
   "decline": "déclin",
   "deleteAccount": "supprimer le compte",
   "details": "détails",
   "detailsTooLong": "les détails doivent comporter 1 000 caractères ou moins",
   "displayName": "nom d'affichage",
+  "downloadOnAppStore": "télécharger sur l'App Store",
   "email": "e-mail",
   "enterEmailAndPassword": "entrez l'email et le mot de passe",
   "enterEmailFirst": "entrez d'abord votre email",
   "enterValidEmail": "entrez un email valide",
-  "failedNodes": "{nodeCount} nœuds échoués",
+  "failedNodes": "graphe {nodeCount} échoué",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -99,6 +111,7 @@
   "passwordMinLength": "le mot de passe doit contenir au moins 6 caractères",
   "passwordTooWeak": "le mot de passe est trop faible",
   "planarity": "planarity",
+  "privacyOptions": "options de confidentialité",
   "planarGraphWikipedia": "wikipedia : graphe planaire",
   "pressAgainToDelete": "appuyez à nouveau pour supprimer",
   "profile": "profil",
@@ -128,7 +141,7 @@
   "signOut": "se déconnecter",
   "signUp": "s'inscrire",
   "signUpToCompete": " rivaliser avec tes amis",
-  "solvedNodes": "{nodeCount} nœuds résolus",
+  "solvedNodes": "graphe {nodeCount} résolu",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

@@ -86,6 +86,20 @@ class AppLocalizationsVi extends AppLocalizations {
   String get dailyGraphPuzzle => 'câu đố đồ thị hằng ngày';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return 'gỡ đồ thị trong $moveCount nước đi';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'loại bỏ mọi giao cắt';
+
+  @override
+  String get levelSubtitleKeepStreak => 'giữ chuỗi tiếp tục';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'nhắm đến lời giải hoàn hảo';
+
+  @override
   String get dailyScore => 'điểm hằng ngày';
 
   @override
@@ -104,6 +118,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get displayName => 'tên hiển thị';
 
   @override
+  String get downloadOnAppStore => 'tải về trên App Store';
+
+  @override
   String get email => 'email';
 
   @override
@@ -117,7 +134,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return 'thất bại $nodeCount nút';
+    return 'đồ thị $nodeCount thất bại';
   }
 
   @override
@@ -224,6 +241,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'tùy chọn quyền riêng tư';
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: đồ thị phẳng';
 
   @override
@@ -298,7 +318,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return 'đã giải $nodeCount nút';
+    return 'đồ thị $nodeCount đã giải';
   }
 
   @override

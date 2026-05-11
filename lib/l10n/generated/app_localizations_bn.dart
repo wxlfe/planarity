@@ -84,6 +84,20 @@ class AppLocalizationsBn extends AppLocalizations {
   String get dailyGraphPuzzle => 'দৈনিক গ্রাফ ধাঁধা';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return '$moveCount চালে গ্রাফটি খুলুন';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'সব ক্রসিং সরিয়ে দিন';
+
+  @override
+  String get levelSubtitleKeepStreak => 'ধারাবাহিকতা চালিয়ে যান';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'নিখুঁত সমাধানের চেষ্টা করুন';
+
+  @override
   String get dailyScore => 'দৈনিক স্কোর';
 
   @override
@@ -102,6 +116,9 @@ class AppLocalizationsBn extends AppLocalizations {
   String get displayName => 'প্রদর্শনের নাম';
 
   @override
+  String get downloadOnAppStore => 'App Store থেকে ডাউনলোড করুন';
+
+  @override
   String get email => 'ইমেল';
 
   @override
@@ -115,7 +132,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return '$nodeCount নোড ব্যর্থ';
+    return 'গ্রাফ $nodeCount ব্যর্থ';
   }
 
   @override
@@ -221,6 +238,9 @@ class AppLocalizationsBn extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'গোপনীয়তার বিকল্প';
+
+  @override
   String get planarGraphWikipedia => 'উইকিপিডিয়া: প্ল্যানার গ্রাফ';
 
   @override
@@ -294,7 +314,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return '$nodeCount নোড সমাধান হয়েছে';
+    return 'গ্রাফ $nodeCount সমাধান হয়েছে';
   }
 
   @override

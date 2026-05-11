@@ -85,6 +85,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dailyGraphPuzzle => 'daily graph puzzle';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      moveCount,
+      locale: localeName,
+      other: 'untangle the graph in $moveCount moves',
+      one: 'untangle the graph in 1 move',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'get rid of all the crossings';
+
+  @override
+  String get levelSubtitleKeepStreak => 'keep the streak going';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'chase a perfect solve';
+
+  @override
   String get dailyScore => 'daily score';
 
   @override
@@ -103,6 +123,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get displayName => 'display name';
 
   @override
+  String get downloadOnAppStore => 'download on the App Store';
+
+  @override
   String get email => 'email';
 
   @override
@@ -116,7 +139,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return 'failed $nodeCount nodes';
+    return 'graph $nodeCount failed';
   }
 
   @override
@@ -222,6 +245,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'privacy options';
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: planar graph';
 
   @override
@@ -294,7 +320,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return 'solved $nodeCount nodes';
+    return 'graph $nodeCount solved';
   }
 
   @override

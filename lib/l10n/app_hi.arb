@@ -43,17 +43,29 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "अपने ईमेल और पासवर्ड से खाता बनाएँ",
   "dailyGraphPuzzle": "दैनिक ग्राफ पहेली",
+  "levelSubtitleUntangleMoves": "ग्राफ को {moveCount} चालों में सुलझाएँ",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "सभी क्रॉसिंग हटाएँ",
+  "levelSubtitleKeepStreak": "श्रृंखला जारी रखें",
+  "levelSubtitlePerfectSolve": "एक परफ़ेक्ट हल की कोशिश करें",
   "dailyScore": "दैनिक स्कोर",
   "decline": "अस्वीकार करें",
   "deleteAccount": "खाता हटाएँ",
   "details": "विवरण",
   "detailsTooLong": "विवरण 1000 अक्षर या कम होना चाहिए",
   "displayName": "प्रदर्शित नाम",
+  "downloadOnAppStore": "App Store से डाउनलोड करें",
   "email": "ईमेल",
   "enterEmailAndPassword": "ईमेल और पासवर्ड दर्ज करें",
   "enterEmailFirst": "पहले अपना ईमेल दर्ज करें",
   "enterValidEmail": "मान्य ईमेल दर्ज करें",
-  "failedNodes": "{nodeCount} नोड विफल",
+  "failedNodes": "ग्राफ {nodeCount} विफल",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -99,6 +111,7 @@
   "passwordMinLength": "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए",
   "passwordTooWeak": "पासवर्ड बहुत कमजोर है",
   "planarity": "planarity",
+  "privacyOptions": "गोपनीयता विकल्प",
   "planarGraphWikipedia": "wikipedia: समतलीय ग्राफ",
   "pressAgainToDelete": "हटाने के लिए फिर दबाएँ",
   "profile": "प्रोफ़ाइल",
@@ -128,7 +141,7 @@
   "signOut": "साइन आउट",
   "signUp": "साइन अप",
   "signUpToCompete": " अपने मित्रों से प्रतिस्पर्धा करने के लिए",
-  "solvedNodes": "{nodeCount} नोड हल किए",
+  "solvedNodes": "ग्राफ {nodeCount} हल हुआ",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

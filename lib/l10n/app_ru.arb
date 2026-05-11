@@ -43,17 +43,29 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "создайте учетную запись с вашим адресом электронной почты и паролем.",
   "dailyGraphPuzzle": "ежедневная головоломка с графами",
+  "levelSubtitleUntangleMoves": "распутайте граф за {moveCount} ходов",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "уберите все пересечения",
+  "levelSubtitleKeepStreak": "продолжайте серию",
+  "levelSubtitlePerfectSolve": "стремитесь к идеальному решению",
   "dailyScore": "дневной счет",
   "decline": "отклонить",
   "deleteAccount": "удалить аккаунт",
   "details": "подробности",
   "detailsTooLong": "Подробности должны содержать не более 1000 символов.",
   "displayName": "отображаемое имя",
+  "downloadOnAppStore": "скачать в App Store",
   "email": "эл. почта",
   "enterEmailAndPassword": "введите адрес электронной почты и пароль",
   "enterEmailFirst": "сначала введите свой адрес электронной почты",
   "enterValidEmail": "введите действительный адрес электронной почты",
-  "failedNodes": "не удалось {nodeCount} узлов",
+  "failedNodes": "граф {nodeCount} не пройден",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -99,6 +111,7 @@
   "passwordMinLength": "пароль должен быть не менее 6 символов",
   "passwordTooWeak": "пароль слишком слабый",
   "planarity": "planarity",
+  "privacyOptions": "настройки конфиденциальности",
   "planarGraphWikipedia": "википедия: планарный граф",
   "pressAgainToDelete": "нажмите еще раз, чтобы удалить",
   "profile": "профиль",
@@ -128,7 +141,7 @@
   "signOut": "выйти",
   "signUp": "зарегистрироваться",
   "signUpToCompete": " соревноваться с друзьями",
-  "solvedNodes": "решено {nodeCount} узлов",
+  "solvedNodes": "граф {nodeCount} решен",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

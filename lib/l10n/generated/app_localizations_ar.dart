@@ -86,6 +86,29 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dailyGraphPuzzle => 'لغز الرسم البياني اليومي';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      moveCount,
+      locale: localeName,
+      other: 'فك الرسم البياني في $moveCount حركة',
+      many: 'فك الرسم البياني في $moveCount حركة',
+      few: 'فك الرسم البياني في $moveCount حركات',
+      two: 'فك الرسم البياني في حركتين',
+      one: 'فك الرسم البياني في حركة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'تخلص من كل التقاطعات';
+
+  @override
+  String get levelSubtitleKeepStreak => 'واصل السلسلة';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'اسع إلى حل مثالي';
+
+  @override
   String get dailyScore => 'نتيجة اليوم';
 
   @override
@@ -104,6 +127,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get displayName => 'اسم العرض';
 
   @override
+  String get downloadOnAppStore => 'تنزيل من App Store';
+
+  @override
   String get email => 'البريد الإلكتروني';
 
   @override
@@ -117,7 +143,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return 'فشل $nodeCount عقد';
+    return 'فشل الرسم البياني $nodeCount';
   }
 
   @override
@@ -223,6 +249,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'خيارات الخصوصية';
+
+  @override
   String get planarGraphWikipedia => 'ويكيبيديا: رسم بياني مستوٍ';
 
   @override
@@ -293,7 +322,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return 'تم حل $nodeCount عقد';
+    return 'تم حل الرسم البياني $nodeCount';
   }
 
   @override

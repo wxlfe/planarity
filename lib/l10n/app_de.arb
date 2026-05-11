@@ -43,17 +43,29 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "Erstellen Sie ein Konto mit Ihrer E-Mail-Adresse und Ihrem Passwort.",
   "dailyGraphPuzzle": "tägliches graphenrätsel",
+  "levelSubtitleUntangleMoves": "entwirre den graphen in {moveCount} zügen",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "entferne alle kreuzungen",
+  "levelSubtitleKeepStreak": "halte die serie am laufen",
+  "levelSubtitlePerfectSolve": "jage eine perfekte lösung",
   "dailyScore": "tagesscore",
   "decline": "Abfall",
   "deleteAccount": "konto löschen",
   "details": "Details",
   "detailsTooLong": "Details dürfen maximal 1000 Zeichen lang sein",
   "displayName": "Anzeigename",
+  "downloadOnAppStore": "im App Store laden",
   "email": "e-mail",
   "enterEmailAndPassword": "Geben Sie E-Mail und Passwort ein",
   "enterEmailFirst": "Geben Sie zuerst Ihre E-Mail-Adresse ein",
   "enterValidEmail": "Geben Sie eine gültige E-Mail-Adresse ein",
-  "failedNodes": "{nodeCount} knoten fehlgeschlagen",
+  "failedNodes": "graph {nodeCount} fehlgeschlagen",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -99,6 +111,7 @@
   "passwordMinLength": "Das Passwort muss mindestens 6 Zeichen lang sein",
   "passwordTooWeak": "Passwort ist zu schwach",
   "planarity": "planarity",
+  "privacyOptions": "Datenschutzoptionen",
   "planarGraphWikipedia": "Wikipedia: Planarer Graph",
   "pressAgainToDelete": "Zum Löschen erneut drücken",
   "profile": "profil",
@@ -128,7 +141,7 @@
   "signOut": "abmelden",
   "signUp": "registrieren",
   "signUpToCompete": " um mit deinen Freunden zu konkurrieren",
-  "solvedNodes": "{nodeCount} knoten gelöst",
+  "solvedNodes": "graph {nodeCount} gelöst",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

@@ -85,6 +85,20 @@ class AppLocalizationsId extends AppLocalizations {
   String get dailyGraphPuzzle => 'teka-teki graf harian';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return 'urai graf dalam $moveCount langkah';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'hilangkan semua persilangan';
+
+  @override
+  String get levelSubtitleKeepStreak => 'pertahankan rentetannya';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'kejar penyelesaian sempurna';
+
+  @override
   String get dailyScore => 'skor harian';
 
   @override
@@ -103,6 +117,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get displayName => 'nama tampilan';
 
   @override
+  String get downloadOnAppStore => 'unduh di App Store';
+
+  @override
   String get email => 'email';
 
   @override
@@ -116,7 +133,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return 'gagal $nodeCount node';
+    return 'graf $nodeCount gagal';
   }
 
   @override
@@ -222,6 +239,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'opsi privasi';
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: grafik planar';
 
   @override
@@ -294,7 +314,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return 'menyelesaikan $nodeCount node';
+    return 'graf $nodeCount selesai';
   }
 
   @override

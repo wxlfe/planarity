@@ -43,17 +43,29 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "create an account with your email and password.",
   "dailyGraphPuzzle": "daily graph puzzle",
+  "levelSubtitleUntangleMoves": "{moveCount, plural, one {untangle the graph in 1 move} other {untangle the graph in {moveCount} moves}}",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "get rid of all the crossings",
+  "levelSubtitleKeepStreak": "keep the streak going",
+  "levelSubtitlePerfectSolve": "chase a perfect solve",
   "dailyScore": "daily score",
   "decline": "decline",
   "deleteAccount": "delete account",
   "details": "details",
   "detailsTooLong": "details must be 1000 characters or less",
   "displayName": "display name",
+  "downloadOnAppStore": "download on the App Store",
   "email": "email",
   "enterEmailAndPassword": "enter email and password",
   "enterEmailFirst": "enter your email first",
   "enterValidEmail": "enter a valid email",
-  "failedNodes": "failed {nodeCount} nodes",
+  "failedNodes": "graph {nodeCount} failed",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -99,6 +111,7 @@
   "passwordMinLength": "password must be at least 6 characters",
   "passwordTooWeak": "password is too weak",
   "planarity": "planarity",
+  "privacyOptions": "privacy options",
   "planarGraphWikipedia": "wikipedia: planar graph",
   "pressAgainToDelete": "press again to delete",
   "profile": "profile",
@@ -128,7 +141,7 @@
   "signOut": "sign out",
   "signUp": "sign up",
   "signUpToCompete": " to compete with your friends",
-  "solvedNodes": "solved {nodeCount} nodes",
+  "solvedNodes": "graph {nodeCount} solved",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

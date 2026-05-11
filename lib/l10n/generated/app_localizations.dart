@@ -260,6 +260,30 @@ abstract class AppLocalizations {
   /// **'daily graph puzzle'**
   String get dailyGraphPuzzle;
 
+  /// No description provided for @levelSubtitleUntangleMoves.
+  ///
+  /// In en, this message translates to:
+  /// **'{moveCount, plural, one {untangle the graph in 1 move} other {untangle the graph in {moveCount} moves}}'**
+  String levelSubtitleUntangleMoves(int moveCount);
+
+  /// No description provided for @levelSubtitleNoCrossings.
+  ///
+  /// In en, this message translates to:
+  /// **'get rid of all the crossings'**
+  String get levelSubtitleNoCrossings;
+
+  /// No description provided for @levelSubtitleKeepStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'keep the streak going'**
+  String get levelSubtitleKeepStreak;
+
+  /// No description provided for @levelSubtitlePerfectSolve.
+  ///
+  /// In en, this message translates to:
+  /// **'chase a perfect solve'**
+  String get levelSubtitlePerfectSolve;
+
   /// No description provided for @dailyScore.
   ///
   /// In en, this message translates to:
@@ -296,6 +320,12 @@ abstract class AppLocalizations {
   /// **'display name'**
   String get displayName;
 
+  /// No description provided for @downloadOnAppStore.
+  ///
+  /// In en, this message translates to:
+  /// **'download on the App Store'**
+  String get downloadOnAppStore;
+
   /// No description provided for @email.
   ///
   /// In en, this message translates to:
@@ -323,7 +353,7 @@ abstract class AppLocalizations {
   /// No description provided for @failedNodes.
   ///
   /// In en, this message translates to:
-  /// **'failed {nodeCount} nodes'**
+  /// **'graph {nodeCount} failed'**
   String failedNodes(int nodeCount);
 
   /// No description provided for @friendInvite.
@@ -512,6 +542,12 @@ abstract class AppLocalizations {
   /// **'planarity'**
   String get planarity;
 
+  /// No description provided for @privacyOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'privacy options'**
+  String get privacyOptions;
+
   /// No description provided for @planarGraphWikipedia.
   ///
   /// In en, this message translates to:
@@ -647,7 +683,7 @@ abstract class AppLocalizations {
   /// No description provided for @solvedNodes.
   ///
   /// In en, this message translates to:
-  /// **'solved {nodeCount} nodes'**
+  /// **'graph {nodeCount} solved'**
   String solvedNodes(int nodeCount);
 
   /// No description provided for @start.

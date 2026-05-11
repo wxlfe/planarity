@@ -81,6 +81,20 @@ class AppLocalizationsJa extends AppLocalizations {
   String get dailyGraphPuzzle => 'デイリーグラフパズル';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return '$moveCount手でグラフをほどこう';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'すべての交差をなくそう';
+
+  @override
+  String get levelSubtitleKeepStreak => '連勝を続けよう';
+
+  @override
+  String get levelSubtitlePerfectSolve => '完璧な解法を狙おう';
+
+  @override
   String get dailyScore => 'デイリースコア';
 
   @override
@@ -99,6 +113,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get displayName => '表示名';
 
   @override
+  String get downloadOnAppStore => 'App Storeでダウンロード';
+
+  @override
   String get email => 'メール';
 
   @override
@@ -112,7 +129,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return '$nodeCount ノード失敗';
+    return 'グラフ $nodeCount 失敗';
   }
 
   @override
@@ -212,6 +229,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'プライバシー設定';
+
+  @override
   String get planarGraphWikipedia => 'wikipedia:平面グラフ';
 
   @override
@@ -281,7 +301,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return '$nodeCount ノード解決';
+    return 'グラフ $nodeCount 解決';
   }
 
   @override

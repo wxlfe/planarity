@@ -86,6 +86,20 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dailyGraphPuzzle => 'günlük grafik bulmacası';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return 'grafı $moveCount hamlede çöz';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'tüm kesişimleri kaldır';
+
+  @override
+  String get levelSubtitleKeepStreak => 'seriyi sürdür';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'mükemmel çözümü kovala';
+
+  @override
   String get dailyScore => 'günlük skor';
 
   @override
@@ -105,6 +119,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get displayName => 'görünen ad';
 
   @override
+  String get downloadOnAppStore => 'App Store\'dan indir';
+
+  @override
   String get email => 'e-posta';
 
   @override
@@ -118,7 +135,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return '$nodeCount düğüm başarısız';
+    return 'graf $nodeCount başarısız';
   }
 
   @override
@@ -226,6 +243,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'gizlilik seçenekleri';
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: düzlemsel grafik';
 
   @override
@@ -300,7 +320,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return '$nodeCount düğüm çözüldü';
+    return 'graf $nodeCount çözüldü';
   }
 
   @override

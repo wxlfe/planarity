@@ -86,6 +86,20 @@ class AppLocalizationsIt extends AppLocalizations {
   String get dailyGraphPuzzle => 'rompicapo grafico quotidiano';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return 'districa il grafo in $moveCount mosse';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'elimina tutti gli incroci';
+
+  @override
+  String get levelSubtitleKeepStreak => 'continua la serie';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'punta a una soluzione perfetta';
+
+  @override
   String get dailyScore => 'punteggio giornaliero';
 
   @override
@@ -105,6 +119,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get displayName => 'nome da visualizzare';
 
   @override
+  String get downloadOnAppStore => 'scarica su App Store';
+
+  @override
   String get email => 'email';
 
   @override
@@ -118,7 +135,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return 'falliti $nodeCount nodi';
+    return 'grafo $nodeCount fallito';
   }
 
   @override
@@ -226,6 +243,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'opzioni privacy';
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: grafico planare';
 
   @override
@@ -301,7 +321,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return 'risolti $nodeCount nodi';
+    return 'grafo $nodeCount risolto';
   }
 
   @override
