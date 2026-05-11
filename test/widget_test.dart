@@ -146,7 +146,7 @@ void main() {
     await tester.pumpWidget(const PlanarityApp());
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('download on the App Store'), findsOneWidget);
+    expect(find.bySemanticsLabel('download on the App Store'), findsOneWidget);
   });
 
   testWidgets('Home page can show privacy options button', (

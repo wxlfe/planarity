@@ -2423,16 +2423,9 @@ class _HomeHeroContent extends StatelessWidget {
             ),
             if (showAppStoreDownloadButton) ...[
               const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: onAppStoreTap,
-                style: outlineButtonStyle,
-                icon: const FaIcon(FontAwesomeIcons.apple, size: 18),
-                label: Text(
-                  l10n.downloadOnAppStore,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+              _AppStoreBadge(
+                label: l10n.downloadOnAppStore,
+                onTap: onAppStoreTap,
               ),
             ],
             if (showLeaderboardBelowButton) ...[
@@ -6170,6 +6163,82 @@ class _MoveDots extends StatelessWidget {
             ),
           );
         }),
+      ),
+    );
+  }
+}
+
+class _AppStoreBadge extends StatelessWidget {
+  const _AppStoreBadge({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    const borderRadius = BorderRadius.all(Radius.circular(9));
+
+    return Semantics(
+      button: true,
+      label: label,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: borderRadius,
+          child: Container(
+            width: 150,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              border: Border.all(color: const Color(0xffa6a6a6)),
+              borderRadius: borderRadius,
+            ),
+            child: const ExcludeSemantics(
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FaIcon(
+                        FontAwesomeIcons.apple,
+                        color: Colors.white,
+                        size: 31,
+                      ),
+                      SizedBox(width: 9),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Download on the',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 9.5,
+                              height: 1,
+                              letterSpacing: -0.1,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'App Store',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 22.5,
+                              height: 1,
+                              letterSpacing: -0.35,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
