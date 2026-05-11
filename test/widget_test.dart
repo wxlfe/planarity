@@ -1,8 +1,8 @@
-import 'dart:ui';
 import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:planarity/main.dart';
@@ -326,6 +326,7 @@ void main() {
 
     expect(find.text('daily score'), findsOneWidget);
     expect(find.text('0'), findsOneWidget);
+    expect(find.byIcon(FontAwesomeIcons.lock), findsNothing);
     expect(find.text('start'), findsOneWidget);
   });
 }

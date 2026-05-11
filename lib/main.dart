@@ -3852,6 +3852,10 @@ int _leaderboardRawScoreFromData(Map<String, dynamic>? profileData) {
 }
 
 bool _leaderboardLockedFromData(Map<String, dynamic>? profileData) {
+  final playedToday = profileData?['lastPlayed'] == _leaderboardTodayKey();
+  if (!playedToday) {
+    return false;
+  }
   final locked = profileData?['locked'];
   if (locked is bool) {
     return locked;
