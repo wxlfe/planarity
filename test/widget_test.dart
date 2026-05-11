@@ -1,10 +1,10 @@
-import 'dart:ui';
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:planarity/l10n/app_localizations.dart';
 import 'package:planarity/main.dart';
 
 String _todayKey() {
@@ -307,6 +307,41 @@ void main() {
     expect(find.text('daily score'), findsOneWidget);
     expect(find.text('7'), findsOneWidget);
     expect(find.text('continue'), findsOneWidget);
+  });
+
+  testWidgets('Level page subtitle changes with current score', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) =>
+              Text(context.l10n.levelSubtitle(score: 0, moveCount: 6)),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('untangle the graph in 6 moves'), findsOneWidget);
+    expect(find.text('daily graph puzzle'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) =>
+              Text(context.l10n.levelSubtitle(score: 30, moveCount: 6)),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('chase a perfect solve'), findsOneWidget);
   });
 
   testWidgets('Home page resets expired daily score to zero', (

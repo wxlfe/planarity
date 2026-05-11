@@ -85,6 +85,20 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dailyGraphPuzzle => 'ежедневная головоломка с графами';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return 'распутайте граф за $moveCount ходов';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'уберите все пересечения';
+
+  @override
+  String get levelSubtitleKeepStreak => 'продолжайте серию';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'стремитесь к идеальному решению';
+
+  @override
   String get dailyScore => 'дневной счет';
 
   @override

@@ -43,6 +43,17 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "আপনার ইমেল এবং পাসওয়ার্ড দিয়ে একটি অ্যাকাউন্ট তৈরি করুন।",
   "dailyGraphPuzzle": "দৈনিক গ্রাফ ধাঁধা",
+  "levelSubtitleUntangleMoves": "{moveCount} চালে গ্রাফটি খুলুন",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "সব ক্রসিং সরিয়ে দিন",
+  "levelSubtitleKeepStreak": "ধারাবাহিকতা চালিয়ে যান",
+  "levelSubtitlePerfectSolve": "নিখুঁত সমাধানের চেষ্টা করুন",
   "dailyScore": "দৈনিক স্কোর",
   "decline": "হ্রাস",
   "deleteAccount": "অ্যাকাউন্ট মুছুন",

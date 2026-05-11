@@ -43,6 +43,17 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "अपने ईमेल और पासवर्ड से खाता बनाएँ",
   "dailyGraphPuzzle": "दैनिक ग्राफ पहेली",
+  "levelSubtitleUntangleMoves": "ग्राफ को {moveCount} चालों में सुलझाएँ",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "सभी क्रॉसिंग हटाएँ",
+  "levelSubtitleKeepStreak": "श्रृंखला जारी रखें",
+  "levelSubtitlePerfectSolve": "एक परफ़ेक्ट हल की कोशिश करें",
   "dailyScore": "दैनिक स्कोर",
   "decline": "अस्वीकार करें",
   "deleteAccount": "खाता हटाएँ",

@@ -260,6 +260,30 @@ abstract class AppLocalizations {
   /// **'daily graph puzzle'**
   String get dailyGraphPuzzle;
 
+  /// No description provided for @levelSubtitleUntangleMoves.
+  ///
+  /// In en, this message translates to:
+  /// **'{moveCount, plural, one {untangle the graph in 1 move} other {untangle the graph in {moveCount} moves}}'**
+  String levelSubtitleUntangleMoves(int moveCount);
+
+  /// No description provided for @levelSubtitleNoCrossings.
+  ///
+  /// In en, this message translates to:
+  /// **'get rid of all the crossings'**
+  String get levelSubtitleNoCrossings;
+
+  /// No description provided for @levelSubtitleKeepStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'keep the streak going'**
+  String get levelSubtitleKeepStreak;
+
+  /// No description provided for @levelSubtitlePerfectSolve.
+  ///
+  /// In en, this message translates to:
+  /// **'chase a perfect solve'**
+  String get levelSubtitlePerfectSolve;
+
   /// No description provided for @dailyScore.
   ///
   /// In en, this message translates to:

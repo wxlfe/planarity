@@ -43,6 +43,17 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "أنشئ حسابًا باستخدام بريدك الإلكتروني وكلمة المرور",
   "dailyGraphPuzzle": "لغز الرسم البياني اليومي",
+  "levelSubtitleUntangleMoves": "{moveCount, plural, one {فك الرسم البياني في حركة واحدة} two {فك الرسم البياني في حركتين} few {فك الرسم البياني في {moveCount} حركات} many {فك الرسم البياني في {moveCount} حركة} other {فك الرسم البياني في {moveCount} حركة}}",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "تخلص من كل التقاطعات",
+  "levelSubtitleKeepStreak": "واصل السلسلة",
+  "levelSubtitlePerfectSolve": "اسع إلى حل مثالي",
   "dailyScore": "نتيجة اليوم",
   "decline": "رفض",
   "deleteAccount": "حذف الحساب",

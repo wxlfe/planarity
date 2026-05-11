@@ -43,6 +43,17 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "créez un compte avec votre email et votre mot de passe.",
   "dailyGraphPuzzle": "casse-tête graphique quotidien",
+  "levelSubtitleUntangleMoves": "démêle le graphe en {moveCount} coups",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "supprime tous les croisements",
+  "levelSubtitleKeepStreak": "continue sur ta lancée",
+  "levelSubtitlePerfectSolve": "vise une résolution parfaite",
   "dailyScore": "score du jour",
   "decline": "déclin",
   "deleteAccount": "supprimer le compte",

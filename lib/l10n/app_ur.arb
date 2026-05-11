@@ -43,6 +43,17 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "اپنے ای میل اور پاس ورڈ کے ساتھ ایک اکاؤنٹ بنائیں ۔",
   "dailyGraphPuzzle": "روزانہ گراف پہیلی",
+  "levelSubtitleUntangleMoves": "گراف کو {moveCount} چالوں میں سلجھائیں",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "تمام کراسنگ ختم کریں",
+  "levelSubtitleKeepStreak": "سلسلہ جاری رکھیں",
+  "levelSubtitlePerfectSolve": "بہترین حل کی کوشش کریں",
   "dailyScore": "روزانہ اسکور",
   "decline": "مسترد کرنا",
   "deleteAccount": "اکاؤنٹ حذف کریں",

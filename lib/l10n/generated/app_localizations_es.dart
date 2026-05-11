@@ -86,6 +86,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dailyGraphPuzzle => 'rompecabezas diario de grafos';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return 'desenreda el grafo en $moveCount movimientos';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'elimina todos los cruces';
+
+  @override
+  String get levelSubtitleKeepStreak => 'mantén la racha';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'busca una solución perfecta';
+
+  @override
   String get dailyScore => 'puntuación diaria';
 
   @override

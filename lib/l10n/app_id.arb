@@ -43,6 +43,17 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "buat akun dengan email dan kata sandi Anda.",
   "dailyGraphPuzzle": "teka-teki graf harian",
+  "levelSubtitleUntangleMoves": "urai graf dalam {moveCount} langkah",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "hilangkan semua persilangan",
+  "levelSubtitleKeepStreak": "pertahankan rentetannya",
+  "levelSubtitlePerfectSolve": "kejar penyelesaian sempurna",
   "dailyScore": "skor harian",
   "decline": "menolak",
   "deleteAccount": "hapus akun",

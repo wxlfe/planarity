@@ -43,6 +43,17 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "create an account with your email and password.",
   "dailyGraphPuzzle": "daily graph puzzle",
+  "levelSubtitleUntangleMoves": "{moveCount, plural, one {untangle the graph in 1 move} other {untangle the graph in {moveCount} moves}}",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "get rid of all the crossings",
+  "levelSubtitleKeepStreak": "keep the streak going",
+  "levelSubtitlePerfectSolve": "chase a perfect solve",
   "dailyScore": "daily score",
   "decline": "decline",
   "deleteAccount": "delete account",

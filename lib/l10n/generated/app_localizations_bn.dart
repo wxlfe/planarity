@@ -84,6 +84,20 @@ class AppLocalizationsBn extends AppLocalizations {
   String get dailyGraphPuzzle => 'দৈনিক গ্রাফ ধাঁধা';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return '$moveCount চালে গ্রাফটি খুলুন';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'সব ক্রসিং সরিয়ে দিন';
+
+  @override
+  String get levelSubtitleKeepStreak => 'ধারাবাহিকতা চালিয়ে যান';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'নিখুঁত সমাধানের চেষ্টা করুন';
+
+  @override
   String get dailyScore => 'দৈনিক স্কোর';
 
   @override

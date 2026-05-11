@@ -85,6 +85,20 @@ class AppLocalizationsId extends AppLocalizations {
   String get dailyGraphPuzzle => 'teka-teki graf harian';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return 'urai graf dalam $moveCount langkah';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'hilangkan semua persilangan';
+
+  @override
+  String get levelSubtitleKeepStreak => 'pertahankan rentetannya';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'kejar penyelesaian sempurna';
+
+  @override
   String get dailyScore => 'skor harian';
 
   @override
