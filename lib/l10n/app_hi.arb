@@ -111,6 +111,7 @@
   "passwordMinLength": "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए",
   "passwordTooWeak": "पासवर्ड बहुत कमजोर है",
   "planarity": "planarity",
+  "privacyOptions": "गोपनीयता विकल्प",
   "planarGraphWikipedia": "wikipedia: समतलीय ग्राफ",
   "pressAgainToDelete": "हटाने के लिए फिर दबाएँ",
   "profile": "प्रोफ़ाइल",

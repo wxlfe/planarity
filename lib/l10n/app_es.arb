@@ -111,6 +111,7 @@
   "passwordMinLength": "la contraseña debe tener al menos 6 caracteres",
   "passwordTooWeak": "la contraseña es demasiado débil",
   "planarity": "planarity",
+  "privacyOptions": "opciones de privacidad",
   "planarGraphWikipedia": "wikipedia: grafo planar",
   "pressAgainToDelete": "presiona de nuevo para eliminar",
   "profile": "perfil",

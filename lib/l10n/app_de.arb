@@ -111,6 +111,7 @@
   "passwordMinLength": "Das Passwort muss mindestens 6 Zeichen lang sein",
   "passwordTooWeak": "Passwort ist zu schwach",
   "planarity": "planarity",
+  "privacyOptions": "Datenschutzoptionen",
   "planarGraphWikipedia": "Wikipedia: Planarer Graph",
   "pressAgainToDelete": "Zum Löschen erneut drücken",
   "profile": "profil",

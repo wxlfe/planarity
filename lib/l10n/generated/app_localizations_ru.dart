@@ -244,6 +244,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'настройки конфиденциальности';
+
+  @override
   String get planarGraphWikipedia => 'википедия: планарный граф';
 
   @override

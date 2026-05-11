@@ -111,6 +111,7 @@
   "passwordMinLength": "пароль должен быть не менее 6 символов",
   "passwordTooWeak": "пароль слишком слабый",
   "planarity": "planarity",
+  "privacyOptions": "настройки конфиденциальности",
   "planarGraphWikipedia": "википедия: планарный граф",
   "pressAgainToDelete": "нажмите еще раз, чтобы удалить",
   "profile": "профиль",

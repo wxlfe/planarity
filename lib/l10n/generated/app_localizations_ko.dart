@@ -230,6 +230,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => '개인정보 옵션';
+
+  @override
   String get planarGraphWikipedia => '위키백과: 평면 그래프';
 
   @override

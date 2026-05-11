@@ -111,6 +111,7 @@
   "passwordMinLength": "kata sandi harus minimal 6 karakter",
   "passwordTooWeak": "kata sandi terlalu lemah",
   "planarity": "planarity",
+  "privacyOptions": "opsi privasi",
   "planarGraphWikipedia": "wikipedia: grafik planar",
   "pressAgainToDelete": "tekan lagi untuk menghapus",
   "profile": "profil",

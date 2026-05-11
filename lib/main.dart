@@ -28,9 +28,16 @@ bool _firebaseReady = false;
 bool _googleSignInReady = false;
 FirebaseAnalytics? _analytics;
 FirebaseAnalyticsObserver? _analyticsObserver;
+bool _mobileAdsInitialized = false;
+bool _canRequestMobileAds = false;
+PrivacyOptionsRequirementStatus _privacyOptionsRequirementStatus =
+    PrivacyOptionsRequirementStatus.notRequired;
 
 @visibleForTesting
 bool debugShowAppStoreDownloadButton = false;
+
+@visibleForTesting
+bool debugShowPrivacyOptionsButton = false;
 
 bool get _supportsMobileAds {
   if (kIsWeb) {
@@ -55,21 +62,117 @@ bool get _supportsAppleSignIn {
 }
 
 Future<void> _initializeMobileAds() async {
-  if (!_supportsMobileAds) {
+  if (!_supportsMobileAds || _mobileAdsInitialized) {
     return;
   }
 
   try {
     await MobileAds.instance.initialize();
+    _mobileAdsInitialized = true;
   } catch (error, stackTrace) {
     debugPrint('Mobile Ads initialization failed: $error');
     debugPrintStack(stackTrace: stackTrace);
   }
 }
 
+Future<void> _configureMobileAdsConsent() async {
+  if (!_supportsMobileAds) {
+    return;
+  }
+
+  final consentInformation = ConsentInformation.instance;
+
+  try {
+    await _requestConsentInfoUpdate(consentInformation);
+    await _loadAndShowConsentFormIfRequired();
+  } catch (error, stackTrace) {
+    debugPrint('Mobile Ads consent flow failed: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
+
+  await _refreshMobileAdsConsentState();
+  if (_canRequestMobileAds) {
+    await _initializeMobileAds();
+  }
+}
+
+Future<void> _requestConsentInfoUpdate(
+  ConsentInformation consentInformation,
+) async {
+  final completer = Completer<void>();
+  consentInformation.requestConsentInfoUpdate(
+    ConsentRequestParameters(),
+    () {
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+    },
+    (error) {
+      if (!completer.isCompleted) {
+        completer.completeError(error);
+      }
+    },
+  );
+  await completer.future;
+}
+
+Future<void> _loadAndShowConsentFormIfRequired() async {
+  await ConsentForm.loadAndShowConsentFormIfRequired((error) {
+    if (error != null) {
+      debugPrint('Mobile Ads consent form failed: $error');
+    }
+  });
+}
+
+Future<void> _refreshMobileAdsConsentState() async {
+  if (!_supportsMobileAds) {
+    _canRequestMobileAds = false;
+    _privacyOptionsRequirementStatus =
+        PrivacyOptionsRequirementStatus.notRequired;
+    return;
+  }
+
+  final consentInformation = ConsentInformation.instance;
+  try {
+    final canRequestAds = await consentInformation.canRequestAds();
+    final privacyOptionsRequirementStatus = await consentInformation
+        .getPrivacyOptionsRequirementStatus();
+    _canRequestMobileAds = canRequestAds;
+    _privacyOptionsRequirementStatus = privacyOptionsRequirementStatus;
+  } catch (error, stackTrace) {
+    debugPrint('Mobile Ads consent status failed: $error');
+    debugPrintStack(stackTrace: stackTrace);
+    _canRequestMobileAds = false;
+    _privacyOptionsRequirementStatus =
+        PrivacyOptionsRequirementStatus.notRequired;
+  }
+}
+
+Future<void> _showMobileAdsPrivacyOptionsForm() async {
+  if (!_supportsMobileAds) {
+    return;
+  }
+
+  try {
+    await ConsentForm.showPrivacyOptionsForm((error) {
+      if (error != null) {
+        debugPrint('Mobile Ads privacy options form failed: $error');
+      }
+    });
+  } catch (error, stackTrace) {
+    debugPrint('Mobile Ads privacy options form failed: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
+
+  await _refreshMobileAdsConsentState();
+  if (_canRequestMobileAds) {
+    await _initializeMobileAds();
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await _initializeMobileAds();
+  await _configureMobileAdsConsent();
   _firebaseReady = await _initializeFirebase();
   _googleSignInReady = await _initializeGoogleSignIn();
   runApp(const PlanarityApp());
@@ -2046,6 +2149,13 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     _refreshLeaderboard();
   }
 
+  Future<void> _showPrivacyOptions() async {
+    await _showMobileAdsPrivacyOptionsForm();
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return _buildHomeScaffold(context, _currentUser);
@@ -2157,16 +2267,35 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
                 ),
                 Align(
                   alignment: Alignment.topRight,
-                  child: IconButton(
-                    onPressed: () {
-                      if (user == null) {
-                        _showAuthModal(isSignIn: false);
-                        return;
-                      }
-                      _showProfileModal(user: user);
-                    },
-                    icon: const FaIcon(FontAwesomeIcons.circleUser, size: 22),
-                    tooltip: _l10n.account,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_privacyOptionsRequirementStatus ==
+                              PrivacyOptionsRequirementStatus.required ||
+                          debugShowPrivacyOptionsButton)
+                        IconButton(
+                          onPressed: _showPrivacyOptions,
+                          icon: const Icon(
+                            Icons.privacy_tip_outlined,
+                            size: 24,
+                          ),
+                          tooltip: _l10n.privacyOptions,
+                        ),
+                      IconButton(
+                        onPressed: () {
+                          if (user == null) {
+                            _showAuthModal(isSignIn: false);
+                            return;
+                          }
+                          _showProfileModal(user: user);
+                        },
+                        icon: const FaIcon(
+                          FontAwesomeIcons.circleUser,
+                          size: 22,
+                        ),
+                        tooltip: _l10n.account,
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -2294,16 +2423,9 @@ class _HomeHeroContent extends StatelessWidget {
             ),
             if (showAppStoreDownloadButton) ...[
               const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: onAppStoreTap,
-                style: outlineButtonStyle,
-                icon: const FaIcon(FontAwesomeIcons.apple, size: 18),
-                label: Text(
-                  l10n.downloadOnAppStore,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+              _AppStoreBadge(
+                label: l10n.downloadOnAppStore,
+                onTap: onAppStoreTap,
               ),
             ],
             if (showLeaderboardBelowButton) ...[
@@ -5224,7 +5346,10 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
 
   void _loadInterstitialAd() {
     final adUnitId = _interstitialAdUnitId;
-    if (adUnitId == null || _interstitialAdLoading || _interstitialAd != null) {
+    if (!_canRequestMobileAds ||
+        adUnitId == null ||
+        _interstitialAdLoading ||
+        _interstitialAd != null) {
       return;
     }
 
@@ -6038,6 +6163,82 @@ class _MoveDots extends StatelessWidget {
             ),
           );
         }),
+      ),
+    );
+  }
+}
+
+class _AppStoreBadge extends StatelessWidget {
+  const _AppStoreBadge({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    const borderRadius = BorderRadius.all(Radius.circular(9));
+
+    return Semantics(
+      button: true,
+      label: label,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: borderRadius,
+          child: Container(
+            width: 150,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              border: Border.all(color: const Color(0xffa6a6a6)),
+              borderRadius: borderRadius,
+            ),
+            child: const ExcludeSemantics(
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FaIcon(
+                        FontAwesomeIcons.apple,
+                        color: Colors.white,
+                        size: 31,
+                      ),
+                      SizedBox(width: 9),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Download on the',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 9.5,
+                              height: 1,
+                              letterSpacing: -0.1,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'App Store',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 22.5,
+                              height: 1,
+                              letterSpacing: -0.35,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
