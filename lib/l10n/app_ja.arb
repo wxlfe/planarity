@@ -43,6 +43,17 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "メールアドレスとパスワードでアカウントを作成します。",
   "dailyGraphPuzzle": "デイリーグラフパズル",
+  "levelSubtitleUntangleMoves": "{moveCount}手でグラフをほどこう",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "すべての交差をなくそう",
+  "levelSubtitleKeepStreak": "連勝を続けよう",
+  "levelSubtitlePerfectSolve": "完璧な解法を狙おう",
   "dailyScore": "デイリースコア",
   "decline": "",
   "deleteAccount": "アカウントを削除",

@@ -85,6 +85,20 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dailyGraphPuzzle => 'दैनिक ग्राफ पहेली';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return 'ग्राफ को $moveCount चालों में सुलझाएँ';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'सभी क्रॉसिंग हटाएँ';
+
+  @override
+  String get levelSubtitleKeepStreak => 'श्रृंखला जारी रखें';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'एक परफ़ेक्ट हल की कोशिश करें';
+
+  @override
   String get dailyScore => 'दैनिक स्कोर';
 
   @override

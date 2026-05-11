@@ -81,6 +81,20 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dailyGraphPuzzle => '일일 그래프 퍼즐';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return '$moveCount번 안에 그래프를 풀어보세요';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => '모든 교차를 없애세요';
+
+  @override
+  String get levelSubtitleKeepStreak => '연속 기록을 이어가세요';
+
+  @override
+  String get levelSubtitlePerfectSolve => '완벽한 풀이에 도전하세요';
+
+  @override
   String get dailyScore => '일일 점수';
 
   @override

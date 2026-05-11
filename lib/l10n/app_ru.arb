@@ -43,6 +43,17 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "создайте учетную запись с вашим адресом электронной почты и паролем.",
   "dailyGraphPuzzle": "ежедневная головоломка с графами",
+  "levelSubtitleUntangleMoves": "распутайте граф за {moveCount} ходов",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "уберите все пересечения",
+  "levelSubtitleKeepStreak": "продолжайте серию",
+  "levelSubtitlePerfectSolve": "стремитесь к идеальному решению",
   "dailyScore": "дневной счет",
   "decline": "отклонить",
   "deleteAccount": "удалить аккаунт",

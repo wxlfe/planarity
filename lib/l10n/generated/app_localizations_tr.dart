@@ -86,6 +86,20 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dailyGraphPuzzle => 'günlük grafik bulmacası';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return 'grafı $moveCount hamlede çöz';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'tüm kesişimleri kaldır';
+
+  @override
+  String get levelSubtitleKeepStreak => 'seriyi sürdür';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'mükemmel çözümü kovala';
+
+  @override
   String get dailyScore => 'günlük skor';
 
   @override

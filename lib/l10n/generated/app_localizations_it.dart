@@ -86,6 +86,20 @@ class AppLocalizationsIt extends AppLocalizations {
   String get dailyGraphPuzzle => 'rompicapo grafico quotidiano';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return 'districa il grafo in $moveCount mosse';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'elimina tutti gli incroci';
+
+  @override
+  String get levelSubtitleKeepStreak => 'continua la serie';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'punta a una soluzione perfetta';
+
+  @override
   String get dailyScore => 'punteggio giornaliero';
 
   @override

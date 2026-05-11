@@ -85,6 +85,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dailyGraphPuzzle => 'daily graph puzzle';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      moveCount,
+      locale: localeName,
+      other: 'untangle the graph in $moveCount moves',
+      one: 'untangle the graph in 1 move',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'get rid of all the crossings';
+
+  @override
+  String get levelSubtitleKeepStreak => 'keep the streak going';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'chase a perfect solve';
+
+  @override
   String get dailyScore => 'daily score';
 
   @override

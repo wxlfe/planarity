@@ -85,6 +85,20 @@ class AppLocalizationsUr extends AppLocalizations {
   String get dailyGraphPuzzle => 'روزانہ گراف پہیلی';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return 'گراف کو $moveCount چالوں میں سلجھائیں';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'تمام کراسنگ ختم کریں';
+
+  @override
+  String get levelSubtitleKeepStreak => 'سلسلہ جاری رکھیں';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'بہترین حل کی کوشش کریں';
+
+  @override
   String get dailyScore => 'روزانہ اسکور';
 
   @override

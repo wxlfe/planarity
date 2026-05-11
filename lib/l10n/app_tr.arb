@@ -43,6 +43,17 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "e - posta adresiniz ve şifrenizle bir hesap oluşturun.",
   "dailyGraphPuzzle": "günlük grafik bulmacası",
+  "levelSubtitleUntangleMoves": "grafı {moveCount} hamlede çöz",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "tüm kesişimleri kaldır",
+  "levelSubtitleKeepStreak": "seriyi sürdür",
+  "levelSubtitlePerfectSolve": "mükemmel çözümü kovala",
   "dailyScore": "günlük skor",
   "decline": "reddetmek",
   "deleteAccount": "hesabı sil",

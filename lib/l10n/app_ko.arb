@@ -43,6 +43,17 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "이메일과 비밀번호로 계정을 만드세요.",
   "dailyGraphPuzzle": "일일 그래프 퍼즐",
+  "levelSubtitleUntangleMoves": "{moveCount}번 안에 그래프를 풀어보세요",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "모든 교차를 없애세요",
+  "levelSubtitleKeepStreak": "연속 기록을 이어가세요",
+  "levelSubtitlePerfectSolve": "완벽한 풀이에 도전하세요",
   "dailyScore": "일일 점수",
   "decline": "거부",
   "deleteAccount": "계정 삭제",

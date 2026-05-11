@@ -86,6 +86,20 @@ class AppLocalizationsVi extends AppLocalizations {
   String get dailyGraphPuzzle => 'câu đố đồ thị hằng ngày';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return 'gỡ đồ thị trong $moveCount nước đi';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'loại bỏ mọi giao cắt';
+
+  @override
+  String get levelSubtitleKeepStreak => 'giữ chuỗi tiếp tục';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'nhắm đến lời giải hoàn hảo';
+
+  @override
   String get dailyScore => 'điểm hằng ngày';
 
   @override

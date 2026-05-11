@@ -86,6 +86,29 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dailyGraphPuzzle => 'لغز الرسم البياني اليومي';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      moveCount,
+      locale: localeName,
+      other: 'فك الرسم البياني في $moveCount حركة',
+      many: 'فك الرسم البياني في $moveCount حركة',
+      few: 'فك الرسم البياني في $moveCount حركات',
+      two: 'فك الرسم البياني في حركتين',
+      one: 'فك الرسم البياني في حركة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => 'تخلص من كل التقاطعات';
+
+  @override
+  String get levelSubtitleKeepStreak => 'واصل السلسلة';
+
+  @override
+  String get levelSubtitlePerfectSolve => 'اسع إلى حل مثالي';
+
+  @override
   String get dailyScore => 'نتيجة اليوم';
 
   @override

@@ -81,6 +81,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dailyGraphPuzzle => '每日图形谜题';
 
   @override
+  String levelSubtitleUntangleMoves(int moveCount) {
+    return '在 $moveCount 步内解开图形';
+  }
+
+  @override
+  String get levelSubtitleNoCrossings => '消除所有交叉';
+
+  @override
+  String get levelSubtitleKeepStreak => '延续连胜';
+
+  @override
+  String get levelSubtitlePerfectSolve => '追求完美解法';
+
+  @override
   String get dailyScore => '每日得分';
 
   @override

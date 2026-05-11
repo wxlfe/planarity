@@ -5470,7 +5470,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
               ),
               const SizedBox(height: 8),
               Text(
-                _l10n.dailyGraphPuzzle,
+                _l10n.levelSubtitle(score: _totalScore, moveCount: _level),
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: Theme.of(
                     context,

@@ -43,6 +43,17 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "tạo một tài khoản với email và mật khẩu của bạn.",
   "dailyGraphPuzzle": "câu đố đồ thị hằng ngày",
+  "levelSubtitleUntangleMoves": "gỡ đồ thị trong {moveCount} nước đi",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "loại bỏ mọi giao cắt",
+  "levelSubtitleKeepStreak": "giữ chuỗi tiếp tục",
+  "levelSubtitlePerfectSolve": "nhắm đến lời giải hoàn hảo",
   "dailyScore": "điểm hằng ngày",
   "decline": "sự suy sụp",
   "deleteAccount": "xóa tài khoản",

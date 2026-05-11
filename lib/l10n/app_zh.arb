@@ -43,6 +43,17 @@
   "copyrightNateWolfe": "© nate wolfe",
   "createAccountSubtitle": "使用邮箱和密码创建账户",
   "dailyGraphPuzzle": "每日图形谜题",
+  "levelSubtitleUntangleMoves": "在 {moveCount} 步内解开图形",
+  "@levelSubtitleUntangleMoves": {
+    "placeholders": {
+      "moveCount": {
+        "type": "int"
+      }
+    }
+  },
+  "levelSubtitleNoCrossings": "消除所有交叉",
+  "levelSubtitleKeepStreak": "延续连胜",
+  "levelSubtitlePerfectSolve": "追求完美解法",
   "dailyScore": "每日得分",
   "decline": "拒绝",
   "deleteAccount": "删除账户",
