@@ -111,6 +111,7 @@
   "passwordMinLength": "パスワードは6文字以上なければなりません",
   "passwordTooWeak": "パスワードが弱すぎます",
   "planarity": "planarity",
+  "privacyOptions": "プライバシー設定",
   "planarGraphWikipedia": "wikipedia:平面グラフ",
   "pressAgainToDelete": "もう一度押すと削除されます",
   "profile": "プロフィール",

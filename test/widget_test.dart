@@ -149,6 +149,21 @@ void main() {
     expect(find.text('download on the App Store'), findsOneWidget);
   });
 
+  testWidgets('Home page can show privacy options button', (
+    WidgetTester tester,
+  ) async {
+    debugShowPrivacyOptionsButton = true;
+    addTearDown(() {
+      debugShowPrivacyOptionsButton = false;
+    });
+
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(const PlanarityApp());
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byTooltip('privacy options'), findsOneWidget);
+  });
+
   testWidgets('Home page follows a Spanish system locale', (
     WidgetTester tester,
   ) async {

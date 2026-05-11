@@ -228,6 +228,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => '隐私选项';
+
+  @override
   String get planarGraphWikipedia => '维基百科：平面图';
 
   @override

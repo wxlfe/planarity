@@ -111,6 +111,7 @@
   "passwordMinLength": "পাসওয়ার্ড কমপক্ষে 6 অক্ষরের হতে হবে",
   "passwordTooWeak": "পাসওয়ার্ড খুব দুর্বল",
   "planarity": "planarity",
+  "privacyOptions": "গোপনীয়তার বিকল্প",
   "planarGraphWikipedia": "উইকিপিডিয়া: প্ল্যানার গ্রাফ",
   "pressAgainToDelete": "মুছে ফেলার জন্য আবার টিপুন",
   "profile": "প্রোফাইল",

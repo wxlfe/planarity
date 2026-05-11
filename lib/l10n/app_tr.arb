@@ -111,6 +111,7 @@
   "passwordMinLength": "şifreniz en az 6 karakter uzunluğunda olmalıdır",
   "passwordTooWeak": "Şifre çok zayıf",
   "planarity": "planarity",
+  "privacyOptions": "gizlilik seçenekleri",
   "planarGraphWikipedia": "wikipedia: düzlemsel grafik",
   "pressAgainToDelete": "silmek için tekrar basın",
   "profile": "profil",

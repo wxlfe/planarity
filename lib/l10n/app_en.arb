@@ -111,6 +111,7 @@
   "passwordMinLength": "password must be at least 6 characters",
   "passwordTooWeak": "password is too weak",
   "planarity": "planarity",
+  "privacyOptions": "privacy options",
   "planarGraphWikipedia": "wikipedia: planar graph",
   "pressAgainToDelete": "press again to delete",
   "profile": "profile",

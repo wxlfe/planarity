@@ -111,6 +111,7 @@
   "passwordMinLength": "پاس ورڈ لازماً کم از کم 6 حروف و علامات پر مشتمل ہو",
   "passwordTooWeak": "پاس ورڈ بہت کمزور ہے",
   "planarity": "planarity",
+  "privacyOptions": "رازداری کے اختیارات",
   "planarGraphWikipedia": "ویکیپیڈیا: پلینار گراف",
   "pressAgainToDelete": "حذف کرنے کے لیے دوبارہ دبائیں",
   "profile": "پروفائل",

@@ -240,6 +240,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'رازداری کے اختیارات';
+
+  @override
   String get planarGraphWikipedia => 'ویکیپیڈیا: پلینار گراف';
 
   @override

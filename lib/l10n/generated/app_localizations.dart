@@ -542,6 +542,12 @@ abstract class AppLocalizations {
   /// **'planarity'**
   String get planarity;
 
+  /// No description provided for @privacyOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'privacy options'**
+  String get privacyOptions;
+
   /// No description provided for @planarGraphWikipedia.
   ///
   /// In en, this message translates to:

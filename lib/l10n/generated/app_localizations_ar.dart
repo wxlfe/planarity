@@ -249,6 +249,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'خيارات الخصوصية';
+
+  @override
   String get planarGraphWikipedia => 'ويكيبيديا: رسم بياني مستوٍ';
 
   @override

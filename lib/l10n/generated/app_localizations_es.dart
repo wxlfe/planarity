@@ -242,6 +242,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'opciones de privacidad';
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: grafo planar';
 
   @override

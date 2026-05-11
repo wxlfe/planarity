@@ -111,6 +111,7 @@
   "passwordMinLength": "密码至少需要 6 个字符",
   "passwordTooWeak": "密码太弱",
   "planarity": "planarity",
+  "privacyOptions": "隐私选项",
   "planarGraphWikipedia": "维基百科：平面图",
   "pressAgainToDelete": "再次按下以删除",
   "profile": "个人资料",

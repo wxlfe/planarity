@@ -241,6 +241,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'tùy chọn quyền riêng tư';
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: đồ thị phẳng';
 
   @override

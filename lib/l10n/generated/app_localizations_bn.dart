@@ -238,6 +238,9 @@ class AppLocalizationsBn extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'গোপনীয়তার বিকল্প';
+
+  @override
   String get planarGraphWikipedia => 'উইকিপিডিয়া: প্ল্যানার গ্রাফ';
 
   @override

@@ -111,6 +111,7 @@
   "passwordMinLength": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
   "passwordTooWeak": "كلمة المرور ضعيفة جدًا",
   "planarity": "planarity",
+  "privacyOptions": "خيارات الخصوصية",
   "planarGraphWikipedia": "ويكيبيديا: رسم بياني مستوٍ",
   "pressAgainToDelete": "اضغط مرة أخرى للحذف",
   "profile": "الملف الشخصي",

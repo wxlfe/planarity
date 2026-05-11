@@ -239,6 +239,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get planarity => 'planarity';
 
   @override
+  String get privacyOptions => 'गोपनीयता विकल्प';
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: समतलीय ग्राफ';
 
   @override

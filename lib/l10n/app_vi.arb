@@ -111,6 +111,7 @@
   "passwordMinLength": "mật khẩu phải có ít nhất 6 ký tự",
   "passwordTooWeak": "mật khẩu quá yếu",
   "planarity": "planarity",
+  "privacyOptions": "tùy chọn quyền riêng tư",
   "planarGraphWikipedia": "wikipedia: đồ thị phẳng",
   "pressAgainToDelete": "nhấn lại để xóa",
   "profile": "hồ sơ",
