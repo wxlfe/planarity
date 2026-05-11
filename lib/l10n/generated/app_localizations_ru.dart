@@ -104,6 +104,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get displayName => 'отображаемое имя';
 
   @override
+  String get downloadOnAppStore => 'скачать в App Store';
+
+  @override
   String get email => 'эл. почта';
 
   @override

@@ -49,6 +49,7 @@
   "details": "details",
   "detailsTooLong": "details must be 1000 characters or less",
   "displayName": "display name",
+  "downloadOnAppStore": "download on the App Store",
   "email": "email",
   "enterEmailAndPassword": "enter email and password",
   "enterEmailFirst": "enter your email first",

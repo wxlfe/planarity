@@ -296,6 +296,12 @@ abstract class AppLocalizations {
   /// **'display name'**
   String get displayName;
 
+  /// No description provided for @downloadOnAppStore.
+  ///
+  /// In en, this message translates to:
+  /// **'download on the App Store'**
+  String get downloadOnAppStore;
+
   /// No description provided for @email.
   ///
   /// In en, this message translates to:

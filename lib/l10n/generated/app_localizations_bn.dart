@@ -102,6 +102,9 @@ class AppLocalizationsBn extends AppLocalizations {
   String get displayName => 'প্রদর্শনের নাম';
 
   @override
+  String get downloadOnAppStore => 'App Store থেকে ডাউনলোড করুন';
+
+  @override
   String get email => 'ইমেল';
 
   @override

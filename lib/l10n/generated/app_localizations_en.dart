@@ -103,6 +103,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get displayName => 'display name';
 
   @override
+  String get downloadOnAppStore => 'download on the App Store';
+
+  @override
   String get email => 'email';
 
   @override

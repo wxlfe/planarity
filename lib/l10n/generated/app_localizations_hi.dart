@@ -103,6 +103,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get displayName => 'प्रदर्शित नाम';
 
   @override
+  String get downloadOnAppStore => 'App Store से डाउनलोड करें';
+
+  @override
   String get email => 'ईमेल';
 
   @override

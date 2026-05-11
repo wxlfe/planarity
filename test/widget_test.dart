@@ -133,6 +133,21 @@ void main() {
     expect(find.text('daily score'), findsOneWidget);
   });
 
+  testWidgets('Web home page shows App Store download button', (
+    WidgetTester tester,
+  ) async {
+    debugShowAppStoreDownloadButton = true;
+    addTearDown(() {
+      debugShowAppStoreDownloadButton = false;
+    });
+
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(const PlanarityApp());
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('download on the App Store'), findsOneWidget);
+  });
+
   testWidgets('Home page follows a Spanish system locale', (
     WidgetTester tester,
   ) async {

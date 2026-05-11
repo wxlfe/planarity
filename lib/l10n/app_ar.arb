@@ -49,6 +49,7 @@
   "details": "التفاصيل",
   "detailsTooLong": "يجب أن تكون التفاصيل 1000 حرف أو أقل",
   "displayName": "اسم العرض",
+  "downloadOnAppStore": "تنزيل من App Store",
   "email": "البريد الإلكتروني",
   "enterEmailAndPassword": "أدخل البريد الإلكتروني وكلمة المرور",
   "enterEmailFirst": "أدخل بريدك الإلكتروني أولًا",

@@ -49,6 +49,7 @@
   "details": "подробности",
   "detailsTooLong": "Подробности должны содержать не более 1000 символов.",
   "displayName": "отображаемое имя",
+  "downloadOnAppStore": "скачать в App Store",
   "email": "эл. почта",
   "enterEmailAndPassword": "введите адрес электронной почты и пароль",
   "enterEmailFirst": "сначала введите свой адрес электронной почты",

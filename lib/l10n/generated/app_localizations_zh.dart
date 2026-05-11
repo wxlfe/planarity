@@ -99,6 +99,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get displayName => '显示名称';
 
   @override
+  String get downloadOnAppStore => '在 App Store 下载';
+
+  @override
   String get email => '邮箱';
 
   @override

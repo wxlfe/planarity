@@ -104,6 +104,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get displayName => 'اسم العرض';
 
   @override
+  String get downloadOnAppStore => 'تنزيل من App Store';
+
+  @override
   String get email => 'البريد الإلكتروني';
 
   @override
