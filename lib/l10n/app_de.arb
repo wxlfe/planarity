@@ -53,7 +53,7 @@
   "enterEmailAndPassword": "Geben Sie E-Mail und Passwort ein",
   "enterEmailFirst": "Geben Sie zuerst Ihre E-Mail-Adresse ein",
   "enterValidEmail": "Geben Sie eine gültige E-Mail-Adresse ein",
-  "failedNodes": "{nodeCount} knoten fehlgeschlagen",
+  "failedNodes": "graph {nodeCount} fehlgeschlagen",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -128,7 +128,7 @@
   "signOut": "abmelden",
   "signUp": "registrieren",
   "signUpToCompete": " um mit deinen Freunden zu konkurrieren",
-  "solvedNodes": "{nodeCount} knoten gelöst",
+  "solvedNodes": "graph {nodeCount} gelöst",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

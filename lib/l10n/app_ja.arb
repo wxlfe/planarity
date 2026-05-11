@@ -53,7 +53,7 @@
   "enterEmailAndPassword": "あなたのメールアドレスとパスワードを入力してください",
   "enterEmailFirst": "最初にメールアドレスを入力してください",
   "enterValidEmail": "有効なメールアドレスを入力してください",
-  "failedNodes": "{nodeCount} ノード失敗",
+  "failedNodes": "グラフ {nodeCount} 失敗",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -128,7 +128,7 @@
   "signOut": "ログアウト",
   "signUp": "登録",
   "signUpToCompete": " 友達と競い合うために",
-  "solvedNodes": "{nodeCount} ノード解決",
+  "solvedNodes": "グラフ {nodeCount} 解決",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

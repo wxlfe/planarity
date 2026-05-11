@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:planarity/l10n/generated/app_localizations_en.dart';
 import 'package:planarity/main.dart';
 
 String _todayKey() {
@@ -32,6 +33,13 @@ void main() {
     expect(scoreForSolvedLevel(level: 6, movesUsed: 2), 4);
     expect(scoreForSolvedLevel(level: 6, movesUsed: 6), 0);
     expect(scoreForSolvedLevel(level: 6, movesUsed: 8), 0);
+  });
+
+  test('completion modal titles identify the graph result', () {
+    final l10n = AppLocalizationsEn();
+
+    expect(l10n.solvedNodes(8), 'graph 8 solved');
+    expect(l10n.failedNodes(8), 'graph 8 failed');
   });
 
   test('display name validation blocks unsafe personal info and profanity', () {

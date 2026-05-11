@@ -119,7 +119,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return 'не удалось $nodeCount узлов';
+    return 'граф $nodeCount не пройден';
   }
 
   @override
@@ -301,7 +301,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return 'решено $nodeCount узлов';
+    return 'граф $nodeCount решен';
   }
 
   @override

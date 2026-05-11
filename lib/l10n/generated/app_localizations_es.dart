@@ -118,7 +118,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return 'fallaste $nodeCount nodos';
+    return 'grafo $nodeCount fallido';
   }
 
   @override
@@ -299,7 +299,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return 'resolviste $nodeCount nodos';
+    return 'grafo $nodeCount resuelto';
   }
 
   @override

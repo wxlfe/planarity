@@ -53,7 +53,7 @@
   "enterEmailAndPassword": "entrez l'email et le mot de passe",
   "enterEmailFirst": "entrez d'abord votre email",
   "enterValidEmail": "entrez un email valide",
-  "failedNodes": "{nodeCount} nœuds échoués",
+  "failedNodes": "graphe {nodeCount} échoué",
   "@failedNodes": {
     "placeholders": {
       "nodeCount": {
@@ -128,7 +128,7 @@
   "signOut": "se déconnecter",
   "signUp": "s'inscrire",
   "signUpToCompete": " rivaliser avec tes amis",
-  "solvedNodes": "{nodeCount} nœuds résolus",
+  "solvedNodes": "graphe {nodeCount} résolu",
   "@solvedNodes": {
     "placeholders": {
       "nodeCount": {

@@ -118,7 +118,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String failedNodes(int nodeCount) {
-    return '$nodeCount düğüm başarısız';
+    return 'graf $nodeCount başarısız';
   }
 
   @override
@@ -300,7 +300,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String solvedNodes(int nodeCount) {
-    return '$nodeCount düğüm çözüldü';
+    return 'graf $nodeCount çözüldü';
   }
 
   @override
