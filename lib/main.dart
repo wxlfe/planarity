@@ -5501,6 +5501,22 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
     unawaited(_logLevelStartEvent(_level));
   }
 
+  void _restartCurrentGraph() {
+    if (_resolvingLevel) {
+      return;
+    }
+    setState(() {
+      _movesUsed = 0;
+      _activeNode = null;
+      _dragStart = null;
+      _current = PlanarityGenerator.generate(
+        dayKey: widget.dayKey,
+        level: _level,
+      );
+      _needsCentering = true;
+    });
+  }
+
   String? get _interstitialAdUnitId {
     if (!_supportsMobileAds) {
       return null;
@@ -5783,13 +5799,23 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                     ),
                     Align(
                       alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: Text(
-                          '$_totalScore',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: _restartCurrentGraph,
+                            icon: const Icon(Icons.restart_alt, size: 22),
+                            tooltip: 'restart',
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Text(
+                              '$_totalScore',
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
