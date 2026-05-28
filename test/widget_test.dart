@@ -166,6 +166,34 @@ void main() {
     expect(find.byIcon(Icons.restart_alt), findsOneWidget);
   });
 
+  testWidgets('Tutorial instructions appear inside the gameplay board', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: PlanarityGamePage(
+          dayKey: '2026-03-18',
+          startLevel: 1,
+          startScore: 0,
+          tutorialCompleted: false,
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final instruction = find.text('this is a node drag it anywhere');
+    final divider = find.byType(Divider);
+
+    expect(instruction, findsOneWidget);
+    expect(divider, findsOneWidget);
+    expect(
+      tester.getTopLeft(instruction).dy,
+      greaterThan(tester.getBottomLeft(divider).dy),
+    );
+  });
+
   test('App Store review prompt requires iOS consecutive signed-in play', () {
     expect(
       shouldPromptForAppStoreReview(

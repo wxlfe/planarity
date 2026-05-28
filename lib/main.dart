@@ -6327,18 +6327,6 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                   ).colorScheme.onSurface.withOpacity(0.75),
                 ),
               ),
-              if (_isTutorialLevel && tutorialText != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  tutorialText,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.72),
-                  ),
-                ),
-              ],
               const SizedBox(height: 18),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -6401,6 +6389,46 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                             ),
                           );
                         }),
+                        if (_isTutorialLevel && tutorialText != null)
+                          Positioned(
+                            top: 16,
+                            left: 16,
+                            right: 16,
+                            child: IgnorePointer(
+                              child: Center(
+                                child: Container(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 520,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.surface
+                                        .withValues(alpha: 0.92),
+                                    border: Border.all(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.28),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    tutorialText,
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context).textTheme.bodyLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     );
                   },
