@@ -870,6 +870,26 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         }, SetOptions(merge: true));
   }
 
+  Future<void> _writeDailyScoreSnapshotBestEffort({
+    required User user,
+    required String dayKey,
+    required int score,
+    required bool locked,
+  }) async {
+    await runDailyScoreSnapshotWriteBestEffort(
+      () => _writeDailyScoreSnapshot(
+        user: user,
+        dayKey: dayKey,
+        score: score,
+        locked: locked,
+      ),
+      onError: (error, stackTrace) {
+        debugPrint('Unable to write daily score snapshot: $error');
+        debugPrintStack(stackTrace: stackTrace);
+      },
+    );
+  }
+
   Future<SharedPreferences?> _prefsOrNull() async {
     try {
       return await SharedPreferences.getInstance();
@@ -917,7 +937,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     );
     final currentUser = _currentUser;
     if (currentUser != null) {
-      await _writeDailyScoreSnapshot(
+      await _writeDailyScoreSnapshotBestEffort(
         user: currentUser,
         dayKey: today,
         score: _score,
@@ -970,7 +990,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     );
     final resultUser = _currentUser;
     if (resultUser != null) {
-      await _writeDailyScoreSnapshot(
+      await _writeDailyScoreSnapshotBestEffort(
         user: resultUser,
         dayKey: result.dayKey,
         score: result.score,
@@ -7475,6 +7495,19 @@ int scoreForSolvedLevel({required int level, required int movesUsed}) {
     return 0;
   }
   return max(0, level - movesUsed);
+}
+
+Future<bool> runDailyScoreSnapshotWriteBestEffort(
+  Future<void> Function() write, {
+  void Function(Object error, StackTrace stackTrace)? onError,
+}) async {
+  try {
+    await write();
+    return true;
+  } catch (error, stackTrace) {
+    onError?.call(error, stackTrace);
+    return false;
+  }
 }
 
 int _countCrossings(List<Offset> nodes, List<Edge> edges) {

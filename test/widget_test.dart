@@ -40,6 +40,25 @@ void main() {
     expect(scoreForSolvedLevel(level: 6, movesUsed: 8), 0);
   });
 
+  test('daily score snapshot writes are best effort', () async {
+    Object? capturedError;
+    StackTrace? capturedStackTrace;
+
+    final writeSucceeded = await runDailyScoreSnapshotWriteBestEffort(
+      () async {
+        throw StateError('permission denied');
+      },
+      onError: (error, stackTrace) {
+        capturedError = error;
+        capturedStackTrace = stackTrace;
+      },
+    );
+
+    expect(writeSucceeded, isFalse);
+    expect(capturedError, isA<StateError>());
+    expect(capturedStackTrace, isNotNull);
+  });
+
   test('completion modal titles identify the graph result', () {
     final l10n = AppLocalizationsEn();
 
