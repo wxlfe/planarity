@@ -15,6 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
@@ -59,6 +60,95 @@ bool get _supportsAppleSignIn {
     TargetPlatform.iOS || TargetPlatform.macOS => true,
     _ => false,
   };
+}
+
+@visibleForTesting
+bool shouldPromptForAppStoreReview({
+  required TargetPlatform platform,
+  required bool isWeb,
+  required bool signedIn,
+  required String? previousLastPlayed,
+  required String todayKey,
+  required String? appStoreReviewPromptedAt,
+}) {
+  if (isWeb || platform != TargetPlatform.iOS || !signedIn) {
+    return false;
+  }
+  if (appStoreReviewPromptedAt != null && appStoreReviewPromptedAt.isNotEmpty) {
+    return false;
+  }
+  return previousLastPlayed == previousDayKey(todayKey);
+}
+
+@visibleForTesting
+String? previousDayKey(String dayKey) {
+  final parsed = DateTime.tryParse(dayKey);
+  if (parsed == null) {
+    return null;
+  }
+  final previousDay = parsed.subtract(const Duration(days: 1));
+  return _dayKeyForDate(previousDay);
+}
+
+String _dayKeyForDate(DateTime date) {
+  final year = date.year.toString().padLeft(4, '0');
+  final month = date.month.toString().padLeft(2, '0');
+  final day = date.day.toString().padLeft(2, '0');
+  return '$year-$month-$day';
+}
+
+@visibleForTesting
+class DailyScoreSnapshotEntry {
+  const DailyScoreSnapshotEntry({
+    required this.uid,
+    required this.displayName,
+    required this.score,
+    this.locked = false,
+  });
+
+  final String uid;
+  final String displayName;
+  final int score;
+  final bool locked;
+}
+
+@visibleForTesting
+int? dailyScoreRankFor(List<DailyScoreSnapshotEntry> entries, String uid) {
+  DailyScoreSnapshotEntry? userEntry;
+  for (final entry in entries) {
+    if (entry.uid == uid) {
+      userEntry = entry;
+      break;
+    }
+  }
+  if (userEntry == null) {
+    return null;
+  }
+  return entries.where((entry) => entry.score > userEntry!.score).length + 1;
+}
+
+@visibleForTesting
+Set<String> previousDayWinnerIds(List<DailyScoreSnapshotEntry> entries) {
+  if (entries.isEmpty) {
+    return <String>{};
+  }
+  final topScore = entries.map((entry) => entry.score).reduce(max);
+  return entries
+      .where((entry) => entry.score == topScore)
+      .map((entry) => entry.uid)
+      .toSet();
+}
+
+@visibleForTesting
+bool shouldShowRankingSummary({
+  required String todayKey,
+  required String? previousLastPlayed,
+  required String? lastRankingSummaryShownFor,
+}) {
+  return previousLastPlayed != null &&
+      previousLastPlayed.isNotEmpty &&
+      previousLastPlayed != todayKey &&
+      lastRankingSummaryShownFor != previousLastPlayed;
 }
 
 Future<void> _initializeMobileAds() async {
@@ -391,13 +481,19 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
   static final Uri _planarGraphInfoUri = Uri.parse(
     'https://en.wikipedia.org/wiki/Planar_graph',
   );
-  static const _startingLevel = 4;
+  static const _tutorialStartLevel = 1;
+  static const _normalStartLevel = 4;
   static const _localGuestUserDocumentKey = 'local_guest_user_document';
 
   bool _isLoaded = false;
   DailyPlayStatus _status = DailyPlayStatus.ready;
-  int _currentLevel = _startingLevel;
+  int _currentLevel = _tutorialStartLevel;
   int _score = 0;
+  bool _tutorialCompleted = false;
+  String? _previousLastPlayed;
+  String? _appStoreReviewPromptedAt;
+  String? _lastRankingSummaryShownFor;
+  bool _rankingSummaryPromptOpen = false;
   int _leaderboardRefreshTick = 0;
   _LeaderboardTab? _selectedLeaderboardTab;
   StreamSubscription<User?>? _authSubscription;
@@ -409,6 +505,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
   final Set<String> _reportedUserIdsThisSession = <String>{};
   final Set<String> _hiddenDisplayNameUserIds = <String>{};
   final Set<String> _currentFriendIds = <String>{};
+  final Set<String> _previousDayGlobalWinnerIds = <String>{};
+  final Set<String> _previousDayFriendWinnerIds = <String>{};
   StreamSubscription<Uri>? _appLinkSubscription;
 
   AppLocalizations get _l10n => context.l10n;
@@ -510,10 +608,12 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     final signedInChanged = (_currentUser != null) != (user != null);
     final lastPlayed = _profileLastPlayed(profileData);
     final playedToday = lastPlayed == _todayKey();
+    final tutorialCompleted = _profileTutorialCompleted(profileData);
     final syncedScore = _profileScore(profileData, playedToday: playedToday);
     final syncedLevel = _profileCurrentLevel(
       profileData,
       playedToday: playedToday,
+      tutorialCompleted: tutorialCompleted,
     );
     final isLocked = _profileLocked(profileData);
     final hiddenDisplayNameUserIds = _profileHiddenDisplayNameUserIds(
@@ -534,6 +634,12 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           : DailyPlayStatus.ready;
       _currentLevel = syncedLevel;
       _score = syncedScore;
+      _tutorialCompleted = tutorialCompleted;
+      _previousLastPlayed = lastPlayed;
+      _appStoreReviewPromptedAt = _profileAppStoreReviewPromptedAt(profileData);
+      _lastRankingSummaryShownFor = _profileLastRankingSummaryShownFor(
+        profileData,
+      );
       _isLoaded = true;
       _hiddenDisplayNameUserIds
         ..clear()
@@ -548,19 +654,25 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       }
     });
     _refreshLeaderboard();
+    unawaited(_refreshPreviousDayWinnerBadges(user, profileData));
     if (user == null) {
       _maybePromptToAuthenticateForFriendInvite();
       return;
     }
 
     _maybePromptToAddIncomingFriend(profileData: profileData);
+    unawaited(
+      _maybeShowRankingSummaryModal(user: user, profileData: profileData),
+    );
 
     if (!playedToday &&
-        (isLocked || syncedScore != 0 || syncedLevel != _startingLevel)) {
+        (isLocked ||
+            syncedScore != 0 ||
+            syncedLevel != _startLevelForTutorial(tutorialCompleted))) {
       await _updateCurrentUserProgressFields(
         user: user,
         score: 0,
-        currentLevel: _startingLevel,
+        currentLevel: _startLevelForTutorial(tutorialCompleted),
         locked: false,
       );
     }
@@ -569,13 +681,16 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
   Map<String, dynamic> _defaultUserDocument({String? displayName}) {
     return <String, dynamic>{
       'displayName': displayName ?? _l10n.anonymousPlayer,
-      'currentLevel': _startingLevel,
+      'currentLevel': _tutorialStartLevel,
+      'appStoreReviewPromptedAt': '',
       'friends': <String>[],
       'hiddenDisplayNameUserIds': <String>[],
       'lastPlayed': '',
+      'lastRankingSummaryShownFor': '',
       'locked': false,
       'lifetimeScore': 0,
       'score': 0,
+      'tutorialCompleted': false,
     };
   }
 
@@ -641,6 +756,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     String? lastPlayed,
     bool? locked,
     int? lifetimeScoreIncrement,
+    bool? tutorialCompleted,
+    String? appStoreReviewPromptedAt,
+    String? lastRankingSummaryShownFor,
   }) async {
     if (user != null) {
       await _updateUserProgressFields(
@@ -650,6 +768,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         lastPlayed: lastPlayed,
         locked: locked,
         lifetimeScoreIncrement: lifetimeScoreIncrement,
+        tutorialCompleted: tutorialCompleted,
+        appStoreReviewPromptedAt: appStoreReviewPromptedAt,
+        lastRankingSummaryShownFor: lastRankingSummaryShownFor,
       );
       return;
     }
@@ -671,6 +792,15 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       localDocument['lifetimeScore'] =
           _profileLifetimeScore(localDocument) + lifetimeScoreIncrement;
     }
+    if (tutorialCompleted != null) {
+      localDocument['tutorialCompleted'] = tutorialCompleted;
+    }
+    if (appStoreReviewPromptedAt != null) {
+      localDocument['appStoreReviewPromptedAt'] = appStoreReviewPromptedAt;
+    }
+    if (lastRankingSummaryShownFor != null) {
+      localDocument['lastRankingSummaryShownFor'] = lastRankingSummaryShownFor;
+    }
     await _saveLocalGuestUserDocument(localDocument);
   }
 
@@ -681,6 +811,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     String? lastPlayed,
     bool? locked,
     int? lifetimeScoreIncrement,
+    bool? tutorialCompleted,
+    String? appStoreReviewPromptedAt,
+    String? lastRankingSummaryShownFor,
   }) async {
     final data = <String, Object>{};
     if (score != null) {
@@ -698,6 +831,15 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     if (lifetimeScoreIncrement != null && lifetimeScoreIncrement > 0) {
       data['lifetimeScore'] = FieldValue.increment(lifetimeScoreIncrement);
     }
+    if (tutorialCompleted != null) {
+      data['tutorialCompleted'] = tutorialCompleted;
+    }
+    if (appStoreReviewPromptedAt != null) {
+      data['appStoreReviewPromptedAt'] = appStoreReviewPromptedAt;
+    }
+    if (lastRankingSummaryShownFor != null) {
+      data['lastRankingSummaryShownFor'] = lastRankingSummaryShownFor;
+    }
     if (data.isEmpty) {
       return;
     }
@@ -706,6 +848,26 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         .collection('users')
         .doc(userId)
         .set(data, SetOptions(merge: true));
+  }
+
+  Future<void> _writeDailyScoreSnapshot({
+    required User user,
+    required String dayKey,
+    required int score,
+    required bool locked,
+  }) async {
+    await FirebaseFirestore.instance
+        .collection('dailyScores')
+        .doc(dayKey)
+        .collection('entries')
+        .doc(user.uid)
+        .set({
+          'uid': user.uid,
+          'displayName': _displayNameForUser(user, l10n: _l10n),
+          'score': max(0, score),
+          'locked': locked,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
   }
 
   Future<SharedPreferences?> _prefsOrNull() async {
@@ -753,6 +915,18 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       lastPlayed: today,
       locked: false,
     );
+    final currentUser = _currentUser;
+    if (currentUser != null) {
+      await _writeDailyScoreSnapshot(
+        user: currentUser,
+        dayKey: today,
+        score: _score,
+        locked: false,
+      );
+    }
+    if (!mounted) {
+      return;
+    }
     final result = await Navigator.of(context).push<GameSessionResult>(
       MaterialPageRoute(
         settings: const RouteSettings(name: 'game_session'),
@@ -760,6 +934,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           dayKey: today,
           startLevel: startLevel,
           startScore: startScore,
+          tutorialCompleted: _tutorialCompleted,
+          onLevelSolved: _handleLevelSolved,
         ),
       ),
     );
@@ -781,6 +957,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         _status = DailyPlayStatus.inProgress;
         _currentLevel = result.level;
       }
+      _tutorialCompleted = result.tutorialCompleted;
     });
     await _updateCurrentUserProgressFields(
       user: _currentUser,
@@ -789,9 +966,240 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       lastPlayed: result.dayKey,
       locked: result.locked,
       lifetimeScoreIncrement: max(0, result.score - previousScore),
+      tutorialCompleted: result.tutorialCompleted,
     );
+    final resultUser = _currentUser;
+    if (resultUser != null) {
+      await _writeDailyScoreSnapshot(
+        user: resultUser,
+        dayKey: result.dayKey,
+        score: result.score,
+        locked: result.locked,
+      );
+    }
     await _logPostScoreEvent(score: result.score, level: result.level);
     _refreshLeaderboard();
+  }
+
+  Future<void> _handleLevelSolved(int level) async {
+    if (level == 3 && !_tutorialCompleted) {
+      _tutorialCompleted = true;
+      try {
+        await _updateCurrentUserProgressFields(
+          user: _currentUser,
+          currentLevel: _normalStartLevel,
+          tutorialCompleted: true,
+        );
+      } catch (error, stackTrace) {
+        debugPrint('Unable to save tutorial completion: $error');
+        debugPrintStack(stackTrace: stackTrace);
+      }
+    }
+
+    if (level != 5 ||
+        !shouldPromptForAppStoreReview(
+          platform: defaultTargetPlatform,
+          isWeb: kIsWeb,
+          signedIn: _currentUser != null,
+          previousLastPlayed: _previousLastPlayed,
+          todayKey: _todayKey(),
+          appStoreReviewPromptedAt: _appStoreReviewPromptedAt,
+        )) {
+      return;
+    }
+
+    try {
+      final inAppReview = InAppReview.instance;
+      if (await inAppReview.isAvailable()) {
+        await inAppReview.requestReview();
+      }
+    } on MissingPluginException {
+      return;
+    } finally {
+      final today = _todayKey();
+      _appStoreReviewPromptedAt = today;
+      try {
+        await _updateCurrentUserProgressFields(
+          user: _currentUser,
+          appStoreReviewPromptedAt: today,
+        );
+      } catch (error, stackTrace) {
+        debugPrint('Unable to save App Store review prompt state: $error');
+        debugPrintStack(stackTrace: stackTrace);
+      }
+    }
+  }
+
+  Future<void> _refreshPreviousDayWinnerBadges(
+    User? user,
+    Map<String, dynamic>? profileData,
+  ) async {
+    if (!_firebaseReady) {
+      return;
+    }
+    final yesterday = previousDayKey(_todayKey());
+    if (yesterday == null) {
+      return;
+    }
+
+    try {
+      final globalWinners = await _loadGlobalDailyWinnerIds(yesterday);
+      final friendIds = user == null
+          ? const <String>[]
+          : <String>{user.uid, ..._profileFriendIds(profileData)}.toList();
+      final friendEntries = await _loadDailyScoreEntriesForUids(
+        dayKey: yesterday,
+        userIds: friendIds,
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _previousDayGlobalWinnerIds
+          ..clear()
+          ..addAll(globalWinners);
+        _previousDayFriendWinnerIds
+          ..clear()
+          ..addAll(previousDayWinnerIds(friendEntries));
+      });
+    } catch (error, stackTrace) {
+      debugPrint('Unable to load previous day winners: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  Future<Set<String>> _loadGlobalDailyWinnerIds(String dayKey) async {
+    final entries = FirebaseFirestore.instance
+        .collection('dailyScores')
+        .doc(dayKey)
+        .collection('entries');
+    final topSnapshot = await entries
+        .orderBy('score', descending: true)
+        .limit(1)
+        .get();
+    if (topSnapshot.docs.isEmpty) {
+      return <String>{};
+    }
+    final topScore = _dailyScoreEntryFromSnapshot(topSnapshot.docs.first).score;
+    final tiedTopSnapshot = await entries
+        .where('score', isEqualTo: topScore)
+        .get();
+    return tiedTopSnapshot.docs.map((doc) => doc.id).toSet();
+  }
+
+  Future<List<DailyScoreSnapshotEntry>> _loadDailyScoreEntriesForUids({
+    required String dayKey,
+    required List<String> userIds,
+  }) async {
+    if (userIds.isEmpty) {
+      return const <DailyScoreSnapshotEntry>[];
+    }
+    final entries = FirebaseFirestore.instance
+        .collection('dailyScores')
+        .doc(dayKey)
+        .collection('entries');
+    final snapshots = await Future.wait(
+      userIds.toSet().map((uid) => entries.doc(uid).get()),
+    );
+    return snapshots
+        .where((snapshot) => snapshot.exists)
+        .map(_dailyScoreEntryFromSnapshot)
+        .toList(growable: false);
+  }
+
+  DailyScoreSnapshotEntry _dailyScoreEntryFromSnapshot(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+  ) {
+    final data = snapshot.data() ?? const <String, dynamic>{};
+    final displayName = data['displayName'];
+    final score = data['score'];
+    final locked = data['locked'];
+    return DailyScoreSnapshotEntry(
+      uid: snapshot.id,
+      displayName: displayName is String && displayName.trim().isNotEmpty
+          ? displayName.trim()
+          : _l10n.anonymousPlayer,
+      score: score is int
+          ? max(0, score)
+          : (score is num ? max(0, score.toInt()) : 0),
+      locked: locked is bool && locked,
+    );
+  }
+
+  Future<void> _maybeShowRankingSummaryModal({
+    required User user,
+    required Map<String, dynamic>? profileData,
+  }) async {
+    final summaryDay = _profileLastPlayed(profileData);
+    if (!_firebaseReady ||
+        _rankingSummaryPromptOpen ||
+        !shouldShowRankingSummary(
+          todayKey: _todayKey(),
+          previousLastPlayed: summaryDay,
+          lastRankingSummaryShownFor: _lastRankingSummaryShownFor,
+        )) {
+      return;
+    }
+
+    _rankingSummaryPromptOpen = true;
+    try {
+      final entries = FirebaseFirestore.instance
+          .collection('dailyScores')
+          .doc(summaryDay!)
+          .collection('entries');
+      final userSnapshot = await entries.doc(user.uid).get();
+      if (!mounted || !userSnapshot.exists) {
+        return;
+      }
+      final userEntry = _dailyScoreEntryFromSnapshot(userSnapshot);
+      final globalRankSnapshot = await entries
+          .where('score', isGreaterThan: userEntry.score)
+          .count()
+          .get();
+      final globalRank = (globalRankSnapshot.count ?? 0) + 1;
+      final globalTopSnapshot = await entries
+          .orderBy('score', descending: true)
+          .limit(10)
+          .get();
+      final globalEntries = <DailyScoreSnapshotEntry>[
+        ...globalTopSnapshot.docs.map(_dailyScoreEntryFromSnapshot),
+      ];
+      if (!globalEntries.any((entry) => entry.uid == user.uid)) {
+        globalEntries.add(userEntry);
+      }
+      final friendEntries = await _loadDailyScoreEntriesForUids(
+        dayKey: summaryDay,
+        userIds: <String>{user.uid, ..._profileFriendIds(profileData)}.toList(),
+      );
+      final friendRank = dailyScoreRankFor(friendEntries, user.uid);
+      if (!mounted) {
+        return;
+      }
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => _RankingSummaryDialog(
+          dayKey: summaryDay,
+          friendRank: friendRank,
+          globalRank: globalRank,
+          friendEntries: friendEntries,
+          globalEntries: globalEntries,
+          currentUserId: user.uid,
+        ),
+      );
+      if (!mounted) {
+        return;
+      }
+      _lastRankingSummaryShownFor = summaryDay;
+      await _updateCurrentUserProgressFields(
+        user: user,
+        lastRankingSummaryShownFor: summaryDay,
+      );
+    } catch (error, stackTrace) {
+      debugPrint('Unable to show ranking summary: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    } finally {
+      _rankingSummaryPromptOpen = false;
+    }
   }
 
   Future<String?> _submitAuth({
@@ -1468,18 +1876,74 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
   int _profileCurrentLevel(
     Map<String, dynamic>? profileData, {
     required bool playedToday,
+    required bool tutorialCompleted,
   }) {
+    final startLevel = _startLevelForTutorial(tutorialCompleted);
     if (!playedToday) {
-      return _startingLevel;
+      return startLevel;
     }
     final currentLevel = profileData?['currentLevel'];
     if (currentLevel is int) {
-      return max(_startingLevel, currentLevel);
+      return max(startLevel, currentLevel);
     }
     if (currentLevel is num) {
-      return max(_startingLevel, currentLevel.toInt());
+      return max(startLevel, currentLevel.toInt());
     }
-    return _startingLevel;
+    return startLevel;
+  }
+
+  int _startLevelForTutorial(bool tutorialCompleted) {
+    return tutorialCompleted ? _normalStartLevel : _tutorialStartLevel;
+  }
+
+  bool _profileTutorialCompleted(Map<String, dynamic>? profileData) {
+    final tutorialCompleted = profileData?['tutorialCompleted'];
+    if (tutorialCompleted is bool) {
+      return tutorialCompleted;
+    }
+    return _profileHasPriorProgress(profileData);
+  }
+
+  bool _profileHasPriorProgress(Map<String, dynamic>? profileData) {
+    final lastPlayed = _profileLastPlayed(profileData);
+    if (lastPlayed != null) {
+      return true;
+    }
+    if (_profileLifetimeScore(profileData) > 0) {
+      return true;
+    }
+    if (_leaderboardRawScoreFromData(profileData) > 0) {
+      return true;
+    }
+    if (_profileLocked(profileData)) {
+      return true;
+    }
+    final currentLevel = profileData?['currentLevel'];
+    if (currentLevel is int) {
+      return currentLevel > _normalStartLevel;
+    }
+    if (currentLevel is num) {
+      return currentLevel.toInt() > _normalStartLevel;
+    }
+    return false;
+  }
+
+  String? _profileAppStoreReviewPromptedAt(Map<String, dynamic>? profileData) {
+    final promptedAt = profileData?['appStoreReviewPromptedAt'];
+    if (promptedAt is String && promptedAt.isNotEmpty) {
+      return promptedAt;
+    }
+    return null;
+  }
+
+  String? _profileLastRankingSummaryShownFor(
+    Map<String, dynamic>? profileData,
+  ) {
+    final shownFor = profileData?['lastRankingSummaryShownFor'];
+    if (shownFor is String && shownFor.isNotEmpty) {
+      return shownFor;
+    }
+    return null;
   }
 
   String? _profileLastPlayed(Map<String, dynamic>? profileData) {
@@ -2198,6 +2662,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         reportedUserIds: _reportedUserIdsThisSession,
         hiddenDisplayNameUserIds: _hiddenDisplayNameUserIds,
         onToggleHiddenDisplayName: _toggleHiddenDisplayName,
+        previousDayFriendWinnerIds: _previousDayFriendWinnerIds,
+        previousDayGlobalWinnerIds: _previousDayGlobalWinnerIds,
         selectedTab: selectedLeaderboardTab,
         onTabSelected: (_LeaderboardTab tab) {
           setState(() {
@@ -2241,6 +2707,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
                                       _hiddenDisplayNameUserIds,
                                   onToggleHiddenDisplayName:
                                       _toggleHiddenDisplayName,
+                                  previousDayFriendWinnerIds:
+                                      _previousDayFriendWinnerIds,
+                                  previousDayGlobalWinnerIds:
+                                      _previousDayGlobalWinnerIds,
                                   selectedTab: selectedLeaderboardTab,
                                   onTabSelected: (_LeaderboardTab tab) {
                                     setState(() {
@@ -4026,6 +4496,8 @@ class _LeaderboardCard extends StatelessWidget {
     required this.reportedUserIds,
     required this.hiddenDisplayNameUserIds,
     required this.onToggleHiddenDisplayName,
+    required this.previousDayFriendWinnerIds,
+    required this.previousDayGlobalWinnerIds,
     required this.selectedTab,
     required this.onTabSelected,
   });
@@ -4042,6 +4514,8 @@ class _LeaderboardCard extends StatelessWidget {
   final Set<String> reportedUserIds;
   final Set<String> hiddenDisplayNameUserIds;
   final ValueChanged<String> onToggleHiddenDisplayName;
+  final Set<String> previousDayFriendWinnerIds;
+  final Set<String> previousDayGlobalWinnerIds;
   final _LeaderboardTab selectedTab;
   final ValueChanged<_LeaderboardTab> onTabSelected;
 
@@ -4066,6 +4540,8 @@ class _LeaderboardCard extends StatelessWidget {
         reportedUserIds: reportedUserIds,
         hiddenDisplayNameUserIds: hiddenDisplayNameUserIds,
         onToggleHiddenDisplayName: onToggleHiddenDisplayName,
+        previousDayFriendWinnerIds: previousDayFriendWinnerIds,
+        previousDayGlobalWinnerIds: previousDayGlobalWinnerIds,
         selectedTab: selectedTab,
         onTabSelected: onTabSelected,
       ),
@@ -4082,6 +4558,8 @@ class _LeaderboardCardContents extends StatelessWidget {
     required this.reportedUserIds,
     required this.hiddenDisplayNameUserIds,
     required this.onToggleHiddenDisplayName,
+    required this.previousDayFriendWinnerIds,
+    required this.previousDayGlobalWinnerIds,
     required this.selectedTab,
     required this.onTabSelected,
   });
@@ -4098,6 +4576,8 @@ class _LeaderboardCardContents extends StatelessWidget {
   final Set<String> reportedUserIds;
   final Set<String> hiddenDisplayNameUserIds;
   final ValueChanged<String> onToggleHiddenDisplayName;
+  final Set<String> previousDayFriendWinnerIds;
+  final Set<String> previousDayGlobalWinnerIds;
   final _LeaderboardTab selectedTab;
   final ValueChanged<_LeaderboardTab> onTabSelected;
 
@@ -4150,6 +4630,7 @@ class _LeaderboardCardContents extends StatelessWidget {
                   reportedUserIds: reportedUserIds,
                   hiddenDisplayNameUserIds: hiddenDisplayNameUserIds,
                   onToggleHiddenDisplayName: onToggleHiddenDisplayName,
+                  previousDayWinnerIds: previousDayFriendWinnerIds,
                 )
               : _GlobalLeaderboardView(
                   key: const ValueKey('global'),
@@ -4158,6 +4639,7 @@ class _LeaderboardCardContents extends StatelessWidget {
                   reportedUserIds: reportedUserIds,
                   hiddenDisplayNameUserIds: hiddenDisplayNameUserIds,
                   onToggleHiddenDisplayName: onToggleHiddenDisplayName,
+                  previousDayWinnerIds: previousDayGlobalWinnerIds,
                 ),
         ),
       ],
@@ -4213,6 +4695,7 @@ class _FriendsLeaderboardView extends StatefulWidget {
     required this.reportedUserIds,
     required this.hiddenDisplayNameUserIds,
     required this.onToggleHiddenDisplayName,
+    required this.previousDayWinnerIds,
   });
 
   final User? user;
@@ -4227,6 +4710,7 @@ class _FriendsLeaderboardView extends StatefulWidget {
   final Set<String> reportedUserIds;
   final Set<String> hiddenDisplayNameUserIds;
   final ValueChanged<String> onToggleHiddenDisplayName;
+  final Set<String> previousDayWinnerIds;
 
   @override
   State<_FriendsLeaderboardView> createState() =>
@@ -4472,6 +4956,7 @@ class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
       reportedUserIds: widget.reportedUserIds,
       hiddenDisplayNameUserIds: widget.hiddenDisplayNameUserIds,
       onToggleHiddenDisplayName: widget.onToggleHiddenDisplayName,
+      previousDayWinnerIds: widget.previousDayWinnerIds,
       onReport: (entry) => widget.onReportUser(
         reportedUid: entry.uid,
         reportedDisplayName: entry.name,
@@ -4554,6 +5039,7 @@ class _GlobalLeaderboardView extends StatefulWidget {
     required this.reportedUserIds,
     required this.hiddenDisplayNameUserIds,
     required this.onToggleHiddenDisplayName,
+    required this.previousDayWinnerIds,
   });
 
   final User? user;
@@ -4566,6 +5052,7 @@ class _GlobalLeaderboardView extends StatefulWidget {
   final Set<String> reportedUserIds;
   final Set<String> hiddenDisplayNameUserIds;
   final ValueChanged<String> onToggleHiddenDisplayName;
+  final Set<String> previousDayWinnerIds;
 
   @override
   State<_GlobalLeaderboardView> createState() => _GlobalLeaderboardViewState();
@@ -5005,6 +5492,7 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
           reportedUserIds: widget.reportedUserIds,
           hiddenDisplayNameUserIds: widget.hiddenDisplayNameUserIds,
           onToggleHiddenDisplayName: widget.onToggleHiddenDisplayName,
+          previousDayWinnerIds: widget.previousDayWinnerIds,
           onReport: _user == null
               ? null
               : (entry) => widget.onReportUser(
@@ -5060,6 +5548,168 @@ class _LeaderboardMetric extends StatelessWidget {
   }
 }
 
+class _RankingSummaryDialog extends StatelessWidget {
+  const _RankingSummaryDialog({
+    required this.dayKey,
+    required this.friendRank,
+    required this.globalRank,
+    required this.friendEntries,
+    required this.globalEntries,
+    required this.currentUserId,
+  });
+
+  final String dayKey;
+  final int? friendRank;
+  final int globalRank;
+  final List<DailyScoreSnapshotEntry> friendEntries;
+  final List<DailyScoreSnapshotEntry> globalEntries;
+  final String currentUserId;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Dialog(
+      backgroundColor: theme.colorScheme.surface,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+        side: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.35)),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'ranking update',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                friendRank == null
+                    ? 'you ranked #$globalRank globally on $dayKey'
+                    : 'you ranked #$friendRank among friends and #$globalRank globally on $dayKey',
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 18),
+              if (friendEntries.isNotEmpty) ...[
+                _DailyScoreSnapshotTable(
+                  title: 'friends',
+                  entries: friendEntries,
+                  currentUserId: currentUserId,
+                ),
+                const SizedBox(height: 18),
+              ],
+              _DailyScoreSnapshotTable(
+                title: 'global',
+                entries: globalEntries,
+                currentUserId: currentUserId,
+              ),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerRight,
+                child: FilledButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('continue'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DailyScoreSnapshotTable extends StatelessWidget {
+  const _DailyScoreSnapshotTable({
+    required this.title,
+    required this.entries,
+    required this.currentUserId,
+  });
+
+  final String title;
+  final List<DailyScoreSnapshotEntry> entries;
+  final String currentUserId;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final sortedEntries = List<DailyScoreSnapshotEntry>.from(entries)
+      ..sort((a, b) {
+        final byScore = b.score.compareTo(a.score);
+        if (byScore != 0) {
+          return byScore;
+        }
+        final byName = a.displayName.toLowerCase().compareTo(
+          b.displayName.toLowerCase(),
+        );
+        if (byName != 0) {
+          return byName;
+        }
+        return a.uid.compareTo(b.uid);
+      });
+    final winnerIds = previousDayWinnerIds(entries);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          title,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...sortedEntries.map((entry) {
+          final isCurrentUser = entry.uid == currentUserId;
+          final rank = dailyScoreRankFor(entries, entry.uid) ?? 0;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                SizedBox(width: 42, child: Text('#$rank')),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          entry.displayName,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: isCurrentUser
+                                ? FontWeight.w800
+                                : FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      if (winnerIds.contains(entry.uid)) ...[
+                        const SizedBox(width: 6),
+                        const Icon(Icons.emoji_events, size: 16),
+                      ],
+                    ],
+                  ),
+                ),
+                Text(
+                  '${entry.score}',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
+
 class _LeaderboardTable extends StatelessWidget {
   const _LeaderboardTable({
     required this.entries,
@@ -5067,6 +5717,7 @@ class _LeaderboardTable extends StatelessWidget {
     required this.reportedUserIds,
     required this.hiddenDisplayNameUserIds,
     required this.onToggleHiddenDisplayName,
+    required this.previousDayWinnerIds,
     this.onReport,
   });
 
@@ -5075,6 +5726,7 @@ class _LeaderboardTable extends StatelessWidget {
   final Set<String> reportedUserIds;
   final Set<String> hiddenDisplayNameUserIds;
   final ValueChanged<String> onToggleHiddenDisplayName;
+  final Set<String> previousDayWinnerIds;
   final ValueChanged<_LeaderboardEntry>? onReport;
 
   @override
@@ -5137,13 +5789,27 @@ class _LeaderboardTable extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: Text(
-                    displayName,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: rowForeground,
-                    ),
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          displayName,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: rowForeground,
+                          ),
+                        ),
+                      ),
+                      if (previousDayWinnerIds.contains(entry.uid)) ...[
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.emoji_events,
+                          size: 16,
+                          color: rowForeground,
+                        ),
+                      ],
+                    ],
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -5257,11 +5923,15 @@ class PlanarityGamePage extends StatefulWidget {
     required this.dayKey,
     required this.startLevel,
     required this.startScore,
+    required this.tutorialCompleted,
+    this.onLevelSolved,
   });
 
   final String dayKey;
   final int startLevel;
   final int startScore;
+  final bool tutorialCompleted;
+  final Future<void> Function(int level)? onLevelSolved;
 
   @override
   State<PlanarityGamePage> createState() => _PlanarityGamePageState();
@@ -5280,6 +5950,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
   late int _level;
   late int _totalScore;
   late PlanarityLevel _current;
+  late bool _tutorialCompleted;
   int _movesUsed = 0;
   int? _activeNode;
   Offset? _dragStart;
@@ -5297,6 +5968,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
     super.initState();
     _level = widget.startLevel;
     _totalScore = widget.startScore;
+    _tutorialCompleted = widget.tutorialCompleted;
     _current = PlanarityGenerator.generate(
       dayKey: widget.dayKey,
       level: _level,
@@ -5326,6 +5998,22 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
     unawaited(_logLevelStartEvent(_level));
   }
 
+  void _restartCurrentGraph() {
+    if (_resolvingLevel) {
+      return;
+    }
+    setState(() {
+      _movesUsed = 0;
+      _activeNode = null;
+      _dragStart = null;
+      _current = PlanarityGenerator.generate(
+        dayKey: widget.dayKey,
+        level: _level,
+      );
+      _needsCentering = true;
+    });
+  }
+
   String? get _interstitialAdUnitId {
     if (!_supportsMobileAds) {
       return null;
@@ -5342,7 +6030,8 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
     };
   }
 
-  bool get _shouldShowInterstitialForCurrentLevel => _level % 3 == 0;
+  bool get _shouldShowInterstitialForCurrentLevel =>
+      _level > 3 && _level % 3 == 0;
 
   void _loadInterstitialAd() {
     final adUnitId = _interstitialAdUnitId;
@@ -5421,6 +6110,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
         score: _totalScore,
         level: _level,
         locked: true,
+        tutorialCompleted: _tutorialCompleted,
       ),
     );
   }
@@ -5432,11 +6122,30 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
         score: _totalScore,
         level: level ?? _level,
         locked: false,
+        tutorialCompleted: _tutorialCompleted,
       ),
     );
   }
 
-  bool _isSolved() => _countCrossings(_current.nodes, _current.edges) == 0;
+  bool get _isTutorialLevel => !_tutorialCompleted && _level <= 3;
+
+  bool get _shouldRequireMoveForSolve => _isTutorialLevel;
+
+  bool _isSolved() {
+    if (_shouldRequireMoveForSolve && _movesUsed == 0) {
+      return false;
+    }
+    return _countCrossings(_current.nodes, _current.edges) == 0;
+  }
+
+  String? _tutorialTextForLevel(int level) {
+    return switch (level) {
+      1 => 'this is a node drag it anywhere',
+      2 => 'nodes are connected by edges edges stay attached',
+      3 => 'a graph is solved when no edges cross this one is already solved',
+      _ => null,
+    };
+  }
 
   void _onPanStart(int index, DragStartDetails details) {
     if (_resolvingLevel) {
@@ -5495,6 +6204,11 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       });
       await _logLevelEndEvent(level: _level, success: true);
       await _logLevelUpEvent(_level + 1);
+      await widget.onLevelSolved?.call(_level);
+      final completedTutorialWithThisLevel = _isTutorialLevel && _level == 3;
+      if (completedTutorialWithThisLevel) {
+        _tutorialCompleted = true;
+      }
       final solvedNodes = List<Offset>.from(_current.nodes);
       final solvedEdges = List<Edge>.from(_current.edges);
       await _showInterstitialAdIfNeeded();
@@ -5548,6 +6262,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       _current.nodes,
       _current.edges,
     );
+    final tutorialText = _tutorialTextForLevel(_level);
 
     return Scaffold(
       body: SafeArea(
@@ -5581,13 +6296,23 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                     ),
                     Align(
                       alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: Text(
-                          '$_totalScore',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: _restartCurrentGraph,
+                            icon: const Icon(Icons.restart_alt, size: 22),
+                            tooltip: 'restart',
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Text(
+                              '$_totalScore',
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -5602,6 +6327,18 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                   ).colorScheme.onSurface.withOpacity(0.75),
                 ),
               ),
+              if (_isTutorialLevel && tutorialText != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  tutorialText,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.72),
+                  ),
+                ),
+              ],
               const SizedBox(height: 18),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -6495,6 +7232,11 @@ class PlanarityLevel {
 
 class PlanarityGenerator {
   static PlanarityLevel generate({required String dayKey, required int level}) {
+    final tutorialLevel = _generateTutorialLevel(level);
+    if (tutorialLevel != null) {
+      return tutorialLevel;
+    }
+
     final nodeCount = max(2, level);
     final structureRandom = _DeterministicRandom(
       _stableSeed(dayKey, nodeCount),
@@ -6516,6 +7258,25 @@ class PlanarityGenerator {
     }
 
     return PlanarityLevel(nodes: scattered, edges: edges);
+  }
+
+  static PlanarityLevel? _generateTutorialLevel(int level) {
+    return switch (level) {
+      1 => PlanarityLevel(nodes: [const Offset(180, 240)], edges: const []),
+      2 => PlanarityLevel(
+        nodes: [const Offset(120, 240), const Offset(240, 240)],
+        edges: const [Edge(0, 1)],
+      ),
+      3 => PlanarityLevel(
+        nodes: [
+          const Offset(180, 120),
+          const Offset(90, 280),
+          const Offset(270, 280),
+        ],
+        edges: const [Edge(0, 1), Edge(1, 2), Edge(0, 2)],
+      ),
+      _ => null,
+    };
   }
 
   static List<Offset> _scatterNodes(int n, _DeterministicRandom random) {
@@ -6671,12 +7432,14 @@ class GameSessionResult {
     required this.score,
     required this.level,
     required this.locked,
+    required this.tutorialCompleted,
   });
 
   final String dayKey;
   final int score;
   final int level;
   final bool locked;
+  final bool tutorialCompleted;
 }
 
 int scoreForSolvedLevel({required int level, required int movesUsed}) {
