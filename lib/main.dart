@@ -7471,6 +7471,9 @@ class GameSessionResult {
 }
 
 int scoreForSolvedLevel({required int level, required int movesUsed}) {
+  if (level <= 3) {
+    return 0;
+  }
   return max(0, level - movesUsed);
 }
 

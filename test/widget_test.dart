@@ -31,6 +31,10 @@ String _graphSignature(PlanarityLevel level) {
 
 void main() {
   test('score updates when a graph is solved', () {
+    expect(scoreForSolvedLevel(level: 1, movesUsed: 1), 0);
+    expect(scoreForSolvedLevel(level: 2, movesUsed: 1), 0);
+    expect(scoreForSolvedLevel(level: 3, movesUsed: 1), 0);
+    expect(scoreForSolvedLevel(level: 3, movesUsed: 3), 0);
     expect(scoreForSolvedLevel(level: 6, movesUsed: 2), 4);
     expect(scoreForSolvedLevel(level: 6, movesUsed: 6), 0);
     expect(scoreForSolvedLevel(level: 6, movesUsed: 8), 0);
