@@ -146,6 +146,26 @@ void main() {
     expect(find.text('this is a node drag it anywhere'), findsOneWidget);
   });
 
+  testWidgets('Game page shows a restart graph button', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: PlanarityGamePage(
+          dayKey: '2026-03-18',
+          startLevel: 4,
+          startScore: 0,
+          tutorialCompleted: true,
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byIcon(Icons.restart_alt), findsOneWidget);
+  });
+
   test('App Store review prompt requires iOS consecutive signed-in play', () {
     expect(
       shouldPromptForAppStoreReview(
