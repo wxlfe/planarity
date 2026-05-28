@@ -15,6 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
@@ -59,6 +60,41 @@ bool get _supportsAppleSignIn {
     TargetPlatform.iOS || TargetPlatform.macOS => true,
     _ => false,
   };
+}
+
+@visibleForTesting
+bool shouldPromptForAppStoreReview({
+  required TargetPlatform platform,
+  required bool isWeb,
+  required bool signedIn,
+  required String? previousLastPlayed,
+  required String todayKey,
+  required String? appStoreReviewPromptedAt,
+}) {
+  if (isWeb || platform != TargetPlatform.iOS || !signedIn) {
+    return false;
+  }
+  if (appStoreReviewPromptedAt != null && appStoreReviewPromptedAt.isNotEmpty) {
+    return false;
+  }
+  return previousLastPlayed == previousDayKey(todayKey);
+}
+
+@visibleForTesting
+String? previousDayKey(String dayKey) {
+  final parsed = DateTime.tryParse(dayKey);
+  if (parsed == null) {
+    return null;
+  }
+  final previousDay = parsed.subtract(const Duration(days: 1));
+  return _dayKeyForDate(previousDay);
+}
+
+String _dayKeyForDate(DateTime date) {
+  final year = date.year.toString().padLeft(4, '0');
+  final month = date.month.toString().padLeft(2, '0');
+  final day = date.day.toString().padLeft(2, '0');
+  return '$year-$month-$day';
 }
 
 Future<void> _initializeMobileAds() async {
@@ -391,13 +427,17 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
   static final Uri _planarGraphInfoUri = Uri.parse(
     'https://en.wikipedia.org/wiki/Planar_graph',
   );
-  static const _startingLevel = 4;
+  static const _tutorialStartLevel = 1;
+  static const _normalStartLevel = 4;
   static const _localGuestUserDocumentKey = 'local_guest_user_document';
 
   bool _isLoaded = false;
   DailyPlayStatus _status = DailyPlayStatus.ready;
-  int _currentLevel = _startingLevel;
+  int _currentLevel = _tutorialStartLevel;
   int _score = 0;
+  bool _tutorialCompleted = false;
+  String? _previousLastPlayed;
+  String? _appStoreReviewPromptedAt;
   int _leaderboardRefreshTick = 0;
   _LeaderboardTab? _selectedLeaderboardTab;
   StreamSubscription<User?>? _authSubscription;
@@ -510,10 +550,12 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     final signedInChanged = (_currentUser != null) != (user != null);
     final lastPlayed = _profileLastPlayed(profileData);
     final playedToday = lastPlayed == _todayKey();
+    final tutorialCompleted = _profileTutorialCompleted(profileData);
     final syncedScore = _profileScore(profileData, playedToday: playedToday);
     final syncedLevel = _profileCurrentLevel(
       profileData,
       playedToday: playedToday,
+      tutorialCompleted: tutorialCompleted,
     );
     final isLocked = _profileLocked(profileData);
     final hiddenDisplayNameUserIds = _profileHiddenDisplayNameUserIds(
@@ -534,6 +576,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           : DailyPlayStatus.ready;
       _currentLevel = syncedLevel;
       _score = syncedScore;
+      _tutorialCompleted = tutorialCompleted;
+      _previousLastPlayed = lastPlayed;
+      _appStoreReviewPromptedAt = _profileAppStoreReviewPromptedAt(profileData);
       _isLoaded = true;
       _hiddenDisplayNameUserIds
         ..clear()
@@ -556,11 +601,13 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     _maybePromptToAddIncomingFriend(profileData: profileData);
 
     if (!playedToday &&
-        (isLocked || syncedScore != 0 || syncedLevel != _startingLevel)) {
+        (isLocked ||
+            syncedScore != 0 ||
+            syncedLevel != _startLevelForTutorial(tutorialCompleted))) {
       await _updateCurrentUserProgressFields(
         user: user,
         score: 0,
-        currentLevel: _startingLevel,
+        currentLevel: _startLevelForTutorial(tutorialCompleted),
         locked: false,
       );
     }
@@ -569,13 +616,15 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
   Map<String, dynamic> _defaultUserDocument({String? displayName}) {
     return <String, dynamic>{
       'displayName': displayName ?? _l10n.anonymousPlayer,
-      'currentLevel': _startingLevel,
+      'currentLevel': _tutorialStartLevel,
+      'appStoreReviewPromptedAt': '',
       'friends': <String>[],
       'hiddenDisplayNameUserIds': <String>[],
       'lastPlayed': '',
       'locked': false,
       'lifetimeScore': 0,
       'score': 0,
+      'tutorialCompleted': false,
     };
   }
 
@@ -641,6 +690,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     String? lastPlayed,
     bool? locked,
     int? lifetimeScoreIncrement,
+    bool? tutorialCompleted,
+    String? appStoreReviewPromptedAt,
   }) async {
     if (user != null) {
       await _updateUserProgressFields(
@@ -650,6 +701,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         lastPlayed: lastPlayed,
         locked: locked,
         lifetimeScoreIncrement: lifetimeScoreIncrement,
+        tutorialCompleted: tutorialCompleted,
+        appStoreReviewPromptedAt: appStoreReviewPromptedAt,
       );
       return;
     }
@@ -671,6 +724,12 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       localDocument['lifetimeScore'] =
           _profileLifetimeScore(localDocument) + lifetimeScoreIncrement;
     }
+    if (tutorialCompleted != null) {
+      localDocument['tutorialCompleted'] = tutorialCompleted;
+    }
+    if (appStoreReviewPromptedAt != null) {
+      localDocument['appStoreReviewPromptedAt'] = appStoreReviewPromptedAt;
+    }
     await _saveLocalGuestUserDocument(localDocument);
   }
 
@@ -681,6 +740,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     String? lastPlayed,
     bool? locked,
     int? lifetimeScoreIncrement,
+    bool? tutorialCompleted,
+    String? appStoreReviewPromptedAt,
   }) async {
     final data = <String, Object>{};
     if (score != null) {
@@ -697,6 +758,12 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     }
     if (lifetimeScoreIncrement != null && lifetimeScoreIncrement > 0) {
       data['lifetimeScore'] = FieldValue.increment(lifetimeScoreIncrement);
+    }
+    if (tutorialCompleted != null) {
+      data['tutorialCompleted'] = tutorialCompleted;
+    }
+    if (appStoreReviewPromptedAt != null) {
+      data['appStoreReviewPromptedAt'] = appStoreReviewPromptedAt;
     }
     if (data.isEmpty) {
       return;
@@ -753,6 +820,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       lastPlayed: today,
       locked: false,
     );
+    if (!mounted) {
+      return;
+    }
     final result = await Navigator.of(context).push<GameSessionResult>(
       MaterialPageRoute(
         settings: const RouteSettings(name: 'game_session'),
@@ -760,6 +830,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           dayKey: today,
           startLevel: startLevel,
           startScore: startScore,
+          tutorialCompleted: _tutorialCompleted,
+          onLevelSolved: _handleLevelSolved,
         ),
       ),
     );
@@ -781,6 +853,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         _status = DailyPlayStatus.inProgress;
         _currentLevel = result.level;
       }
+      _tutorialCompleted = result.tutorialCompleted;
     });
     await _updateCurrentUserProgressFields(
       user: _currentUser,
@@ -789,9 +862,59 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       lastPlayed: result.dayKey,
       locked: result.locked,
       lifetimeScoreIncrement: max(0, result.score - previousScore),
+      tutorialCompleted: result.tutorialCompleted,
     );
     await _logPostScoreEvent(score: result.score, level: result.level);
     _refreshLeaderboard();
+  }
+
+  Future<void> _handleLevelSolved(int level) async {
+    if (level == 3 && !_tutorialCompleted) {
+      _tutorialCompleted = true;
+      try {
+        await _updateCurrentUserProgressFields(
+          user: _currentUser,
+          currentLevel: _normalStartLevel,
+          tutorialCompleted: true,
+        );
+      } catch (error, stackTrace) {
+        debugPrint('Unable to save tutorial completion: $error');
+        debugPrintStack(stackTrace: stackTrace);
+      }
+    }
+
+    if (level != 5 ||
+        !shouldPromptForAppStoreReview(
+          platform: defaultTargetPlatform,
+          isWeb: kIsWeb,
+          signedIn: _currentUser != null,
+          previousLastPlayed: _previousLastPlayed,
+          todayKey: _todayKey(),
+          appStoreReviewPromptedAt: _appStoreReviewPromptedAt,
+        )) {
+      return;
+    }
+
+    try {
+      final inAppReview = InAppReview.instance;
+      if (await inAppReview.isAvailable()) {
+        await inAppReview.requestReview();
+      }
+    } on MissingPluginException {
+      return;
+    } finally {
+      final today = _todayKey();
+      _appStoreReviewPromptedAt = today;
+      try {
+        await _updateCurrentUserProgressFields(
+          user: _currentUser,
+          appStoreReviewPromptedAt: today,
+        );
+      } catch (error, stackTrace) {
+        debugPrint('Unable to save App Store review prompt state: $error');
+        debugPrintStack(stackTrace: stackTrace);
+      }
+    }
   }
 
   Future<String?> _submitAuth({
@@ -1468,18 +1591,64 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
   int _profileCurrentLevel(
     Map<String, dynamic>? profileData, {
     required bool playedToday,
+    required bool tutorialCompleted,
   }) {
+    final startLevel = _startLevelForTutorial(tutorialCompleted);
     if (!playedToday) {
-      return _startingLevel;
+      return startLevel;
     }
     final currentLevel = profileData?['currentLevel'];
     if (currentLevel is int) {
-      return max(_startingLevel, currentLevel);
+      return max(startLevel, currentLevel);
     }
     if (currentLevel is num) {
-      return max(_startingLevel, currentLevel.toInt());
+      return max(startLevel, currentLevel.toInt());
     }
-    return _startingLevel;
+    return startLevel;
+  }
+
+  int _startLevelForTutorial(bool tutorialCompleted) {
+    return tutorialCompleted ? _normalStartLevel : _tutorialStartLevel;
+  }
+
+  bool _profileTutorialCompleted(Map<String, dynamic>? profileData) {
+    final tutorialCompleted = profileData?['tutorialCompleted'];
+    if (tutorialCompleted is bool) {
+      return tutorialCompleted;
+    }
+    return _profileHasPriorProgress(profileData);
+  }
+
+  bool _profileHasPriorProgress(Map<String, dynamic>? profileData) {
+    final lastPlayed = _profileLastPlayed(profileData);
+    if (lastPlayed != null) {
+      return true;
+    }
+    if (_profileLifetimeScore(profileData) > 0) {
+      return true;
+    }
+    if (_leaderboardRawScoreFromData(profileData) > 0) {
+      return true;
+    }
+    if (_profileLocked(profileData)) {
+      return true;
+    }
+    final currentLevel = profileData?['currentLevel'];
+    if (currentLevel is int) {
+      return currentLevel > _normalStartLevel;
+    }
+    if (currentLevel is num) {
+      return currentLevel.toInt() > _normalStartLevel;
+    }
+    return false;
+  }
+
+  String? _profileAppStoreReviewPromptedAt(Map<String, dynamic>? profileData) {
+    final promptedAt = profileData?['appStoreReviewPromptedAt'];
+    if (promptedAt is String && promptedAt.isNotEmpty) {
+      return promptedAt;
+    }
+    return null;
   }
 
   String? _profileLastPlayed(Map<String, dynamic>? profileData) {
@@ -5257,11 +5426,15 @@ class PlanarityGamePage extends StatefulWidget {
     required this.dayKey,
     required this.startLevel,
     required this.startScore,
+    required this.tutorialCompleted,
+    this.onLevelSolved,
   });
 
   final String dayKey;
   final int startLevel;
   final int startScore;
+  final bool tutorialCompleted;
+  final Future<void> Function(int level)? onLevelSolved;
 
   @override
   State<PlanarityGamePage> createState() => _PlanarityGamePageState();
@@ -5280,6 +5453,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
   late int _level;
   late int _totalScore;
   late PlanarityLevel _current;
+  late bool _tutorialCompleted;
   int _movesUsed = 0;
   int? _activeNode;
   Offset? _dragStart;
@@ -5297,6 +5471,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
     super.initState();
     _level = widget.startLevel;
     _totalScore = widget.startScore;
+    _tutorialCompleted = widget.tutorialCompleted;
     _current = PlanarityGenerator.generate(
       dayKey: widget.dayKey,
       level: _level,
@@ -5342,7 +5517,8 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
     };
   }
 
-  bool get _shouldShowInterstitialForCurrentLevel => _level % 3 == 0;
+  bool get _shouldShowInterstitialForCurrentLevel =>
+      _level > 3 && _level % 3 == 0;
 
   void _loadInterstitialAd() {
     final adUnitId = _interstitialAdUnitId;
@@ -5421,6 +5597,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
         score: _totalScore,
         level: _level,
         locked: true,
+        tutorialCompleted: _tutorialCompleted,
       ),
     );
   }
@@ -5432,11 +5609,30 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
         score: _totalScore,
         level: level ?? _level,
         locked: false,
+        tutorialCompleted: _tutorialCompleted,
       ),
     );
   }
 
-  bool _isSolved() => _countCrossings(_current.nodes, _current.edges) == 0;
+  bool get _isTutorialLevel => !_tutorialCompleted && _level <= 3;
+
+  bool get _shouldRequireMoveForSolve => _isTutorialLevel;
+
+  bool _isSolved() {
+    if (_shouldRequireMoveForSolve && _movesUsed == 0) {
+      return false;
+    }
+    return _countCrossings(_current.nodes, _current.edges) == 0;
+  }
+
+  String? _tutorialTextForLevel(int level) {
+    return switch (level) {
+      1 => 'this is a node drag it anywhere',
+      2 => 'nodes are connected by edges edges stay attached',
+      3 => 'a graph is solved when no edges cross this one is already solved',
+      _ => null,
+    };
+  }
 
   void _onPanStart(int index, DragStartDetails details) {
     if (_resolvingLevel) {
@@ -5495,6 +5691,11 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       });
       await _logLevelEndEvent(level: _level, success: true);
       await _logLevelUpEvent(_level + 1);
+      await widget.onLevelSolved?.call(_level);
+      final completedTutorialWithThisLevel = _isTutorialLevel && _level == 3;
+      if (completedTutorialWithThisLevel) {
+        _tutorialCompleted = true;
+      }
       final solvedNodes = List<Offset>.from(_current.nodes);
       final solvedEdges = List<Edge>.from(_current.edges);
       await _showInterstitialAdIfNeeded();
@@ -5548,6 +5749,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       _current.nodes,
       _current.edges,
     );
+    final tutorialText = _tutorialTextForLevel(_level);
 
     return Scaffold(
       body: SafeArea(
@@ -5602,6 +5804,18 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                   ).colorScheme.onSurface.withOpacity(0.75),
                 ),
               ),
+              if (_isTutorialLevel && tutorialText != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  tutorialText,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.72),
+                  ),
+                ),
+              ],
               const SizedBox(height: 18),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -6495,6 +6709,11 @@ class PlanarityLevel {
 
 class PlanarityGenerator {
   static PlanarityLevel generate({required String dayKey, required int level}) {
+    final tutorialLevel = _generateTutorialLevel(level);
+    if (tutorialLevel != null) {
+      return tutorialLevel;
+    }
+
     final nodeCount = max(2, level);
     final structureRandom = _DeterministicRandom(
       _stableSeed(dayKey, nodeCount),
@@ -6516,6 +6735,25 @@ class PlanarityGenerator {
     }
 
     return PlanarityLevel(nodes: scattered, edges: edges);
+  }
+
+  static PlanarityLevel? _generateTutorialLevel(int level) {
+    return switch (level) {
+      1 => PlanarityLevel(nodes: [const Offset(180, 240)], edges: const []),
+      2 => PlanarityLevel(
+        nodes: [const Offset(120, 240), const Offset(240, 240)],
+        edges: const [Edge(0, 1)],
+      ),
+      3 => PlanarityLevel(
+        nodes: [
+          const Offset(180, 120),
+          const Offset(90, 280),
+          const Offset(270, 280),
+        ],
+        edges: const [Edge(0, 1), Edge(1, 2), Edge(0, 2)],
+      ),
+      _ => null,
+    };
   }
 
   static List<Offset> _scatterNodes(int n, _DeterministicRandom random) {
@@ -6671,12 +6909,14 @@ class GameSessionResult {
     required this.score,
     required this.level,
     required this.locked,
+    required this.tutorialCompleted,
   });
 
   final String dayKey;
   final int score;
   final int level;
   final bool locked;
+  final bool tutorialCompleted;
 }
 
 int scoreForSolvedLevel({required int level, required int movesUsed}) {

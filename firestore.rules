@@ -13,6 +13,7 @@ service cloud.firestore {
     function userFields() {
       return [
         'currentLevel',
+        'appStoreReviewPromptedAt',
         'displayName',
         'friends',
         'hiddenDisplayNameUserIds',
@@ -20,6 +21,7 @@ service cloud.firestore {
         'lifetimeScore',
         'locked',
         'score',
+        'tutorialCompleted',
       ];
     }
 
@@ -61,15 +63,27 @@ service cloud.firestore {
         );
     }
 
+    function validOptionalTutorialCompleted(data) {
+      return !('tutorialCompleted' in data.keys()) ||
+        data.tutorialCompleted is bool;
+    }
+
+    function validOptionalAppStoreReviewPromptedAt(data) {
+      return !('appStoreReviewPromptedAt' in data.keys()) ||
+        validLastPlayed(data.appStoreReviewPromptedAt);
+    }
+
     function validUserDocument(data) {
       return data.keys().hasOnly(userFields()) &&
         data.keys().hasAll(requiredUserFields()) &&
         validDisplayName(data.displayName) &&
         data.currentLevel is int &&
-        data.currentLevel >= 4 &&
+        data.currentLevel >= 1 &&
         data.friends is list &&
         validFriends(data.friends) &&
         validHiddenDisplayNameUserIds(data) &&
+        validOptionalTutorialCompleted(data) &&
+        validOptionalAppStoreReviewPromptedAt(data) &&
         validLastPlayed(data.lastPlayed) &&
         data.locked is bool &&
         data.lifetimeScore is int &&

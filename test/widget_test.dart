@@ -63,20 +63,8 @@ void main() {
         dayKey: '2026-03-18',
         level: 6,
       );
-      final equivalentNodeCount = PlanarityGenerator.generate(
-        dayKey: '2026-03-18',
-        level: 2,
-      );
-      final equivalentNodeCountAgain = PlanarityGenerator.generate(
-        dayKey: '2026-03-18',
-        level: 1,
-      );
 
       expect(_graphSignature(first), _graphSignature(second));
-      expect(
-        _graphSignature(equivalentNodeCount),
-        _graphSignature(equivalentNodeCountAgain),
-      );
     },
   );
 
@@ -98,6 +86,122 @@ void main() {
     expect(
       _graphSignature(baseline),
       isNot(_graphSignature(differentNodeCount)),
+    );
+  });
+
+  test('tutorial graph generation uses one two and three node lessons', () {
+    final graphOne = PlanarityGenerator.generate(
+      dayKey: '2026-03-18',
+      level: 1,
+    );
+    final graphTwo = PlanarityGenerator.generate(
+      dayKey: '2026-03-18',
+      level: 2,
+    );
+    final graphThree = PlanarityGenerator.generate(
+      dayKey: '2026-03-18',
+      level: 3,
+    );
+
+    expect(graphOne.nodes, hasLength(1));
+    expect(graphOne.edges, isEmpty);
+    expect(graphTwo.nodes, hasLength(2));
+    expect(graphTwo.edges, [const Edge(0, 1)]);
+    expect(graphThree.nodes, hasLength(3));
+    expect(graphThree.edges, hasLength(3));
+  });
+
+  testWidgets('First-time local guests start with the tutorial', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(const PlanarityApp());
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.text('start'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('this is a node drag it anywhere'), findsOneWidget);
+    expect(find.text('untangle the graph in 1 move'), findsOneWidget);
+  });
+
+  testWidgets('Existing no-progress profiles still start with the tutorial', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'local_guest_user_document': jsonEncode({
+        'currentLevel': 4,
+        'lastPlayed': '',
+        'locked': false,
+        'lifetimeScore': 0,
+        'score': 0,
+      }),
+    });
+
+    await tester.pumpWidget(const PlanarityApp());
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.text('start'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('this is a node drag it anywhere'), findsOneWidget);
+  });
+
+  test('App Store review prompt requires iOS consecutive signed-in play', () {
+    expect(
+      shouldPromptForAppStoreReview(
+        platform: TargetPlatform.iOS,
+        isWeb: false,
+        signedIn: true,
+        previousLastPlayed: '2026-05-27',
+        todayKey: '2026-05-28',
+        appStoreReviewPromptedAt: null,
+      ),
+      isTrue,
+    );
+
+    expect(
+      shouldPromptForAppStoreReview(
+        platform: TargetPlatform.android,
+        isWeb: false,
+        signedIn: true,
+        previousLastPlayed: '2026-05-27',
+        todayKey: '2026-05-28',
+        appStoreReviewPromptedAt: null,
+      ),
+      isFalse,
+    );
+    expect(
+      shouldPromptForAppStoreReview(
+        platform: TargetPlatform.iOS,
+        isWeb: false,
+        signedIn: false,
+        previousLastPlayed: '2026-05-27',
+        todayKey: '2026-05-28',
+        appStoreReviewPromptedAt: null,
+      ),
+      isFalse,
+    );
+    expect(
+      shouldPromptForAppStoreReview(
+        platform: TargetPlatform.iOS,
+        isWeb: false,
+        signedIn: true,
+        previousLastPlayed: '2026-05-26',
+        todayKey: '2026-05-28',
+        appStoreReviewPromptedAt: null,
+      ),
+      isFalse,
+    );
+    expect(
+      shouldPromptForAppStoreReview(
+        platform: TargetPlatform.iOS,
+        isWeb: false,
+        signedIn: true,
+        previousLastPlayed: '2026-05-27',
+        todayKey: '2026-05-28',
+        appStoreReviewPromptedAt: '2026-05-28',
+      ),
+      isFalse,
     );
   });
 
