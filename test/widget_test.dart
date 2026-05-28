@@ -205,6 +205,54 @@ void main() {
     );
   });
 
+  test('daily score ranking uses competition rank and top winner ties', () {
+    const entries = [
+      DailyScoreSnapshotEntry(uid: 'ada', displayName: 'ada', score: 42),
+      DailyScoreSnapshotEntry(uid: 'grace', displayName: 'grace', score: 57),
+      DailyScoreSnapshotEntry(
+        uid: 'katherine',
+        displayName: 'katherine',
+        score: 57,
+      ),
+      DailyScoreSnapshotEntry(
+        uid: 'dorothy',
+        displayName: 'dorothy',
+        score: 12,
+      ),
+    ];
+
+    expect(dailyScoreRankFor(entries, 'ada'), 3);
+    expect(dailyScoreRankFor(entries, 'grace'), 1);
+    expect(previousDayWinnerIds(entries), {'grace', 'katherine'});
+  });
+
+  test('ranking summary is shown once for a previous played day', () {
+    expect(
+      shouldShowRankingSummary(
+        todayKey: '2026-05-28',
+        previousLastPlayed: '2026-05-27',
+        lastRankingSummaryShownFor: null,
+      ),
+      isTrue,
+    );
+    expect(
+      shouldShowRankingSummary(
+        todayKey: '2026-05-28',
+        previousLastPlayed: '2026-05-27',
+        lastRankingSummaryShownFor: '2026-05-27',
+      ),
+      isFalse,
+    );
+    expect(
+      shouldShowRankingSummary(
+        todayKey: '2026-05-28',
+        previousLastPlayed: '2026-05-28',
+        lastRankingSummaryShownFor: null,
+      ),
+      isFalse,
+    );
+  });
+
   testWidgets('Home page shows mobile leaderboard with global default', (
     WidgetTester tester,
   ) async {
