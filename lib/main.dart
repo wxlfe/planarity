@@ -97,6 +97,60 @@ String _dayKeyForDate(DateTime date) {
   return '$year-$month-$day';
 }
 
+@visibleForTesting
+class DailyScoreSnapshotEntry {
+  const DailyScoreSnapshotEntry({
+    required this.uid,
+    required this.displayName,
+    required this.score,
+    this.locked = false,
+  });
+
+  final String uid;
+  final String displayName;
+  final int score;
+  final bool locked;
+}
+
+@visibleForTesting
+int? dailyScoreRankFor(List<DailyScoreSnapshotEntry> entries, String uid) {
+  DailyScoreSnapshotEntry? userEntry;
+  for (final entry in entries) {
+    if (entry.uid == uid) {
+      userEntry = entry;
+      break;
+    }
+  }
+  if (userEntry == null) {
+    return null;
+  }
+  return entries.where((entry) => entry.score > userEntry!.score).length + 1;
+}
+
+@visibleForTesting
+Set<String> previousDayWinnerIds(List<DailyScoreSnapshotEntry> entries) {
+  if (entries.isEmpty) {
+    return <String>{};
+  }
+  final topScore = entries.map((entry) => entry.score).reduce(max);
+  return entries
+      .where((entry) => entry.score == topScore)
+      .map((entry) => entry.uid)
+      .toSet();
+}
+
+@visibleForTesting
+bool shouldShowRankingSummary({
+  required String todayKey,
+  required String? previousLastPlayed,
+  required String? lastRankingSummaryShownFor,
+}) {
+  return previousLastPlayed != null &&
+      previousLastPlayed.isNotEmpty &&
+      previousLastPlayed != todayKey &&
+      lastRankingSummaryShownFor != previousLastPlayed;
+}
+
 Future<void> _initializeMobileAds() async {
   if (!_supportsMobileAds || _mobileAdsInitialized) {
     return;
@@ -438,6 +492,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
   bool _tutorialCompleted = false;
   String? _previousLastPlayed;
   String? _appStoreReviewPromptedAt;
+  String? _lastRankingSummaryShownFor;
+  bool _rankingSummaryPromptOpen = false;
   int _leaderboardRefreshTick = 0;
   _LeaderboardTab? _selectedLeaderboardTab;
   StreamSubscription<User?>? _authSubscription;
@@ -449,6 +505,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
   final Set<String> _reportedUserIdsThisSession = <String>{};
   final Set<String> _hiddenDisplayNameUserIds = <String>{};
   final Set<String> _currentFriendIds = <String>{};
+  final Set<String> _previousDayGlobalWinnerIds = <String>{};
+  final Set<String> _previousDayFriendWinnerIds = <String>{};
   StreamSubscription<Uri>? _appLinkSubscription;
 
   AppLocalizations get _l10n => context.l10n;
@@ -579,6 +637,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       _tutorialCompleted = tutorialCompleted;
       _previousLastPlayed = lastPlayed;
       _appStoreReviewPromptedAt = _profileAppStoreReviewPromptedAt(profileData);
+      _lastRankingSummaryShownFor = _profileLastRankingSummaryShownFor(
+        profileData,
+      );
       _isLoaded = true;
       _hiddenDisplayNameUserIds
         ..clear()
@@ -593,12 +654,16 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       }
     });
     _refreshLeaderboard();
+    unawaited(_refreshPreviousDayWinnerBadges(user, profileData));
     if (user == null) {
       _maybePromptToAuthenticateForFriendInvite();
       return;
     }
 
     _maybePromptToAddIncomingFriend(profileData: profileData);
+    unawaited(
+      _maybeShowRankingSummaryModal(user: user, profileData: profileData),
+    );
 
     if (!playedToday &&
         (isLocked ||
@@ -621,6 +686,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       'friends': <String>[],
       'hiddenDisplayNameUserIds': <String>[],
       'lastPlayed': '',
+      'lastRankingSummaryShownFor': '',
       'locked': false,
       'lifetimeScore': 0,
       'score': 0,
@@ -692,6 +758,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     int? lifetimeScoreIncrement,
     bool? tutorialCompleted,
     String? appStoreReviewPromptedAt,
+    String? lastRankingSummaryShownFor,
   }) async {
     if (user != null) {
       await _updateUserProgressFields(
@@ -703,6 +770,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         lifetimeScoreIncrement: lifetimeScoreIncrement,
         tutorialCompleted: tutorialCompleted,
         appStoreReviewPromptedAt: appStoreReviewPromptedAt,
+        lastRankingSummaryShownFor: lastRankingSummaryShownFor,
       );
       return;
     }
@@ -730,6 +798,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     if (appStoreReviewPromptedAt != null) {
       localDocument['appStoreReviewPromptedAt'] = appStoreReviewPromptedAt;
     }
+    if (lastRankingSummaryShownFor != null) {
+      localDocument['lastRankingSummaryShownFor'] = lastRankingSummaryShownFor;
+    }
     await _saveLocalGuestUserDocument(localDocument);
   }
 
@@ -742,6 +813,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     int? lifetimeScoreIncrement,
     bool? tutorialCompleted,
     String? appStoreReviewPromptedAt,
+    String? lastRankingSummaryShownFor,
   }) async {
     final data = <String, Object>{};
     if (score != null) {
@@ -765,6 +837,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     if (appStoreReviewPromptedAt != null) {
       data['appStoreReviewPromptedAt'] = appStoreReviewPromptedAt;
     }
+    if (lastRankingSummaryShownFor != null) {
+      data['lastRankingSummaryShownFor'] = lastRankingSummaryShownFor;
+    }
     if (data.isEmpty) {
       return;
     }
@@ -773,6 +848,26 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         .collection('users')
         .doc(userId)
         .set(data, SetOptions(merge: true));
+  }
+
+  Future<void> _writeDailyScoreSnapshot({
+    required User user,
+    required String dayKey,
+    required int score,
+    required bool locked,
+  }) async {
+    await FirebaseFirestore.instance
+        .collection('dailyScores')
+        .doc(dayKey)
+        .collection('entries')
+        .doc(user.uid)
+        .set({
+          'uid': user.uid,
+          'displayName': _displayNameForUser(user, l10n: _l10n),
+          'score': max(0, score),
+          'locked': locked,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
   }
 
   Future<SharedPreferences?> _prefsOrNull() async {
@@ -820,6 +915,15 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       lastPlayed: today,
       locked: false,
     );
+    final currentUser = _currentUser;
+    if (currentUser != null) {
+      await _writeDailyScoreSnapshot(
+        user: currentUser,
+        dayKey: today,
+        score: _score,
+        locked: false,
+      );
+    }
     if (!mounted) {
       return;
     }
@@ -864,6 +968,15 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       lifetimeScoreIncrement: max(0, result.score - previousScore),
       tutorialCompleted: result.tutorialCompleted,
     );
+    final resultUser = _currentUser;
+    if (resultUser != null) {
+      await _writeDailyScoreSnapshot(
+        user: resultUser,
+        dayKey: result.dayKey,
+        score: result.score,
+        locked: result.locked,
+      );
+    }
     await _logPostScoreEvent(score: result.score, level: result.level);
     _refreshLeaderboard();
   }
@@ -914,6 +1027,178 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         debugPrint('Unable to save App Store review prompt state: $error');
         debugPrintStack(stackTrace: stackTrace);
       }
+    }
+  }
+
+  Future<void> _refreshPreviousDayWinnerBadges(
+    User? user,
+    Map<String, dynamic>? profileData,
+  ) async {
+    if (!_firebaseReady) {
+      return;
+    }
+    final yesterday = previousDayKey(_todayKey());
+    if (yesterday == null) {
+      return;
+    }
+
+    try {
+      final globalWinners = await _loadGlobalDailyWinnerIds(yesterday);
+      final friendIds = user == null
+          ? const <String>[]
+          : <String>{user.uid, ..._profileFriendIds(profileData)}.toList();
+      final friendEntries = await _loadDailyScoreEntriesForUids(
+        dayKey: yesterday,
+        userIds: friendIds,
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _previousDayGlobalWinnerIds
+          ..clear()
+          ..addAll(globalWinners);
+        _previousDayFriendWinnerIds
+          ..clear()
+          ..addAll(previousDayWinnerIds(friendEntries));
+      });
+    } catch (error, stackTrace) {
+      debugPrint('Unable to load previous day winners: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  Future<Set<String>> _loadGlobalDailyWinnerIds(String dayKey) async {
+    final entries = FirebaseFirestore.instance
+        .collection('dailyScores')
+        .doc(dayKey)
+        .collection('entries');
+    final topSnapshot = await entries
+        .orderBy('score', descending: true)
+        .limit(1)
+        .get();
+    if (topSnapshot.docs.isEmpty) {
+      return <String>{};
+    }
+    final topScore = _dailyScoreEntryFromSnapshot(topSnapshot.docs.first).score;
+    final tiedTopSnapshot = await entries
+        .where('score', isEqualTo: topScore)
+        .get();
+    return tiedTopSnapshot.docs.map((doc) => doc.id).toSet();
+  }
+
+  Future<List<DailyScoreSnapshotEntry>> _loadDailyScoreEntriesForUids({
+    required String dayKey,
+    required List<String> userIds,
+  }) async {
+    if (userIds.isEmpty) {
+      return const <DailyScoreSnapshotEntry>[];
+    }
+    final entries = FirebaseFirestore.instance
+        .collection('dailyScores')
+        .doc(dayKey)
+        .collection('entries');
+    final snapshots = await Future.wait(
+      userIds.toSet().map((uid) => entries.doc(uid).get()),
+    );
+    return snapshots
+        .where((snapshot) => snapshot.exists)
+        .map(_dailyScoreEntryFromSnapshot)
+        .toList(growable: false);
+  }
+
+  DailyScoreSnapshotEntry _dailyScoreEntryFromSnapshot(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+  ) {
+    final data = snapshot.data() ?? const <String, dynamic>{};
+    final displayName = data['displayName'];
+    final score = data['score'];
+    final locked = data['locked'];
+    return DailyScoreSnapshotEntry(
+      uid: snapshot.id,
+      displayName: displayName is String && displayName.trim().isNotEmpty
+          ? displayName.trim()
+          : _l10n.anonymousPlayer,
+      score: score is int
+          ? max(0, score)
+          : (score is num ? max(0, score.toInt()) : 0),
+      locked: locked is bool && locked,
+    );
+  }
+
+  Future<void> _maybeShowRankingSummaryModal({
+    required User user,
+    required Map<String, dynamic>? profileData,
+  }) async {
+    final summaryDay = _profileLastPlayed(profileData);
+    if (!_firebaseReady ||
+        _rankingSummaryPromptOpen ||
+        !shouldShowRankingSummary(
+          todayKey: _todayKey(),
+          previousLastPlayed: summaryDay,
+          lastRankingSummaryShownFor: _lastRankingSummaryShownFor,
+        )) {
+      return;
+    }
+
+    _rankingSummaryPromptOpen = true;
+    try {
+      final entries = FirebaseFirestore.instance
+          .collection('dailyScores')
+          .doc(summaryDay!)
+          .collection('entries');
+      final userSnapshot = await entries.doc(user.uid).get();
+      if (!mounted || !userSnapshot.exists) {
+        return;
+      }
+      final userEntry = _dailyScoreEntryFromSnapshot(userSnapshot);
+      final globalRankSnapshot = await entries
+          .where('score', isGreaterThan: userEntry.score)
+          .count()
+          .get();
+      final globalRank = (globalRankSnapshot.count ?? 0) + 1;
+      final globalTopSnapshot = await entries
+          .orderBy('score', descending: true)
+          .limit(10)
+          .get();
+      final globalEntries = <DailyScoreSnapshotEntry>[
+        ...globalTopSnapshot.docs.map(_dailyScoreEntryFromSnapshot),
+      ];
+      if (!globalEntries.any((entry) => entry.uid == user.uid)) {
+        globalEntries.add(userEntry);
+      }
+      final friendEntries = await _loadDailyScoreEntriesForUids(
+        dayKey: summaryDay,
+        userIds: <String>{user.uid, ..._profileFriendIds(profileData)}.toList(),
+      );
+      final friendRank = dailyScoreRankFor(friendEntries, user.uid);
+      if (!mounted) {
+        return;
+      }
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => _RankingSummaryDialog(
+          dayKey: summaryDay,
+          friendRank: friendRank,
+          globalRank: globalRank,
+          friendEntries: friendEntries,
+          globalEntries: globalEntries,
+          currentUserId: user.uid,
+        ),
+      );
+      if (!mounted) {
+        return;
+      }
+      _lastRankingSummaryShownFor = summaryDay;
+      await _updateCurrentUserProgressFields(
+        user: user,
+        lastRankingSummaryShownFor: summaryDay,
+      );
+    } catch (error, stackTrace) {
+      debugPrint('Unable to show ranking summary: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    } finally {
+      _rankingSummaryPromptOpen = false;
     }
   }
 
@@ -1651,6 +1936,16 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     return null;
   }
 
+  String? _profileLastRankingSummaryShownFor(
+    Map<String, dynamic>? profileData,
+  ) {
+    final shownFor = profileData?['lastRankingSummaryShownFor'];
+    if (shownFor is String && shownFor.isNotEmpty) {
+      return shownFor;
+    }
+    return null;
+  }
+
   String? _profileLastPlayed(Map<String, dynamic>? profileData) {
     final lastPlayed = profileData?['lastPlayed'];
     if (lastPlayed is String && lastPlayed.isNotEmpty) {
@@ -2367,6 +2662,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         reportedUserIds: _reportedUserIdsThisSession,
         hiddenDisplayNameUserIds: _hiddenDisplayNameUserIds,
         onToggleHiddenDisplayName: _toggleHiddenDisplayName,
+        previousDayFriendWinnerIds: _previousDayFriendWinnerIds,
+        previousDayGlobalWinnerIds: _previousDayGlobalWinnerIds,
         selectedTab: selectedLeaderboardTab,
         onTabSelected: (_LeaderboardTab tab) {
           setState(() {
@@ -2410,6 +2707,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
                                       _hiddenDisplayNameUserIds,
                                   onToggleHiddenDisplayName:
                                       _toggleHiddenDisplayName,
+                                  previousDayFriendWinnerIds:
+                                      _previousDayFriendWinnerIds,
+                                  previousDayGlobalWinnerIds:
+                                      _previousDayGlobalWinnerIds,
                                   selectedTab: selectedLeaderboardTab,
                                   onTabSelected: (_LeaderboardTab tab) {
                                     setState(() {
@@ -4195,6 +4496,8 @@ class _LeaderboardCard extends StatelessWidget {
     required this.reportedUserIds,
     required this.hiddenDisplayNameUserIds,
     required this.onToggleHiddenDisplayName,
+    required this.previousDayFriendWinnerIds,
+    required this.previousDayGlobalWinnerIds,
     required this.selectedTab,
     required this.onTabSelected,
   });
@@ -4211,6 +4514,8 @@ class _LeaderboardCard extends StatelessWidget {
   final Set<String> reportedUserIds;
   final Set<String> hiddenDisplayNameUserIds;
   final ValueChanged<String> onToggleHiddenDisplayName;
+  final Set<String> previousDayFriendWinnerIds;
+  final Set<String> previousDayGlobalWinnerIds;
   final _LeaderboardTab selectedTab;
   final ValueChanged<_LeaderboardTab> onTabSelected;
 
@@ -4235,6 +4540,8 @@ class _LeaderboardCard extends StatelessWidget {
         reportedUserIds: reportedUserIds,
         hiddenDisplayNameUserIds: hiddenDisplayNameUserIds,
         onToggleHiddenDisplayName: onToggleHiddenDisplayName,
+        previousDayFriendWinnerIds: previousDayFriendWinnerIds,
+        previousDayGlobalWinnerIds: previousDayGlobalWinnerIds,
         selectedTab: selectedTab,
         onTabSelected: onTabSelected,
       ),
@@ -4251,6 +4558,8 @@ class _LeaderboardCardContents extends StatelessWidget {
     required this.reportedUserIds,
     required this.hiddenDisplayNameUserIds,
     required this.onToggleHiddenDisplayName,
+    required this.previousDayFriendWinnerIds,
+    required this.previousDayGlobalWinnerIds,
     required this.selectedTab,
     required this.onTabSelected,
   });
@@ -4267,6 +4576,8 @@ class _LeaderboardCardContents extends StatelessWidget {
   final Set<String> reportedUserIds;
   final Set<String> hiddenDisplayNameUserIds;
   final ValueChanged<String> onToggleHiddenDisplayName;
+  final Set<String> previousDayFriendWinnerIds;
+  final Set<String> previousDayGlobalWinnerIds;
   final _LeaderboardTab selectedTab;
   final ValueChanged<_LeaderboardTab> onTabSelected;
 
@@ -4319,6 +4630,7 @@ class _LeaderboardCardContents extends StatelessWidget {
                   reportedUserIds: reportedUserIds,
                   hiddenDisplayNameUserIds: hiddenDisplayNameUserIds,
                   onToggleHiddenDisplayName: onToggleHiddenDisplayName,
+                  previousDayWinnerIds: previousDayFriendWinnerIds,
                 )
               : _GlobalLeaderboardView(
                   key: const ValueKey('global'),
@@ -4327,6 +4639,7 @@ class _LeaderboardCardContents extends StatelessWidget {
                   reportedUserIds: reportedUserIds,
                   hiddenDisplayNameUserIds: hiddenDisplayNameUserIds,
                   onToggleHiddenDisplayName: onToggleHiddenDisplayName,
+                  previousDayWinnerIds: previousDayGlobalWinnerIds,
                 ),
         ),
       ],
@@ -4382,6 +4695,7 @@ class _FriendsLeaderboardView extends StatefulWidget {
     required this.reportedUserIds,
     required this.hiddenDisplayNameUserIds,
     required this.onToggleHiddenDisplayName,
+    required this.previousDayWinnerIds,
   });
 
   final User? user;
@@ -4396,6 +4710,7 @@ class _FriendsLeaderboardView extends StatefulWidget {
   final Set<String> reportedUserIds;
   final Set<String> hiddenDisplayNameUserIds;
   final ValueChanged<String> onToggleHiddenDisplayName;
+  final Set<String> previousDayWinnerIds;
 
   @override
   State<_FriendsLeaderboardView> createState() =>
@@ -4641,6 +4956,7 @@ class _FriendsLeaderboardViewState extends State<_FriendsLeaderboardView> {
       reportedUserIds: widget.reportedUserIds,
       hiddenDisplayNameUserIds: widget.hiddenDisplayNameUserIds,
       onToggleHiddenDisplayName: widget.onToggleHiddenDisplayName,
+      previousDayWinnerIds: widget.previousDayWinnerIds,
       onReport: (entry) => widget.onReportUser(
         reportedUid: entry.uid,
         reportedDisplayName: entry.name,
@@ -4723,6 +5039,7 @@ class _GlobalLeaderboardView extends StatefulWidget {
     required this.reportedUserIds,
     required this.hiddenDisplayNameUserIds,
     required this.onToggleHiddenDisplayName,
+    required this.previousDayWinnerIds,
   });
 
   final User? user;
@@ -4735,6 +5052,7 @@ class _GlobalLeaderboardView extends StatefulWidget {
   final Set<String> reportedUserIds;
   final Set<String> hiddenDisplayNameUserIds;
   final ValueChanged<String> onToggleHiddenDisplayName;
+  final Set<String> previousDayWinnerIds;
 
   @override
   State<_GlobalLeaderboardView> createState() => _GlobalLeaderboardViewState();
@@ -5174,6 +5492,7 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
           reportedUserIds: widget.reportedUserIds,
           hiddenDisplayNameUserIds: widget.hiddenDisplayNameUserIds,
           onToggleHiddenDisplayName: widget.onToggleHiddenDisplayName,
+          previousDayWinnerIds: widget.previousDayWinnerIds,
           onReport: _user == null
               ? null
               : (entry) => widget.onReportUser(
@@ -5229,6 +5548,168 @@ class _LeaderboardMetric extends StatelessWidget {
   }
 }
 
+class _RankingSummaryDialog extends StatelessWidget {
+  const _RankingSummaryDialog({
+    required this.dayKey,
+    required this.friendRank,
+    required this.globalRank,
+    required this.friendEntries,
+    required this.globalEntries,
+    required this.currentUserId,
+  });
+
+  final String dayKey;
+  final int? friendRank;
+  final int globalRank;
+  final List<DailyScoreSnapshotEntry> friendEntries;
+  final List<DailyScoreSnapshotEntry> globalEntries;
+  final String currentUserId;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Dialog(
+      backgroundColor: theme.colorScheme.surface,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+        side: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.35)),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'ranking update',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                friendRank == null
+                    ? 'you ranked #$globalRank globally on $dayKey'
+                    : 'you ranked #$friendRank among friends and #$globalRank globally on $dayKey',
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 18),
+              if (friendEntries.isNotEmpty) ...[
+                _DailyScoreSnapshotTable(
+                  title: 'friends',
+                  entries: friendEntries,
+                  currentUserId: currentUserId,
+                ),
+                const SizedBox(height: 18),
+              ],
+              _DailyScoreSnapshotTable(
+                title: 'global',
+                entries: globalEntries,
+                currentUserId: currentUserId,
+              ),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerRight,
+                child: FilledButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('continue'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DailyScoreSnapshotTable extends StatelessWidget {
+  const _DailyScoreSnapshotTable({
+    required this.title,
+    required this.entries,
+    required this.currentUserId,
+  });
+
+  final String title;
+  final List<DailyScoreSnapshotEntry> entries;
+  final String currentUserId;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final sortedEntries = List<DailyScoreSnapshotEntry>.from(entries)
+      ..sort((a, b) {
+        final byScore = b.score.compareTo(a.score);
+        if (byScore != 0) {
+          return byScore;
+        }
+        final byName = a.displayName.toLowerCase().compareTo(
+          b.displayName.toLowerCase(),
+        );
+        if (byName != 0) {
+          return byName;
+        }
+        return a.uid.compareTo(b.uid);
+      });
+    final winnerIds = previousDayWinnerIds(entries);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          title,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...sortedEntries.map((entry) {
+          final isCurrentUser = entry.uid == currentUserId;
+          final rank = dailyScoreRankFor(entries, entry.uid) ?? 0;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                SizedBox(width: 42, child: Text('#$rank')),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          entry.displayName,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: isCurrentUser
+                                ? FontWeight.w800
+                                : FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      if (winnerIds.contains(entry.uid)) ...[
+                        const SizedBox(width: 6),
+                        const Icon(Icons.emoji_events, size: 16),
+                      ],
+                    ],
+                  ),
+                ),
+                Text(
+                  '${entry.score}',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
+
 class _LeaderboardTable extends StatelessWidget {
   const _LeaderboardTable({
     required this.entries,
@@ -5236,6 +5717,7 @@ class _LeaderboardTable extends StatelessWidget {
     required this.reportedUserIds,
     required this.hiddenDisplayNameUserIds,
     required this.onToggleHiddenDisplayName,
+    required this.previousDayWinnerIds,
     this.onReport,
   });
 
@@ -5244,6 +5726,7 @@ class _LeaderboardTable extends StatelessWidget {
   final Set<String> reportedUserIds;
   final Set<String> hiddenDisplayNameUserIds;
   final ValueChanged<String> onToggleHiddenDisplayName;
+  final Set<String> previousDayWinnerIds;
   final ValueChanged<_LeaderboardEntry>? onReport;
 
   @override
@@ -5306,13 +5789,27 @@ class _LeaderboardTable extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: Text(
-                    displayName,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: rowForeground,
-                    ),
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          displayName,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: rowForeground,
+                          ),
+                        ),
+                      ),
+                      if (previousDayWinnerIds.contains(entry.uid)) ...[
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.emoji_events,
+                          size: 16,
+                          color: rowForeground,
+                        ),
+                      ],
+                    ],
                   ),
                 ),
                 const SizedBox(width: 12),
