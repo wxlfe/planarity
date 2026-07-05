@@ -623,7 +623,7 @@ void main() {
 
     expect(find.text('daily score'), findsOneWidget);
     expect(find.text('0'), findsOneWidget);
-    expect(find.byIcon(FontAwesomeIcons.lock), findsNothing);
+    expect(find.byIcon(FontAwesomeIcons.lock.data), findsNothing);
     expect(find.text('start'), findsOneWidget);
   });
 }
