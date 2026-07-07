@@ -955,7 +955,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           startLevel: startLevel,
           startScore: startScore,
           tutorialCompleted: _tutorialCompleted,
-          onLevelSolved: _handleLevelSolved,
+          onLevelProgressed: _handleLevelProgressed,
         ),
       ),
     );
@@ -998,6 +998,45 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       );
     }
     await _logPostScoreEvent(score: result.score, level: result.level);
+    _refreshLeaderboard();
+  }
+
+  Future<void> _handleLevelProgressed(SolvedLevelProgress progress) async {
+    final previousScore = _score;
+    if (mounted) {
+      setState(() {
+        _score = progress.score;
+        _currentLevel = progress.nextLevel;
+        _status = progress.locked
+            ? DailyPlayStatus.locked
+            : DailyPlayStatus.inProgress;
+        _tutorialCompleted = progress.tutorialCompleted;
+      });
+    } else {
+      _score = progress.score;
+      _currentLevel = progress.nextLevel;
+      _tutorialCompleted = progress.tutorialCompleted;
+    }
+
+    await _updateCurrentUserProgressFields(
+      user: _currentUser,
+      score: progress.score,
+      currentLevel: progress.nextLevel,
+      lastPlayed: progress.dayKey,
+      locked: progress.locked,
+      lifetimeScoreIncrement: max(0, progress.score - previousScore),
+      tutorialCompleted: progress.tutorialCompleted,
+    );
+    final currentUser = _currentUser;
+    if (currentUser != null) {
+      await _writeDailyScoreSnapshotBestEffort(
+        user: currentUser,
+        dayKey: progress.dayKey,
+        score: progress.score,
+        locked: progress.locked,
+      );
+    }
+    await _handleLevelSolved(progress.solvedLevel);
     _refreshLeaderboard();
   }
 
@@ -5944,6 +5983,7 @@ class PlanarityGamePage extends StatefulWidget {
     required this.startLevel,
     required this.startScore,
     required this.tutorialCompleted,
+    this.onLevelProgressed,
     this.onLevelSolved,
   });
 
@@ -5951,6 +5991,7 @@ class PlanarityGamePage extends StatefulWidget {
   final int startLevel;
   final int startScore;
   final bool tutorialCompleted;
+  final Future<void> Function(SolvedLevelProgress progress)? onLevelProgressed;
   final Future<void> Function(int level)? onLevelSolved;
 
   @override
@@ -6224,11 +6265,21 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       });
       await _logLevelEndEvent(level: _level, success: true);
       await _logLevelUpEvent(_level + 1);
-      await widget.onLevelSolved?.call(_level);
       final completedTutorialWithThisLevel = _isTutorialLevel && _level == 3;
       if (completedTutorialWithThisLevel) {
         _tutorialCompleted = true;
       }
+      await widget.onLevelProgressed?.call(
+        SolvedLevelProgress(
+          dayKey: widget.dayKey,
+          solvedLevel: _level,
+          nextLevel: _level + 1,
+          score: _totalScore,
+          locked: false,
+          tutorialCompleted: _tutorialCompleted,
+        ),
+      );
+      await widget.onLevelSolved?.call(_level);
       final solvedNodes = List<Offset>.from(_current.nodes);
       final solvedEdges = List<Edge>.from(_current.edges);
       await _showInterstitialAdIfNeeded();
@@ -7486,6 +7537,24 @@ class GameSessionResult {
   final String dayKey;
   final int score;
   final int level;
+  final bool locked;
+  final bool tutorialCompleted;
+}
+
+class SolvedLevelProgress {
+  const SolvedLevelProgress({
+    required this.dayKey,
+    required this.solvedLevel,
+    required this.nextLevel,
+    required this.score,
+    required this.locked,
+    required this.tutorialCompleted,
+  });
+
+  final String dayKey;
+  final int solvedLevel;
+  final int nextLevel;
+  final int score;
   final bool locked;
   final bool tutorialCompleted;
 }

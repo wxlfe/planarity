@@ -189,6 +189,40 @@ void main() {
     expect(find.byIcon(Icons.restart_alt), findsOneWidget);
   });
 
+  testWidgets('Game page reports progress when each graph is solved', (
+    WidgetTester tester,
+  ) async {
+    final reportedProgress = <SolvedLevelProgress>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: PlanarityGamePage(
+          dayKey: '2026-03-18',
+          startLevel: 1,
+          startScore: 7,
+          tutorialCompleted: false,
+          onLevelProgressed: (progress) async {
+            reportedProgress.add(progress);
+          },
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.drag(find.byType(GestureDetector).last, const Offset(24, 0));
+    await tester.pumpAndSettle();
+
+    expect(reportedProgress, hasLength(1));
+    expect(reportedProgress.single.dayKey, '2026-03-18');
+    expect(reportedProgress.single.solvedLevel, 1);
+    expect(reportedProgress.single.nextLevel, 2);
+    expect(reportedProgress.single.score, 7);
+    expect(reportedProgress.single.locked, isFalse);
+    expect(reportedProgress.single.tutorialCompleted, isFalse);
+  });
+
   testWidgets('Tutorial instructions appear inside the gameplay board', (
     WidgetTester tester,
   ) async {
