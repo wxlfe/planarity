@@ -6018,7 +6018,6 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
   bool _resolvingLevel = false;
   Size? _lastBoardSize;
   bool _needsCentering = true;
-  bool _recenterScheduled = false;
   InterstitialAd? _interstitialAd;
   bool _interstitialAdLoading = false;
 
@@ -6520,22 +6519,9 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
     if (!_needsCentering && !sizeChanged) {
       return;
     }
-    if (_recenterScheduled) {
-      return;
-    }
-    _recenterScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        _recenterScheduled = false;
-        return;
-      }
-      setState(() {
-        _centerNodesInBoard(boardSize);
-        _lastBoardSize = boardSize;
-        _needsCentering = false;
-        _recenterScheduled = false;
-      });
-    });
+    _centerNodesInBoard(boardSize);
+    _lastBoardSize = boardSize;
+    _needsCentering = false;
   }
 
   void _centerNodesInBoard(Size boardSize) {
@@ -6544,35 +6530,19 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
     }
 
     const padding = 20.0;
-    double minX = _current.nodes.first.dx;
-    double maxX = _current.nodes.first.dx;
-    double minY = _current.nodes.first.dy;
-    double maxY = _current.nodes.first.dy;
-    for (final node in _current.nodes) {
-      minX = min(minX, node.dx);
-      maxX = max(maxX, node.dx);
-      minY = min(minY, node.dy);
-      maxY = max(maxY, node.dy);
-    }
-
-    final currentCenter = Offset((minX + maxX) / 2, (minY + maxY) / 2);
-    final targetCenter = Offset(boardSize.width / 2, boardSize.height / 2);
-    var dx = targetCenter.dx - currentCenter.dx;
-    var dy = targetCenter.dy - currentCenter.dy;
-
-    final minDx = padding - minX;
-    final maxDx = (boardSize.width - padding) - maxX;
-    final minDy = padding - minY;
-    final maxDy = (boardSize.height - padding) - maxY;
-    dx = dx.clamp(minDx, maxDx);
-    dy = dy.clamp(minDy, maxDy);
-
+    final safePadding = min(
+      padding,
+      max(0.0, min(boardSize.width, boardSize.height) / 2),
+    );
+    final target = Rect.fromLTWH(
+      safePadding,
+      safePadding,
+      max(1.0, boardSize.width - (safePadding * 2)),
+      max(1.0, boardSize.height - (safePadding * 2)),
+    );
+    final fittedNodes = _normalizeNodesToRect(_current.nodes, target);
     for (var i = 0; i < _current.nodes.length; i++) {
-      final shifted = _current.nodes[i] + Offset(dx, dy);
-      _current.nodes[i] = Offset(
-        shifted.dx.clamp(padding, boardSize.width - padding),
-        shifted.dy.clamp(padding, boardSize.height - padding),
-      );
+      _current.nodes[i] = fittedNodes[i];
     }
   }
 

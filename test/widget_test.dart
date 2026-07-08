@@ -29,6 +29,35 @@ String _graphSignature(PlanarityLevel level) {
   return '$nodeSignature::$edgeSignature';
 }
 
+void _expectGameplayNodesInsideBoard(WidgetTester tester) {
+  final board = find.byWidgetPredicate(
+    (widget) => widget is CustomPaint && widget.painter is GraphPainter,
+  );
+  final boardRect = tester.getRect(board);
+
+  final nodeFinders = find
+      .byType(GestureDetector)
+      .evaluate()
+      .map((element) {
+        return find.byWidget(element.widget);
+      })
+      .where((node) {
+        final nodeSize = tester.getSize(node);
+        return nodeSize == const Size(20, 20);
+      });
+
+  for (final node in nodeFinders) {
+    final nodeRect = tester.getRect(node);
+    expect(
+      boardRect.contains(nodeRect.topLeft) &&
+          boardRect.contains(nodeRect.bottomRight),
+      isTrue,
+      reason: 'expected $nodeRect to be inside $boardRect after rotation',
+    );
+    expect(tester.hitTestOnBinding(nodeRect.center).path, isNotEmpty);
+  }
+}
+
 void main() {
   test('score updates when a graph is solved', () {
     expect(scoreForSolvedLevel(level: 1, movesUsed: 1), 0);
@@ -187,6 +216,34 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.byIcon(Icons.restart_alt), findsOneWidget);
+  });
+
+  testWidgets('Game page keeps nodes visible immediately after rotation', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: PlanarityGamePage(
+          dayKey: '2026-03-18',
+          startLevel: 8,
+          startScore: 0,
+          tutorialCompleted: true,
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    tester.view.physicalSize = const Size(844, 390);
+    await tester.pump();
+
+    _expectGameplayNodesInsideBoard(tester);
   });
 
   testWidgets('Game page reports progress when each graph is solved', (
