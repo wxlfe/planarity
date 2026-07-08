@@ -58,3 +58,7 @@ firebase-debug.log
 .env.firebase
 .vercel
 .env*.local
+
+# Local agent/tooling skills
+.agents/
+skills-lock.json
