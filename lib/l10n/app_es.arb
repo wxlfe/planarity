@@ -182,5 +182,114 @@
   "reportReasonAbuse": "abuso o acoso",
   "reportReasonImpersonation": "suplantación",
   "reportReasonSpam": "spam o estafa",
-  "reportReasonOther": "otro"
+  "reportReasonOther": "otro",
+  "nodesCount": "{count} nodos",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "{count} movimientos",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "puntuación {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "grafo {level}, sin resolver, jugar",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "grafo {level}, resuelto en {moves} movimientos, puntuación {score}, volver a jugar",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "grafo {level}, bloqueado",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "grafo {level}, repetición en curso, continuar",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "volver a jugar",
+  "replayGraphQuestion": "¿volver a jugar el grafo {level}?",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "tu puntuación volverá a 0 hasta que resuelvas este grafo de nuevo. los grafos superiores no estarán disponibles si lo dejas sin resolver.",
+  "resetAndReplay": "reiniciar y volver a jugar",
+  "unableSaveProgress": "no se puede guardar el progreso en este momento",
+  "saveYourProgress": "guarda tu progreso",
+  "saveProgressDescription": "regístrate gratis para conservar los grafos de hoy y tus logros en todos tus dispositivos.",
+  "achievements": "logros",
+  "achievementFirstStepTitle": "primer paso",
+  "achievementFirstStepDescription": "resuelve tu primer grafo",
+  "achievementPracticeTitle": "práctica",
+  "achievementPracticeDescription": "resuelve 8 grafos",
+  "achievementPersistenceTitle": "perseverancia",
+  "achievementPersistenceDescription": "resuelve 16 grafos",
+  "achievementDedicationTitle": "dedicación",
+  "achievementDedicationDescription": "resuelve 32 grafos",
+  "achievementPlanarityTitle": "planaridad",
+  "achievementPlanarityDescription": "resuelve 64 grafos",
+  "achievementEfficientTitle": "eficiente",
+  "achievementEfficientDescription": "resuelve un grafo con al menos 2 movimientos restantes",
+  "achievementPreciseTitle": "preciso",
+  "achievementPreciseDescription": "resuelve un grafo con al menos 4 movimientos restantes",
+  "achievementOptimalTitle": "óptimo",
+  "achievementOptimalDescription": "resuelve un grafo con el máximo número posible de movimientos restantes",
+  "achievementCloseCallTitle": "por los pelos",
+  "achievementCloseCallDescription": "resuelve un grafo sin movimientos restantes",
+  "achievementSecondAttemptTitle": "segundo intento",
+  "achievementSecondAttemptDescription": "vuelve a jugar un grafo resuelto",
+  "achievementImprovementTitle": "superación",
+  "achievementImprovementDescription": "supera tu puntuación anterior al volver a jugar",
+  "achievementRedemptionTitle": "redención",
+  "achievementRedemptionDescription": "consigue una puntuación mayor que cero al volver a jugar un grafo en el que antes obtuviste 0",
+  "achievementPerfectedTitle": "perfeccionado",
+  "achievementPerfectedDescription": "mejora un grafo resuelto hasta su máxima puntuación posible al volver a jugar",
+  "unableLoadProfile": "no se puede cargar tu perfil en este momento",
+  "unableShareRightNow": "no se puede compartir en este momento",
+  "restart": "reiniciar",
+  "tutorialNodeInstruction": "esto es un nodo arrástralo a cualquier lugar",
+  "tutorialEdgesInstruction": "los nodos están conectados por aristas las aristas permanecen unidas",
+  "tutorialSolvedInstruction": "un grafo está resuelto cuando ninguna arista se cruza este ya está resuelto"
 }

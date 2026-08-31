@@ -433,4 +433,174 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get reportReasonOther => 'bağımsız';
+
+  @override
+  String nodesCount(int count) {
+    return '$count düğüm';
+  }
+
+  @override
+  String movesCount(int count) {
+    return '$count hamle';
+  }
+
+  @override
+  String scoreValue(int score) {
+    return 'puan $score';
+  }
+
+  @override
+  String graphUnsolvedSemantics(int level) {
+    return 'graf $level, çözülmedi, oyna';
+  }
+
+  @override
+  String graphSolvedSemantics(int level, int moves, int score) {
+    return 'graf $level, $moves hamlede çözüldü, puan $score, yeniden oyna';
+  }
+
+  @override
+  String graphBlockedSemantics(int level) {
+    return 'graf $level, kilitli';
+  }
+
+  @override
+  String graphReplayInProgressSemantics(int level) {
+    return 'graf $level, yeniden oynama sürüyor, devam et';
+  }
+
+  @override
+  String get replay => 'yeniden oyna';
+
+  @override
+  String replayGraphQuestion(int level) {
+    return '$level. grafi yeniden oyna?';
+  }
+
+  @override
+  String get replayWarning =>
+      'bu grafi tekrar çözene kadar puanın 0\'a sıfırlanacak. çözmeden ayrılırsan sonraki grafikler kullanılamayacak.';
+
+  @override
+  String get resetAndReplay => 'sıfırla ve yeniden oyna';
+
+  @override
+  String get unableSaveProgress => 'ilerleme şu anda kaydedilemiyor';
+
+  @override
+  String get saveYourProgress => 'ilerlemeni kaydet';
+
+  @override
+  String get saveProgressDescription =>
+      'bugünün grafiklerini ve başarılarını tüm cihazlarında saklamak için ücretsiz kaydol.';
+
+  @override
+  String get achievements => 'başarılar';
+
+  @override
+  String get achievementFirstStepTitle => 'ilk adım';
+
+  @override
+  String get achievementFirstStepDescription => 'ilk grafini çöz';
+
+  @override
+  String get achievementPracticeTitle => 'pratik';
+
+  @override
+  String get achievementPracticeDescription => '8 grafik çöz';
+
+  @override
+  String get achievementPersistenceTitle => 'azim';
+
+  @override
+  String get achievementPersistenceDescription => '16 grafik çöz';
+
+  @override
+  String get achievementDedicationTitle => 'adanmışlık';
+
+  @override
+  String get achievementDedicationDescription => '32 grafik çöz';
+
+  @override
+  String get achievementPlanarityTitle => 'düzlemsellik';
+
+  @override
+  String get achievementPlanarityDescription => '64 grafik çöz';
+
+  @override
+  String get achievementEfficientTitle => 'verimli';
+
+  @override
+  String get achievementEfficientDescription =>
+      'en az 2 hamle kala bir grafik çöz';
+
+  @override
+  String get achievementPreciseTitle => 'hassas';
+
+  @override
+  String get achievementPreciseDescription =>
+      'en az 4 hamle kala bir grafik çöz';
+
+  @override
+  String get achievementOptimalTitle => 'optimum';
+
+  @override
+  String get achievementOptimalDescription =>
+      'mümkün olan en fazla hamle kala bir grafik çöz';
+
+  @override
+  String get achievementCloseCallTitle => 'kıl payı';
+
+  @override
+  String get achievementCloseCallDescription =>
+      'hiç hamle kalmadan bir grafik çöz';
+
+  @override
+  String get achievementSecondAttemptTitle => 'ikinci deneme';
+
+  @override
+  String get achievementSecondAttemptDescription =>
+      'çözülmüş bir grafiği yeniden oyna';
+
+  @override
+  String get achievementImprovementTitle => 'gelişim';
+
+  @override
+  String get achievementImprovementDescription =>
+      'yeniden oynarken önceki puanını geç';
+
+  @override
+  String get achievementRedemptionTitle => 'telafi';
+
+  @override
+  String get achievementRedemptionDescription =>
+      'daha önce 0 puan aldığın bir grafiği yeniden oynayıp sıfırdan yüksek puan al';
+
+  @override
+  String get achievementPerfectedTitle => 'mükemmelleştirildi';
+
+  @override
+  String get achievementPerfectedDescription =>
+      'çözülmüş bir grafiği yeniden oynayarak mümkün olan en yüksek puana çıkar';
+
+  @override
+  String get unableLoadProfile => 'profilin şu anda yüklenemiyor';
+
+  @override
+  String get unableShareRightNow => 'şu anda paylaşılamıyor';
+
+  @override
+  String get restart => 'yeniden başlat';
+
+  @override
+  String get tutorialNodeInstruction =>
+      'bu bir düğüm onu istediğin yere sürükle';
+
+  @override
+  String get tutorialEdgesInstruction =>
+      'düğümler kenarlarla bağlıdır kenarlar bağlı kalır';
+
+  @override
+  String get tutorialSolvedInstruction =>
+      'hiçbir kenar kesişmediğinde grafik çözülür bu grafik zaten çözülmüş';
 }

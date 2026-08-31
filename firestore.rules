@@ -23,6 +23,17 @@ service cloud.firestore {
         'locked',
         'score',
         'tutorialCompleted',
+        'dailyResultsDay',
+        'dailyLevelResults',
+        'dailyScoreCarry',
+        'blockedLevel',
+        'activeReplayLevel',
+        'replayPreviousScore',
+        'replayRestoreBlockedLevel',
+        'achievementSolveCount',
+        'unlockedAchievements',
+        'signUpPromptShownAt',
+        'signUpPromptEligibleDay',
       ];
     }
 
@@ -79,6 +90,31 @@ service cloud.firestore {
         validLastPlayed(data.lastRankingSummaryShownFor);
     }
 
+    function validOptionalDailyProgress(data) {
+      return (!('dailyResultsDay' in data.keys()) || validLastPlayed(data.dailyResultsDay)) &&
+        (!('dailyLevelResults' in data.keys()) ||
+          (data.dailyLevelResults is list && data.dailyLevelResults.size() <= 512)) &&
+        (!('dailyScoreCarry' in data.keys()) ||
+          (data.dailyScoreCarry is int && data.dailyScoreCarry >= 0)) &&
+        (!('blockedLevel' in data.keys()) ||
+          (data.blockedLevel is int && data.blockedLevel >= 0)) &&
+        (!('activeReplayLevel' in data.keys()) ||
+          (data.activeReplayLevel is int && data.activeReplayLevel >= 0)) &&
+        (!('replayPreviousScore' in data.keys()) ||
+          (data.replayPreviousScore is int && data.replayPreviousScore >= 0)) &&
+        (!('replayRestoreBlockedLevel' in data.keys()) ||
+          (data.replayRestoreBlockedLevel is int && data.replayRestoreBlockedLevel >= 0));
+    }
+
+    function validOptionalAchievements(data) {
+      return (!('achievementSolveCount' in data.keys()) ||
+          (data.achievementSolveCount is int && data.achievementSolveCount >= 0)) &&
+        (!('unlockedAchievements' in data.keys()) ||
+          (data.unlockedAchievements is list && data.unlockedAchievements.size() <= 13)) &&
+        (!('signUpPromptShownAt' in data.keys()) || validLastPlayed(data.signUpPromptShownAt)) &&
+        (!('signUpPromptEligibleDay' in data.keys()) || validLastPlayed(data.signUpPromptEligibleDay));
+    }
+
     function validUserDocument(data) {
       return data.keys().hasOnly(userFields()) &&
         data.keys().hasAll(requiredUserFields()) &&
@@ -91,6 +127,8 @@ service cloud.firestore {
         validOptionalTutorialCompleted(data) &&
         validOptionalAppStoreReviewPromptedAt(data) &&
         validOptionalLastRankingSummaryShownFor(data) &&
+        validOptionalDailyProgress(data) &&
+        validOptionalAchievements(data) &&
         validLastPlayed(data.lastPlayed) &&
         data.locked is bool &&
         data.lifetimeScore is int &&
@@ -107,7 +145,11 @@ service cloud.firestore {
       return isOwner(uid) &&
         validUserDocument(request.resource.data) &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(userFields()) &&
-        request.resource.data.lifetimeScore >= resource.data.lifetimeScore;
+        request.resource.data.lifetimeScore >= resource.data.lifetimeScore &&
+        (!('achievementSolveCount' in resource.data.keys()) ||
+          request.resource.data.achievementSolveCount >= resource.data.achievementSolveCount) &&
+        (!('unlockedAchievements' in resource.data.keys()) ||
+          request.resource.data.unlockedAchievements.hasAll(resource.data.unlockedAchievements));
     }
 
     function validReciprocalFriendUpdate(uid) {

@@ -182,5 +182,114 @@
   "reportReasonAbuse": "abus ou harcèlement",
   "reportReasonImpersonation": "usurpation d’identité",
   "reportReasonSpam": "spam ou arnaque",
-  "reportReasonOther": "autre"
+  "reportReasonOther": "autre",
+  "nodesCount": "{count} nœuds",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "{count} coups",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "score {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "graphe {level}, non résolu, jouer",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "graphe {level}, résolu en {moves} coups, score {score}, rejouer",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "graphe {level}, bloqué",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "graphe {level}, nouvelle tentative en cours, continuer",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "rejouer",
+  "replayGraphQuestion": "rejouer le graphe {level} ?",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "ton score sera remis à 0 jusqu'à ce que tu résolves à nouveau ce graphe. les graphes suivants seront indisponibles si tu le laisses non résolu.",
+  "resetAndReplay": "réinitialiser et rejouer",
+  "unableSaveProgress": "impossible d'enregistrer la progression pour le moment",
+  "saveYourProgress": "enregistre ta progression",
+  "saveProgressDescription": "inscris-toi gratuitement pour conserver les graphes du jour et tes succès sur tous tes appareils.",
+  "achievements": "succès",
+  "achievementFirstStepTitle": "premier pas",
+  "achievementFirstStepDescription": "résous ton premier graphe",
+  "achievementPracticeTitle": "entraînement",
+  "achievementPracticeDescription": "résous 8 graphes",
+  "achievementPersistenceTitle": "persévérance",
+  "achievementPersistenceDescription": "résous 16 graphes",
+  "achievementDedicationTitle": "dévouement",
+  "achievementDedicationDescription": "résous 32 graphes",
+  "achievementPlanarityTitle": "planarité",
+  "achievementPlanarityDescription": "résous 64 graphes",
+  "achievementEfficientTitle": "efficace",
+  "achievementEfficientDescription": "résous un graphe avec au moins 2 coups restants",
+  "achievementPreciseTitle": "précis",
+  "achievementPreciseDescription": "résous un graphe avec au moins 4 coups restants",
+  "achievementOptimalTitle": "optimal",
+  "achievementOptimalDescription": "résous un graphe avec le maximum de coups restants possible",
+  "achievementCloseCallTitle": "de justesse",
+  "achievementCloseCallDescription": "résous un graphe sans aucun coup restant",
+  "achievementSecondAttemptTitle": "deuxième essai",
+  "achievementSecondAttemptDescription": "rejoue un graphe résolu",
+  "achievementImprovementTitle": "progression",
+  "achievementImprovementDescription": "bats ton score précédent en rejouant",
+  "achievementRedemptionTitle": "rédemption",
+  "achievementRedemptionDescription": "obtiens un score supérieur à zéro en rejouant un graphe précédemment noté 0",
+  "achievementPerfectedTitle": "perfectionné",
+  "achievementPerfectedDescription": "améliore un graphe résolu jusqu'à son score maximal possible en rejouant",
+  "unableLoadProfile": "impossible de charger ton profil pour le moment",
+  "unableShareRightNow": "impossible de partager pour le moment",
+  "restart": "recommencer",
+  "tutorialNodeInstruction": "ceci est un sommet déplace-le où tu veux",
+  "tutorialEdgesInstruction": "les sommets sont reliés par des arêtes les arêtes restent attachées",
+  "tutorialSolvedInstruction": "un graphe est résolu quand les arêtes ne se croisent pas celui-ci est déjà résolu"
 }

@@ -182,5 +182,114 @@
   "reportReasonAbuse": "abuso o molestie",
   "reportReasonImpersonation": "impersonificazione",
   "reportReasonSpam": "spam o truffa",
-  "reportReasonOther": "altro"
+  "reportReasonOther": "altro",
+  "nodesCount": "{count} nodi",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "{count} mosse",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "punteggio {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "grafo {level}, irrisolto, gioca",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "grafo {level}, risolto in {moves} mosse, punteggio {score}, rigioca",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "grafo {level}, bloccato",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "grafo {level}, nuovo tentativo in corso, continua",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "rigioca",
+  "replayGraphQuestion": "rigiocare il grafo {level}?",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "il tuo punteggio tornerà a 0 finché non risolverai di nuovo questo grafo. i grafi successivi non saranno disponibili se lo lasci irrisolto.",
+  "resetAndReplay": "azzera e rigioca",
+  "unableSaveProgress": "impossibile salvare i progressi in questo momento",
+  "saveYourProgress": "salva i tuoi progressi",
+  "saveProgressDescription": "registrati gratis per conservare i grafi di oggi e i tuoi traguardi su tutti i dispositivi.",
+  "achievements": "traguardi",
+  "achievementFirstStepTitle": "primo passo",
+  "achievementFirstStepDescription": "risolvi il tuo primo grafo",
+  "achievementPracticeTitle": "pratica",
+  "achievementPracticeDescription": "risolvi 8 grafi",
+  "achievementPersistenceTitle": "perseveranza",
+  "achievementPersistenceDescription": "risolvi 16 grafi",
+  "achievementDedicationTitle": "dedizione",
+  "achievementDedicationDescription": "risolvi 32 grafi",
+  "achievementPlanarityTitle": "planarità",
+  "achievementPlanarityDescription": "risolvi 64 grafi",
+  "achievementEfficientTitle": "efficiente",
+  "achievementEfficientDescription": "risolvi un grafo con almeno 2 mosse rimaste",
+  "achievementPreciseTitle": "preciso",
+  "achievementPreciseDescription": "risolvi un grafo con almeno 4 mosse rimaste",
+  "achievementOptimalTitle": "ottimale",
+  "achievementOptimalDescription": "risolvi un grafo con il massimo numero possibile di mosse rimaste",
+  "achievementCloseCallTitle": "per un soffio",
+  "achievementCloseCallDescription": "risolvi un grafo senza mosse rimaste",
+  "achievementSecondAttemptTitle": "secondo tentativo",
+  "achievementSecondAttemptDescription": "rigioca un grafo risolto",
+  "achievementImprovementTitle": "miglioramento",
+  "achievementImprovementDescription": "supera il tuo punteggio precedente rigiocando",
+  "achievementRedemptionTitle": "riscatto",
+  "achievementRedemptionDescription": "ottieni un punteggio superiore a zero rigiocando un grafo in cui avevi totalizzato 0",
+  "achievementPerfectedTitle": "perfezionato",
+  "achievementPerfectedDescription": "porta un grafo risolto al suo punteggio massimo possibile rigiocando",
+  "unableLoadProfile": "impossibile caricare il tuo profilo in questo momento",
+  "unableShareRightNow": "impossibile condividere in questo momento",
+  "restart": "ricomincia",
+  "tutorialNodeInstruction": "questo è un nodo trascinalo dove vuoi",
+  "tutorialEdgesInstruction": "i nodi sono collegati da archi gli archi rimangono collegati",
+  "tutorialSolvedInstruction": "un grafo è risolto quando nessun arco si incrocia questo è già risolto"
 }

@@ -437,4 +437,173 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get reportReasonOther => 'другое';
+
+  @override
+  String nodesCount(int count) {
+    return 'узлов: $count';
+  }
+
+  @override
+  String movesCount(int count) {
+    return 'ходов: $count';
+  }
+
+  @override
+  String scoreValue(int score) {
+    return 'счёт $score';
+  }
+
+  @override
+  String graphUnsolvedSemantics(int level) {
+    return 'граф $level, не решён, играть';
+  }
+
+  @override
+  String graphSolvedSemantics(int level, int moves, int score) {
+    return 'граф $level, решён за $moves ходов, счёт $score, переиграть';
+  }
+
+  @override
+  String graphBlockedSemantics(int level) {
+    return 'граф $level, заблокирован';
+  }
+
+  @override
+  String graphReplayInProgressSemantics(int level) {
+    return 'граф $level, идёт повторное прохождение, продолжить';
+  }
+
+  @override
+  String get replay => 'переиграть';
+
+  @override
+  String replayGraphQuestion(int level) {
+    return 'переиграть граф $level?';
+  }
+
+  @override
+  String get replayWarning =>
+      'ваш результат обнулится, пока вы снова не решите этот граф. если оставить его нерешённым, следующие графы будут недоступны.';
+
+  @override
+  String get resetAndReplay => 'сбросить и переиграть';
+
+  @override
+  String get unableSaveProgress => 'сейчас не удаётся сохранить прогресс';
+
+  @override
+  String get saveYourProgress => 'сохраните свой прогресс';
+
+  @override
+  String get saveProgressDescription =>
+      'зарегистрируйтесь бесплатно, чтобы сохранить сегодняшние графы и достижения на всех устройствах.';
+
+  @override
+  String get achievements => 'достижения';
+
+  @override
+  String get achievementFirstStepTitle => 'первый шаг';
+
+  @override
+  String get achievementFirstStepDescription => 'решите свой первый граф';
+
+  @override
+  String get achievementPracticeTitle => 'практика';
+
+  @override
+  String get achievementPracticeDescription => 'решите 8 графов';
+
+  @override
+  String get achievementPersistenceTitle => 'упорство';
+
+  @override
+  String get achievementPersistenceDescription => 'решите 16 графов';
+
+  @override
+  String get achievementDedicationTitle => 'преданность';
+
+  @override
+  String get achievementDedicationDescription => 'решите 32 графа';
+
+  @override
+  String get achievementPlanarityTitle => 'планарность';
+
+  @override
+  String get achievementPlanarityDescription => 'решите 64 графа';
+
+  @override
+  String get achievementEfficientTitle => 'эффективность';
+
+  @override
+  String get achievementEfficientDescription =>
+      'решите граф, сохранив не менее 2 ходов';
+
+  @override
+  String get achievementPreciseTitle => 'точность';
+
+  @override
+  String get achievementPreciseDescription =>
+      'решите граф, сохранив не менее 4 ходов';
+
+  @override
+  String get achievementOptimalTitle => 'оптимальность';
+
+  @override
+  String get achievementOptimalDescription =>
+      'решите граф, сохранив максимально возможное число ходов';
+
+  @override
+  String get achievementCloseCallTitle => 'на пределе';
+
+  @override
+  String get achievementCloseCallDescription =>
+      'решите граф, не оставив ни одного хода';
+
+  @override
+  String get achievementSecondAttemptTitle => 'вторая попытка';
+
+  @override
+  String get achievementSecondAttemptDescription => 'переиграйте решённый граф';
+
+  @override
+  String get achievementImprovementTitle => 'улучшение';
+
+  @override
+  String get achievementImprovementDescription =>
+      'превзойдите свой предыдущий результат при повторной игре';
+
+  @override
+  String get achievementRedemptionTitle => 'исправление';
+
+  @override
+  String get achievementRedemptionDescription =>
+      'наберите больше нуля при повторной игре в графе, за который ранее получили 0';
+
+  @override
+  String get achievementPerfectedTitle => 'совершенство';
+
+  @override
+  String get achievementPerfectedDescription =>
+      'улучшите результат решённого графа до максимально возможного при повторной игре';
+
+  @override
+  String get unableLoadProfile => 'сейчас не удаётся загрузить ваш профиль';
+
+  @override
+  String get unableShareRightNow => 'сейчас не удаётся поделиться';
+
+  @override
+  String get restart => 'начать заново';
+
+  @override
+  String get tutorialNodeInstruction =>
+      'это вершина перетащите её в любое место';
+
+  @override
+  String get tutorialEdgesInstruction =>
+      'вершины соединены рёбрами рёбра остаются прикреплёнными';
+
+  @override
+  String get tutorialSolvedInstruction =>
+      'граф решён когда рёбра не пересекаются этот граф уже решён';
 }

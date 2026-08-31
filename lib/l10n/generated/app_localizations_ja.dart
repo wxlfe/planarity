@@ -406,4 +406,164 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get reportReasonOther => 'その他';
+
+  @override
+  String nodesCount(int count) {
+    return '$count個のノード';
+  }
+
+  @override
+  String movesCount(int count) {
+    return '$count手';
+  }
+
+  @override
+  String scoreValue(int score) {
+    return 'スコア $score';
+  }
+
+  @override
+  String graphUnsolvedSemantics(int level) {
+    return 'グラフ $level、未クリア、プレイ';
+  }
+
+  @override
+  String graphSolvedSemantics(int level, int moves, int score) {
+    return 'グラフ $level、$moves 手でクリア、スコア $score、リプレイ';
+  }
+
+  @override
+  String graphBlockedSemantics(int level) {
+    return 'グラフ $level、ロック中';
+  }
+
+  @override
+  String graphReplayInProgressSemantics(int level) {
+    return 'グラフ $level、リプレイ中、続ける';
+  }
+
+  @override
+  String get replay => 'リプレイ';
+
+  @override
+  String replayGraphQuestion(int level) {
+    return 'グラフ$levelをもう一度プレイしますか？';
+  }
+
+  @override
+  String get replayWarning =>
+      'このグラフを再び解くまで、スコアは0にリセットされます。未クリアのまま終了すると、以降のグラフはプレイできません。';
+
+  @override
+  String get resetAndReplay => 'リセットしてリプレイ';
+
+  @override
+  String get unableSaveProgress => '現在、進行状況を保存できません';
+
+  @override
+  String get saveYourProgress => '進行状況を保存';
+
+  @override
+  String get saveProgressDescription => '無料登録すると、今日のグラフと実績をすべてのデバイスで引き継げます。';
+
+  @override
+  String get achievements => '実績';
+
+  @override
+  String get achievementFirstStepTitle => 'はじめの一歩';
+
+  @override
+  String get achievementFirstStepDescription => '最初のグラフを解く';
+
+  @override
+  String get achievementPracticeTitle => '練習';
+
+  @override
+  String get achievementPracticeDescription => 'グラフを8個解く';
+
+  @override
+  String get achievementPersistenceTitle => '粘り強さ';
+
+  @override
+  String get achievementPersistenceDescription => 'グラフを16個解く';
+
+  @override
+  String get achievementDedicationTitle => 'ひたむきさ';
+
+  @override
+  String get achievementDedicationDescription => 'グラフを32個解く';
+
+  @override
+  String get achievementPlanarityTitle => 'プラナリティ';
+
+  @override
+  String get achievementPlanarityDescription => 'グラフを64個解く';
+
+  @override
+  String get achievementEfficientTitle => '効率的';
+
+  @override
+  String get achievementEfficientDescription => '2手以上残してグラフを解く';
+
+  @override
+  String get achievementPreciseTitle => '正確無比';
+
+  @override
+  String get achievementPreciseDescription => '4手以上残してグラフを解く';
+
+  @override
+  String get achievementOptimalTitle => '最適解';
+
+  @override
+  String get achievementOptimalDescription => '残り手数を最大限残してグラフを解く';
+
+  @override
+  String get achievementCloseCallTitle => '間一髪';
+
+  @override
+  String get achievementCloseCallDescription => '残り0手でグラフを解く';
+
+  @override
+  String get achievementSecondAttemptTitle => '再挑戦';
+
+  @override
+  String get achievementSecondAttemptDescription => 'クリア済みのグラフをリプレイする';
+
+  @override
+  String get achievementImprovementTitle => '自己ベスト更新';
+
+  @override
+  String get achievementImprovementDescription => 'リプレイで以前のスコアを上回る';
+
+  @override
+  String get achievementRedemptionTitle => '雪辱';
+
+  @override
+  String get achievementRedemptionDescription =>
+      '以前のスコアが0だったグラフをリプレイし、1点以上獲得する';
+
+  @override
+  String get achievementPerfectedTitle => '完全攻略';
+
+  @override
+  String get achievementPerfectedDescription => 'クリア済みのグラフをリプレイし、最高スコアまで更新する';
+
+  @override
+  String get unableLoadProfile => '現在、プロフィールを読み込めません';
+
+  @override
+  String get unableShareRightNow => '現在、共有できません';
+
+  @override
+  String get restart => 'やり直す';
+
+  @override
+  String get tutorialNodeInstruction => 'これは頂点です好きな場所にドラッグしてください';
+
+  @override
+  String get tutorialEdgesInstruction => '頂点は辺でつながっています辺は頂点につながったままです';
+
+  @override
+  String get tutorialSolvedInstruction =>
+      'どの辺も交差していなければグラフはクリアですこれはすでにクリアしています';
 }

@@ -428,4 +428,175 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get reportReasonOther => 'অন্যান্য';
+
+  @override
+  String nodesCount(int count) {
+    return '$countটি নোড';
+  }
+
+  @override
+  String movesCount(int count) {
+    return '$countটি চাল';
+  }
+
+  @override
+  String scoreValue(int score) {
+    return 'স্কোর $score';
+  }
+
+  @override
+  String graphUnsolvedSemantics(int level) {
+    return 'গ্রাফ $level, সমাধান করা হয়নি, খেলুন';
+  }
+
+  @override
+  String graphSolvedSemantics(int level, int moves, int score) {
+    return 'গ্রাফ $level, $moves চালে সমাধান করা হয়েছে, স্কোর $score, আবার খেলুন';
+  }
+
+  @override
+  String graphBlockedSemantics(int level) {
+    return 'গ্রাফ $level, লক করা আছে';
+  }
+
+  @override
+  String graphReplayInProgressSemantics(int level) {
+    return 'গ্রাফ $level, আবার খেলা চলছে, চালিয়ে যান';
+  }
+
+  @override
+  String get replay => 'আবার খেলুন';
+
+  @override
+  String replayGraphQuestion(int level) {
+    return 'গ্রাফ $level আবার খেলবেন?';
+  }
+
+  @override
+  String get replayWarning =>
+      'এই গ্রাফটি আবার সমাধান না করা পর্যন্ত আপনার স্কোর 0 হয়ে যাবে। এটি অসমাধিত রেখে গেলে পরবর্তী গ্রাফগুলো পাওয়া যাবে না।';
+
+  @override
+  String get resetAndReplay => 'রিসেট করে আবার খেলুন';
+
+  @override
+  String get unableSaveProgress => 'এই মুহূর্তে অগ্রগতি সংরক্ষণ করা যাচ্ছে না';
+
+  @override
+  String get saveYourProgress => 'আপনার অগ্রগতি সংরক্ষণ করুন';
+
+  @override
+  String get saveProgressDescription =>
+      'আজকের গ্রাফ ও অর্জনগুলো সব ডিভাইসে রাখতে বিনামূল্যে সাইন আপ করুন।';
+
+  @override
+  String get achievements => 'অর্জন';
+
+  @override
+  String get achievementFirstStepTitle => 'প্রথম পদক্ষেপ';
+
+  @override
+  String get achievementFirstStepDescription => 'আপনার প্রথম গ্রাফ সমাধান করুন';
+
+  @override
+  String get achievementPracticeTitle => 'অনুশীলন';
+
+  @override
+  String get achievementPracticeDescription => '8টি গ্রাফ সমাধান করুন';
+
+  @override
+  String get achievementPersistenceTitle => 'অধ্যবসায়';
+
+  @override
+  String get achievementPersistenceDescription => '16টি গ্রাফ সমাধান করুন';
+
+  @override
+  String get achievementDedicationTitle => 'নিষ্ঠা';
+
+  @override
+  String get achievementDedicationDescription => '32টি গ্রাফ সমাধান করুন';
+
+  @override
+  String get achievementPlanarityTitle => 'প্ল্যানারিটি';
+
+  @override
+  String get achievementPlanarityDescription => '64টি গ্রাফ সমাধান করুন';
+
+  @override
+  String get achievementEfficientTitle => 'দক্ষ';
+
+  @override
+  String get achievementEfficientDescription =>
+      'অন্তত 2টি চাল বাকি রেখে একটি গ্রাফ সমাধান করুন';
+
+  @override
+  String get achievementPreciseTitle => 'নিখুঁত';
+
+  @override
+  String get achievementPreciseDescription =>
+      'অন্তত 4টি চাল বাকি রেখে একটি গ্রাফ সমাধান করুন';
+
+  @override
+  String get achievementOptimalTitle => 'সর্বোত্তম';
+
+  @override
+  String get achievementOptimalDescription =>
+      'সর্বোচ্চ সম্ভব চাল বাকি রেখে একটি গ্রাফ সমাধান করুন';
+
+  @override
+  String get achievementCloseCallTitle => 'অল্পের জন্য';
+
+  @override
+  String get achievementCloseCallDescription =>
+      'কোনো চাল বাকি না রেখে একটি গ্রাফ সমাধান করুন';
+
+  @override
+  String get achievementSecondAttemptTitle => 'দ্বিতীয় প্রচেষ্টা';
+
+  @override
+  String get achievementSecondAttemptDescription =>
+      'সমাধান করা একটি গ্রাফ আবার খেলুন';
+
+  @override
+  String get achievementImprovementTitle => 'উন্নতি';
+
+  @override
+  String get achievementImprovementDescription =>
+      'আবার খেলে আপনার আগের স্কোর ছাড়িয়ে যান';
+
+  @override
+  String get achievementRedemptionTitle => 'ঘুরে দাঁড়ানো';
+
+  @override
+  String get achievementRedemptionDescription =>
+      'আগে 0 স্কোর করা গ্রাফ আবার খেলে শূন্যের বেশি স্কোর করুন';
+
+  @override
+  String get achievementPerfectedTitle => 'সম্পূর্ণ নিখুঁত';
+
+  @override
+  String get achievementPerfectedDescription =>
+      'আবার খেলে সমাধান করা একটি গ্রাফের স্কোর সর্বোচ্চ সম্ভব স্কোরে উন্নীত করুন';
+
+  @override
+  String get unableLoadProfile =>
+      'এই মুহূর্তে আপনার প্রোফাইল লোড করা যাচ্ছে না';
+
+  @override
+  String get unableShareRightNow => 'এই মুহূর্তে শেয়ার করা যাচ্ছে না';
+
+  @override
+  String get restart => 'আবার শুরু করুন';
+
+  @override
+  String get tutorialNodeInstruction =>
+      'এটি একটি নোড এটিকে যেকোনো জায়গায় টেনে নিন';
+
+  @override
+  String get tutorialEdgesInstruction =>
+      'নোডগুলো প্রান্ত দিয়ে যুক্ত থাকে প্রান্তগুলো নোডের সঙ্গে যুক্ত থাকে';
+
+  @override
+  String get tutorialSolvedInstruction =>
+      'কোনো প্রান্ত পরস্পরকে ছেদ না করলে গ্রাফটি সমাধান হয় এটি ইতিমধ্যেই সমাধান করা';
 }

@@ -889,6 +889,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'other'**
   String get reportReasonOther;
+
+  /// No description provided for @nodesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} nodes'**
+  String nodesCount(int count);
+
+  /// No description provided for @movesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} moves'**
+  String movesCount(int count);
+
+  /// No description provided for @scoreValue.
+  ///
+  /// In en, this message translates to:
+  /// **'score {score}'**
+  String scoreValue(int score);
+
+  /// No description provided for @graphUnsolvedSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'graph {level}, unsolved, play'**
+  String graphUnsolvedSemantics(int level);
+
+  /// No description provided for @graphSolvedSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'graph {level}, solved in {moves} moves, score {score}, replay'**
+  String graphSolvedSemantics(int level, int moves, int score);
+
+  /// No description provided for @graphBlockedSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'graph {level}, blocked'**
+  String graphBlockedSemantics(int level);
+
+  /// No description provided for @graphReplayInProgressSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'graph {level}, replay in progress, continue'**
+  String graphReplayInProgressSemantics(int level);
+
+  /// No description provided for @replay.
+  ///
+  /// In en, this message translates to:
+  /// **'replay'**
+  String get replay;
+
+  /// No description provided for @replayGraphQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'replay graph {level}?'**
+  String replayGraphQuestion(int level);
+
+  /// No description provided for @replayWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'your score will reset to 0 until you solve this graph again. higher graphs will be unavailable if you leave it unsolved.'**
+  String get replayWarning;
+
+  /// No description provided for @resetAndReplay.
+  ///
+  /// In en, this message translates to:
+  /// **'reset and replay'**
+  String get resetAndReplay;
+
+  /// No description provided for @unableSaveProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'unable to save progress right now'**
+  String get unableSaveProgress;
+
+  /// No description provided for @saveYourProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'save your progress'**
+  String get saveYourProgress;
+
+  /// No description provided for @saveProgressDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'sign up for free to keep today\'s graphs and achievements across devices.'**
+  String get saveProgressDescription;
+
+  /// No description provided for @achievements.
+  ///
+  /// In en, this message translates to:
+  /// **'achievements'**
+  String get achievements;
+
+  /// No description provided for @achievementFirstStepTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'first step'**
+  String get achievementFirstStepTitle;
+
+  /// No description provided for @achievementFirstStepDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'solve your first graph'**
+  String get achievementFirstStepDescription;
+
+  /// No description provided for @achievementPracticeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'practice'**
+  String get achievementPracticeTitle;
+
+  /// No description provided for @achievementPracticeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'solve 8 graphs'**
+  String get achievementPracticeDescription;
+
+  /// No description provided for @achievementPersistenceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'persistence'**
+  String get achievementPersistenceTitle;
+
+  /// No description provided for @achievementPersistenceDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'solve 16 graphs'**
+  String get achievementPersistenceDescription;
+
+  /// No description provided for @achievementDedicationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'dedication'**
+  String get achievementDedicationTitle;
+
+  /// No description provided for @achievementDedicationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'solve 32 graphs'**
+  String get achievementDedicationDescription;
+
+  /// No description provided for @achievementPlanarityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'planarity'**
+  String get achievementPlanarityTitle;
+
+  /// No description provided for @achievementPlanarityDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'solve 64 graphs'**
+  String get achievementPlanarityDescription;
+
+  /// No description provided for @achievementEfficientTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'efficient'**
+  String get achievementEfficientTitle;
+
+  /// No description provided for @achievementEfficientDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'solve a graph with at least 2 moves remaining'**
+  String get achievementEfficientDescription;
+
+  /// No description provided for @achievementPreciseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'precise'**
+  String get achievementPreciseTitle;
+
+  /// No description provided for @achievementPreciseDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'solve a graph with at least 4 moves remaining'**
+  String get achievementPreciseDescription;
+
+  /// No description provided for @achievementOptimalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'optimal'**
+  String get achievementOptimalTitle;
+
+  /// No description provided for @achievementOptimalDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'solve a graph with the maximum possible moves remaining'**
+  String get achievementOptimalDescription;
+
+  /// No description provided for @achievementCloseCallTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'close call'**
+  String get achievementCloseCallTitle;
+
+  /// No description provided for @achievementCloseCallDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'solve a graph with no moves remaining'**
+  String get achievementCloseCallDescription;
+
+  /// No description provided for @achievementSecondAttemptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'second attempt'**
+  String get achievementSecondAttemptTitle;
+
+  /// No description provided for @achievementSecondAttemptDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'replay a solved graph'**
+  String get achievementSecondAttemptDescription;
+
+  /// No description provided for @achievementImprovementTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'improvement'**
+  String get achievementImprovementTitle;
+
+  /// No description provided for @achievementImprovementDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'beat your previous score on a replay'**
+  String get achievementImprovementDescription;
+
+  /// No description provided for @achievementRedemptionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'redemption'**
+  String get achievementRedemptionTitle;
+
+  /// No description provided for @achievementRedemptionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'earn a nonzero score on a replay of a graph previously scored 0'**
+  String get achievementRedemptionDescription;
+
+  /// No description provided for @achievementPerfectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'perfected'**
+  String get achievementPerfectedTitle;
+
+  /// No description provided for @achievementPerfectedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'improve a solved graph to its maximum possible score on a replay'**
+  String get achievementPerfectedDescription;
+
+  /// No description provided for @unableLoadProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'unable to load your profile right now'**
+  String get unableLoadProfile;
+
+  /// No description provided for @unableShareRightNow.
+  ///
+  /// In en, this message translates to:
+  /// **'unable to share right now'**
+  String get unableShareRightNow;
+
+  /// No description provided for @restart.
+  ///
+  /// In en, this message translates to:
+  /// **'restart'**
+  String get restart;
+
+  /// No description provided for @tutorialNodeInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'this is a node drag it anywhere'**
+  String get tutorialNodeInstruction;
+
+  /// No description provided for @tutorialEdgesInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'nodes are connected by edges edges stay attached'**
+  String get tutorialEdgesInstruction;
+
+  /// No description provided for @tutorialSolvedInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'a graph is solved when no edges cross this one is already solved'**
+  String get tutorialSolvedInstruction;
 }
 
 class _AppLocalizationsDelegate

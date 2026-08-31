@@ -182,5 +182,114 @@
   "reportReasonAbuse": "missbrauch oder belästigung",
   "reportReasonImpersonation": "identitätsmissbrauch",
   "reportReasonSpam": "spam oder betrug",
-  "reportReasonOther": "anderes"
+  "reportReasonOther": "anderes",
+  "nodesCount": "{count} Knoten",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "{count} Züge",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "Punktzahl {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "Graph {level}, ungelöst, spielen",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "Graph {level}, in {moves} Zügen gelöst, Punktzahl {score}, erneut spielen",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "Graph {level}, gesperrt",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "Graph {level}, Wiederholung läuft, fortsetzen",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "erneut spielen",
+  "replayGraphQuestion": "Graph {level} erneut spielen?",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "deine Punktzahl wird auf 0 zurückgesetzt, bis du diesen Graphen erneut löst. höhere Graphen sind nicht verfügbar, wenn du ihn ungelöst lässt.",
+  "resetAndReplay": "zurücksetzen und erneut spielen",
+  "unableSaveProgress": "Fortschritt kann derzeit nicht gespeichert werden",
+  "saveYourProgress": "Fortschritt speichern",
+  "saveProgressDescription": "registriere dich kostenlos, um die heutigen Graphen und Erfolge auf all deinen Geräten zu behalten.",
+  "achievements": "Erfolge",
+  "achievementFirstStepTitle": "erster Schritt",
+  "achievementFirstStepDescription": "löse deinen ersten Graphen",
+  "achievementPracticeTitle": "Übung",
+  "achievementPracticeDescription": "löse 8 Graphen",
+  "achievementPersistenceTitle": "Ausdauer",
+  "achievementPersistenceDescription": "löse 16 Graphen",
+  "achievementDedicationTitle": "Hingabe",
+  "achievementDedicationDescription": "löse 32 Graphen",
+  "achievementPlanarityTitle": "Planarität",
+  "achievementPlanarityDescription": "löse 64 Graphen",
+  "achievementEfficientTitle": "effizient",
+  "achievementEfficientDescription": "löse einen Graphen mit mindestens 2 verbleibenden Zügen",
+  "achievementPreciseTitle": "präzise",
+  "achievementPreciseDescription": "löse einen Graphen mit mindestens 4 verbleibenden Zügen",
+  "achievementOptimalTitle": "optimal",
+  "achievementOptimalDescription": "löse einen Graphen mit der maximal möglichen Zahl verbleibender Züge",
+  "achievementCloseCallTitle": "knapp geschafft",
+  "achievementCloseCallDescription": "löse einen Graphen ohne verbleibende Züge",
+  "achievementSecondAttemptTitle": "zweiter Versuch",
+  "achievementSecondAttemptDescription": "spiele einen gelösten Graphen erneut",
+  "achievementImprovementTitle": "Verbesserung",
+  "achievementImprovementDescription": "übertriff beim erneuten Spielen deine bisherige Punktzahl",
+  "achievementRedemptionTitle": "Wiedergutmachung",
+  "achievementRedemptionDescription": "erziele beim erneuten Spielen eines zuvor mit 0 bewerteten Graphen mehr als 0 Punkte",
+  "achievementPerfectedTitle": "perfektioniert",
+  "achievementPerfectedDescription": "verbessere einen gelösten Graphen beim erneuten Spielen auf die maximal mögliche Punktzahl",
+  "unableLoadProfile": "dein Profil kann derzeit nicht geladen werden",
+  "unableShareRightNow": "Teilen ist derzeit nicht möglich",
+  "restart": "neu starten",
+  "tutorialNodeInstruction": "dies ist ein Knoten ziehe ihn an eine beliebige Stelle",
+  "tutorialEdgesInstruction": "Knoten sind durch Kanten verbunden Kanten bleiben mit ihnen verbunden",
+  "tutorialSolvedInstruction": "ein Graph ist gelöst wenn sich keine Kanten kreuzen dieser ist bereits gelöst"
 }

@@ -182,5 +182,114 @@
   "reportReasonAbuse": "بدسلوکی یا ہراساں کرنا",
   "reportReasonImpersonation": "نقالی",
   "reportReasonSpam": "سپیم یا دھوکہ دہی",
-  "reportReasonOther": "دیگر"
+  "reportReasonOther": "دیگر",
+  "nodesCount": "{count} نوڈز",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "{count} چالیں",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "اسکور {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "گراف {level}، حل نہیں ہوا، کھیلیں",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "گراف {level}، {moves} چالوں میں حل ہوا، اسکور {score}، دوبارہ کھیلیں",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "گراف {level}، مقفل",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "گراف {level}، دوبارہ کھیل جاری ہے، جاری رکھیں",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "دوبارہ کھیلیں",
+  "replayGraphQuestion": "گراف {level} دوبارہ کھیلیں؟",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "جب تک آپ یہ گراف دوبارہ حل نہیں کرتے، آپ کا اسکور 0 ہو جائے گا۔ اگر آپ اسے حل کیے بغیر چھوڑ دیں تو اگلے گراف دستیاب نہیں ہوں گے۔",
+  "resetAndReplay": "ری سیٹ کرکے دوبارہ کھیلیں",
+  "unableSaveProgress": "اس وقت پیش رفت محفوظ نہیں کی جا سکتی",
+  "saveYourProgress": "اپنی پیش رفت محفوظ کریں",
+  "saveProgressDescription": "آج کے گراف اور کامیابیاں اپنے تمام آلات پر رکھنے کے لیے مفت سائن اپ کریں۔",
+  "achievements": "کامیابیاں",
+  "achievementFirstStepTitle": "پہلا قدم",
+  "achievementFirstStepDescription": "اپنا پہلا گراف حل کریں",
+  "achievementPracticeTitle": "مشق",
+  "achievementPracticeDescription": "8 گراف حل کریں",
+  "achievementPersistenceTitle": "ثابت قدمی",
+  "achievementPersistenceDescription": "16 گراف حل کریں",
+  "achievementDedicationTitle": "لگن",
+  "achievementDedicationDescription": "32 گراف حل کریں",
+  "achievementPlanarityTitle": "پلینارٹی",
+  "achievementPlanarityDescription": "64 گراف حل کریں",
+  "achievementEfficientTitle": "موثر",
+  "achievementEfficientDescription": "کم از کم 2 چالیں باقی رکھتے ہوئے گراف حل کریں",
+  "achievementPreciseTitle": "درست",
+  "achievementPreciseDescription": "کم از کم 4 چالیں باقی رکھتے ہوئے گراف حل کریں",
+  "achievementOptimalTitle": "بہترین",
+  "achievementOptimalDescription": "زیادہ سے زیادہ ممکنہ چالیں باقی رکھتے ہوئے گراف حل کریں",
+  "achievementCloseCallTitle": "بال بال",
+  "achievementCloseCallDescription": "کوئی چال باقی رکھے بغیر گراف حل کریں",
+  "achievementSecondAttemptTitle": "دوسری کوشش",
+  "achievementSecondAttemptDescription": "حل شدہ گراف دوبارہ کھیلیں",
+  "achievementImprovementTitle": "بہتری",
+  "achievementImprovementDescription": "دوبارہ کھیل کر اپنا پچھلا اسکور توڑیں",
+  "achievementRedemptionTitle": "ازالہ",
+  "achievementRedemptionDescription": "جس گراف پر پہلے 0 اسکور ہوا تھا اسے دوبارہ کھیل کر صفر سے زیادہ اسکور حاصل کریں",
+  "achievementPerfectedTitle": "کمال",
+  "achievementPerfectedDescription": "حل شدہ گراف کو دوبارہ کھیل کر اس کے زیادہ سے زیادہ ممکنہ اسکور تک بہتر کریں",
+  "unableLoadProfile": "اس وقت آپ کی پروفائل لوڈ نہیں کی جا سکتی",
+  "unableShareRightNow": "اس وقت شیئر نہیں کیا جا سکتا",
+  "restart": "دوبارہ شروع کریں",
+  "tutorialNodeInstruction": "یہ ایک نوڈ ہے اسے کہیں بھی گھسیٹیں",
+  "tutorialEdgesInstruction": "نوڈ کناروں سے جڑے ہوتے ہیں کنارے نوڈ سے جڑے رہتے ہیں",
+  "tutorialSolvedInstruction": "جب کنارے ایک دوسرے کو نہ کاٹیں تو گراف حل ہو جاتا ہے یہ گراف پہلے ہی حل شدہ ہے"
 }

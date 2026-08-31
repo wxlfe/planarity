@@ -182,5 +182,114 @@
   "reportReasonAbuse": "학대 또는 괴롭힘",
   "reportReasonImpersonation": "사칭",
   "reportReasonSpam": "스팸 또는 사기",
-  "reportReasonOther": "기타"
+  "reportReasonOther": "기타",
+  "nodesCount": "노드 {count}개",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "{count}번 이동",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "점수 {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "그래프 {level}, 미해결, 플레이",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "그래프 {level}, {moves}번 만에 해결, 점수 {score}, 다시 플레이",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "그래프 {level}, 잠김",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "그래프 {level}, 다시 플레이 진행 중, 계속",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "다시 플레이",
+  "replayGraphQuestion": "그래프 {level}을(를) 다시 플레이할까요?",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "이 그래프를 다시 풀 때까지 점수가 0으로 초기화됩니다. 풀지 않은 채 나가면 이후 그래프를 이용할 수 없습니다.",
+  "resetAndReplay": "초기화하고 다시 플레이",
+  "unableSaveProgress": "지금은 진행 상황을 저장할 수 없습니다",
+  "saveYourProgress": "진행 상황 저장",
+  "saveProgressDescription": "무료로 가입하고 오늘의 그래프와 업적을 모든 기기에서 이어가세요.",
+  "achievements": "업적",
+  "achievementFirstStepTitle": "첫걸음",
+  "achievementFirstStepDescription": "첫 번째 그래프 풀기",
+  "achievementPracticeTitle": "연습",
+  "achievementPracticeDescription": "그래프 8개 풀기",
+  "achievementPersistenceTitle": "끈기",
+  "achievementPersistenceDescription": "그래프 16개 풀기",
+  "achievementDedicationTitle": "헌신",
+  "achievementDedicationDescription": "그래프 32개 풀기",
+  "achievementPlanarityTitle": "평면성",
+  "achievementPlanarityDescription": "그래프 64개 풀기",
+  "achievementEfficientTitle": "효율적",
+  "achievementEfficientDescription": "2번 이상 이동을 남기고 그래프 풀기",
+  "achievementPreciseTitle": "정확함",
+  "achievementPreciseDescription": "4번 이상 이동을 남기고 그래프 풀기",
+  "achievementOptimalTitle": "최적",
+  "achievementOptimalDescription": "가능한 최대 이동 횟수를 남기고 그래프 풀기",
+  "achievementCloseCallTitle": "아슬아슬",
+  "achievementCloseCallDescription": "이동 횟수를 남기지 않고 그래프 풀기",
+  "achievementSecondAttemptTitle": "두 번째 도전",
+  "achievementSecondAttemptDescription": "푼 그래프 다시 플레이하기",
+  "achievementImprovementTitle": "향상",
+  "achievementImprovementDescription": "다시 플레이해 이전 점수 넘기기",
+  "achievementRedemptionTitle": "명예 회복",
+  "achievementRedemptionDescription": "이전에 0점을 받은 그래프를 다시 플레이해 0점보다 높은 점수 얻기",
+  "achievementPerfectedTitle": "완벽 달성",
+  "achievementPerfectedDescription": "푼 그래프를 다시 플레이해 가능한 최고 점수로 향상하기",
+  "unableLoadProfile": "지금은 프로필을 불러올 수 없습니다",
+  "unableShareRightNow": "지금은 공유할 수 없습니다",
+  "restart": "다시 시작",
+  "tutorialNodeInstruction": "이것은 꼭짓점입니다 원하는 곳으로 드래그하세요",
+  "tutorialEdgesInstruction": "꼭짓점은 변으로 연결되어 있으며 변은 계속 연결된 상태로 유지됩니다",
+  "tutorialSolvedInstruction": "어떤 변도 교차하지 않으면 그래프가 풀립니다 이 그래프는 이미 풀려 있습니다"
 }

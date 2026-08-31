@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -67,6 +68,235 @@ void main() {
     expect(scoreForSolvedLevel(level: 6, movesUsed: 2), 4);
     expect(scoreForSolvedLevel(level: 6, movesUsed: 6), 0);
     expect(scoreForSolvedLevel(level: 6, movesUsed: 8), 0);
+  });
+
+  test('daily score is recomputed from the latest per-level results', () {
+    const results = [
+      DailyLevelResult(level: 4, movesUsed: 2, score: 2),
+      DailyLevelResult(level: 5, movesUsed: 5, score: 0),
+      DailyLevelResult(level: 6, movesUsed: 1, score: 5),
+    ];
+
+    expect(dailyScoreFor(results), 7);
+    expect(dailyScoreFor(results, carry: 9), 16);
+  });
+
+  test('blocked levels permit the gate and lower levels only', () {
+    expect(canOpenLevel(level: 5, blockedLevel: 0), isTrue);
+    expect(canOpenLevel(level: 5, blockedLevel: 5), isTrue);
+    expect(canOpenLevel(level: 4, blockedLevel: 5), isTrue);
+    expect(canOpenLevel(level: 6, blockedLevel: 5), isFalse);
+  });
+
+  test('replay completion restores an earlier progression gate', () {
+    expect(
+      blockedLevelAfterSolve(
+        solvedLevel: 4,
+        blockedLevel: 4,
+        isReplay: true,
+        replayRestoreBlockedLevel: 6,
+      ),
+      6,
+    );
+    expect(
+      blockedLevelAfterSolve(
+        solvedLevel: 6,
+        blockedLevel: 6,
+        isReplay: false,
+        replayRestoreBlockedLevel: 0,
+      ),
+      0,
+    );
+  });
+
+  test('lifetime score counts only newly earned replay points', () {
+    expect(
+      lifetimeScoreIncrementForSolve(
+        levelScore: 3,
+        isReplay: false,
+        previousScore: 0,
+      ),
+      3,
+    );
+    expect(
+      lifetimeScoreIncrementForSolve(
+        levelScore: 3,
+        isReplay: true,
+        previousScore: 3,
+      ),
+      0,
+    );
+    expect(
+      lifetimeScoreIncrementForSolve(
+        levelScore: 4,
+        isReplay: true,
+        previousScore: 3,
+      ),
+      1,
+    );
+  });
+
+  test('signup prompt requires a guest first solve on a consecutive day', () {
+    expect(
+      shouldPromptForSignUp(
+        signedIn: false,
+        previousLastPlayed: '2026-05-27',
+        todayKey: '2026-05-28',
+        solvedLevelsToday: 0,
+        signUpPromptShownAt: null,
+      ),
+      isTrue,
+    );
+    expect(
+      shouldPromptForSignUp(
+        signedIn: false,
+        previousLastPlayed: '2026-05-27',
+        todayKey: '2026-05-28',
+        solvedLevelsToday: 1,
+        signUpPromptShownAt: null,
+      ),
+      isFalse,
+    );
+    expect(
+      shouldPromptForSignUp(
+        signedIn: true,
+        previousLastPlayed: '2026-05-27',
+        todayKey: '2026-05-28',
+        solvedLevelsToday: 0,
+        signUpPromptShownAt: null,
+      ),
+      isFalse,
+    );
+    expect(
+      shouldPromptForSignUp(
+        signedIn: false,
+        previousLastPlayed: '2026-05-27',
+        todayKey: '2026-05-28',
+        solvedLevelsToday: 0,
+        signUpPromptShownAt: '2026-05-28',
+      ),
+      isFalse,
+    );
+  });
+
+  test('new accounts inherit guest progress without guest identity fields', () {
+    final merged = mergeGuestProgressForNewAccount(
+      defaultDocument: {
+        'displayName': 'Ada',
+        'friends': <String>[],
+        'currentLevel': 1,
+        'score': 0,
+      },
+      guestDocument: {
+        'displayName': 'anonymous player',
+        'friends': ['guest-only-friend'],
+        'currentLevel': 7,
+        'score': 9,
+        'dailyResultsDay': '2026-05-28',
+        'achievementSolveCount': 8,
+        'unlockedAchievements': ['first_step', 'practice'],
+      },
+    );
+
+    expect(merged['displayName'], 'Ada');
+    expect(merged['friends'], isEmpty);
+    expect(merged['currentLevel'], 7);
+    expect(merged['score'], 9);
+    expect(merged['achievementSolveCount'], 8);
+    expect(merged['unlockedAchievements'], ['first_step', 'practice']);
+  });
+
+  test('service errors are classified without exposing raw messages', () {
+    expect(
+      sanitizedServiceErrorMessage(
+        StateError('secret backend detail'),
+        genericMessage: 'try again',
+        networkMessage: 'check connection',
+      ),
+      'try again',
+    );
+    expect(
+      sanitizedServiceErrorMessage(
+        FirebaseException(plugin: 'firestore', code: 'unavailable'),
+        genericMessage: 'try again',
+        networkMessage: 'check connection',
+      ),
+      'check connection',
+    );
+  });
+
+  test('solve achievements cover counts efficiency and replay improvement', () {
+    expect(
+      achievementIdsForSolve(
+        solveCount: 1,
+        level: 4,
+        movesUsed: 4,
+        isReplay: false,
+        previousScore: 0,
+      ),
+      containsAll(<String>['first_step', 'close_call']),
+    );
+    expect(
+      achievementIdsForSolve(
+        solveCount: 8,
+        level: 8,
+        movesUsed: 4,
+        isReplay: false,
+        previousScore: 0,
+      ),
+      containsAll(<String>['practice', 'efficient', 'precise']),
+    );
+    expect(
+      achievementIdsForSolve(
+        solveCount: 16,
+        level: 8,
+        movesUsed: 1,
+        isReplay: true,
+        previousScore: 2,
+      ),
+      containsAll(<String>[
+        'persistence',
+        'optimal',
+        'second_attempt',
+        'improvement',
+        'perfected',
+      ]),
+    );
+    expect(
+      achievementIdsForSolve(
+        solveCount: 2,
+        level: 6,
+        movesUsed: 4,
+        isReplay: true,
+        previousScore: 0,
+      ),
+      containsAll(<String>['second_attempt', 'improvement', 'redemption']),
+    );
+  });
+
+  testWidgets('achievement list grays locked entries and expands details', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const Scaffold(
+          body: AchievementList(unlockedIds: {'first_step'}),
+        ),
+      ),
+    );
+
+    expect(find.text('first step'), findsOneWidget);
+    expect(find.text('practice'), findsOneWidget);
+    expect(find.text('solve your first graph'), findsNothing);
+
+    await tester.tap(find.text('first step'));
+    await tester.pump();
+
+    expect(find.text('solve your first graph'), findsOneWidget);
+    final lockedTitle = tester.widget<Text>(find.text('practice'));
+    expect(lockedTitle.style?.color?.a, lessThan(1));
   });
 
   test('daily score snapshot writes are best effort', () async {
@@ -170,7 +400,7 @@ void main() {
 
     await tester.pumpWidget(const PlanarityApp());
     await tester.pump(const Duration(milliseconds: 100));
-    await tester.tap(find.text('start'));
+    await tester.tap(find.byKey(const ValueKey('graph-tile-1')));
     await tester.pumpAndSettle();
 
     expect(find.text('this is a node drag it anywhere'), findsOneWidget);
@@ -192,7 +422,7 @@ void main() {
 
     await tester.pumpWidget(const PlanarityApp());
     await tester.pump(const Duration(milliseconds: 100));
-    await tester.tap(find.text('start'));
+    await tester.tap(find.byKey(const ValueKey('graph-tile-1')));
     await tester.pumpAndSettle();
 
     expect(find.text('this is a node drag it anywhere'), findsOneWidget);
@@ -278,6 +508,34 @@ void main() {
     expect(reportedProgress.single.score, 7);
     expect(reportedProgress.single.locked, isFalse);
     expect(reportedProgress.single.tutorialCompleted, isFalse);
+    expect(reportedProgress.single.movesUsed, 1);
+    expect(reportedProgress.single.levelScore, 0);
+    expect(reportedProgress.single.isReplay, isFalse);
+  });
+
+  testWidgets('qualifying completion offers to save guest progress', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const PlanarityGamePage(
+          dayKey: '2026-05-28',
+          startLevel: 1,
+          startScore: 0,
+          tutorialCompleted: false,
+          showSignUpPrompt: true,
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.drag(find.byType(GestureDetector).last, const Offset(24, 0));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('save your progress'), findsOneWidget);
+    expect(find.text('sign up'), findsOneWidget);
   });
 
   testWidgets('Tutorial instructions appear inside the gameplay board', (
@@ -423,7 +681,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('planarity'), findsAtLeastNWidgets(1));
-    expect(find.text('start'), findsOneWidget);
+    expect(find.byKey(const ValueKey('graph-tile-1')), findsOneWidget);
+    expect(find.text('start'), findsNothing);
     expect(find.text('leaderboard'), findsOneWidget);
     expect(find.text('global'), findsOneWidget);
     expect(find.text('no global scores yet'), findsOneWidget);
@@ -444,8 +703,43 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('leaderboard'), findsOneWidget);
-    expect(find.text('start'), findsOneWidget);
+    expect(find.byKey(const ValueKey('graph-tile-1')), findsOneWidget);
+    expect(find.text('start'), findsNothing);
     expect(find.text('daily score'), findsOneWidget);
+  });
+
+  testWidgets('Short wide windows use the scrollable Home layout', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1000, 400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(const PlanarityApp());
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byKey(const ValueKey('graph-tile-1')), findsOneWidget);
+    expect(find.text('leaderboard'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Graph carousel squares grow with large system text', (
+    WidgetTester tester,
+  ) async {
+    tester.binding.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(
+      tester.binding.platformDispatcher.clearTextScaleFactorTestValue,
+    );
+
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(const PlanarityApp());
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final tile = tester.getSize(find.byKey(const ValueKey('graph-tile-1')));
+    expect(tile.width, tile.height);
+    expect(tile.width, greaterThan(112));
   });
 
   testWidgets('Web home page shows App Store download button', (
@@ -489,7 +783,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('planarity'), findsAtLeastNWidgets(1));
-    expect(find.text('comenzar'), findsOneWidget);
+    expect(find.byKey(const ValueKey('graph-tile-1')), findsOneWidget);
     expect(find.text('clasificación'), findsOneWidget);
     expect(find.text('global'), findsOneWidget);
     expect(find.text('puntuación diaria'), findsOneWidget);
@@ -507,7 +801,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('planarity'), findsAtLeastNWidgets(1));
-    expect(find.text('开始'), findsOneWidget);
+    expect(find.byKey(const ValueKey('graph-tile-1')), findsOneWidget);
     expect(find.text('排行榜'), findsOneWidget);
     expect(find.text('全球'), findsOneWidget);
     expect(find.text('每日得分'), findsOneWidget);
@@ -525,7 +819,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('planarity'), findsAtLeastNWidgets(1));
-    expect(find.text('शुरू करें'), findsOneWidget);
+    expect(find.byKey(const ValueKey('graph-tile-1')), findsOneWidget);
     expect(find.text('लीडरबोर्ड'), findsOneWidget);
     expect(find.text('वैश्विक'), findsOneWidget);
     expect(find.text('दैनिक स्कोर'), findsOneWidget);
@@ -632,7 +926,7 @@ void main() {
         findsAtLeastNWidgets(1),
         reason: 'expected ${entry.key} to show the app name',
       );
-      for (final expectedText in entry.value) {
+      for (final expectedText in entry.value.skip(1)) {
         expect(
           find.text(expectedText),
           findsOneWidget,
@@ -659,7 +953,168 @@ void main() {
 
     expect(find.text('daily score'), findsOneWidget);
     expect(find.text('7'), findsOneWidget);
-    expect(find.text('continue'), findsOneWidget);
+    expect(find.byKey(const ValueKey('graph-tile-8')), findsOneWidget);
+    expect(find.text('continue'), findsNothing);
+  });
+
+  testWidgets('Home page lists today solved graphs with replay details', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'local_guest_user_document': jsonEncode({
+        'currentLevel': 6,
+        'dailyResultsDay': _todayKey(),
+        'dailyLevelResults': [
+          {'level': 4, 'movesUsed': 2, 'score': 2},
+          {'level': 5, 'movesUsed': 5, 'score': 0},
+        ],
+        'lastPlayed': _todayKey(),
+        'locked': false,
+        'score': 2,
+        'tutorialCompleted': true,
+      }),
+    });
+
+    await tester.pumpWidget(const PlanarityApp());
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump();
+
+    expect(find.text("today's graphs"), findsNothing);
+    expect(find.text('4 nodes'), findsOneWidget);
+    expect(find.textContaining('2 moves'), findsOneWidget);
+    expect(find.text('score 2'), findsOneWidget);
+    expect(find.byKey(const ValueKey('graph-tile-6')), findsOneWidget);
+    expect(find.text('continue'), findsNothing);
+    expect(
+      find.bySemanticsLabel('graph 4, solved in 2 moves, score 2, replay'),
+      findsOneWidget,
+    );
+    expect(find.bySemanticsLabel('graph 6, unsolved, play'), findsOneWidget);
+    final carousel = tester.widget<ListView>(
+      find.byKey(const ValueKey('graph-carousel-scroll')),
+    );
+    expect(carousel.scrollDirection, Axis.horizontal);
+
+    final tile4 = tester.getSize(find.byKey(const ValueKey('graph-tile-4')));
+    expect(tile4.width, tile4.height);
+    expect(
+      tester.getCenter(find.byKey(const ValueKey('graph-tile-4'))).dx,
+      lessThan(tester.getCenter(find.byKey(const ValueKey('graph-tile-5'))).dx),
+    );
+    expect(
+      tester.getCenter(find.byKey(const ValueKey('graph-tile-5'))).dx,
+      lessThan(tester.getCenter(find.byKey(const ValueKey('graph-tile-6'))).dx),
+    );
+    expect(
+      tester.getCenter(find.byKey(const ValueKey('graph-tile-6'))).dx,
+      closeTo(
+        tester.getCenter(find.byKey(const ValueKey('graph-carousel'))).dx,
+        1,
+      ),
+    );
+  });
+
+  testWidgets('replay requires confirmation before resetting a score', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'local_guest_user_document': jsonEncode({
+        'currentLevel': 5,
+        'dailyResultsDay': _todayKey(),
+        'dailyLevelResults': [
+          {'level': 4, 'movesUsed': 2, 'score': 2},
+        ],
+        'lastPlayed': _todayKey(),
+        'locked': false,
+        'score': 2,
+        'tutorialCompleted': true,
+      }),
+    });
+
+    await tester.pumpWidget(const PlanarityApp());
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byKey(const ValueKey('graph-tile-4')));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('replay graph 4?'), findsOneWidget);
+    expect(find.textContaining('score will reset to 0'), findsOneWidget);
+
+    await tester.tap(find.text('reset and replay'));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final prefs = await SharedPreferences.getInstance();
+    final saved =
+        jsonDecode(prefs.getString('local_guest_user_document')!)
+            as Map<String, dynamic>;
+    expect(saved['score'], 0);
+    expect(saved['blockedLevel'], 4);
+    expect(saved['activeReplayLevel'], 4);
+    expect(find.byIcon(Icons.restart_alt), findsOneWidget);
+  });
+
+  testWidgets('Graph carousel centers the actionable graph in RTL', (
+    WidgetTester tester,
+  ) async {
+    tester.binding.platformDispatcher.localesTestValue = const [Locale('ar')];
+    addTearDown(tester.binding.platformDispatcher.clearLocalesTestValue);
+    SharedPreferences.setMockInitialValues({
+      'local_guest_user_document': jsonEncode({
+        'currentLevel': 6,
+        'dailyResultsDay': _todayKey(),
+        'dailyLevelResults': [
+          {'level': 4, 'movesUsed': 2, 'score': 2},
+          {'level': 5, 'movesUsed': 3, 'score': 2},
+        ],
+        'lastPlayed': _todayKey(),
+        'locked': false,
+        'score': 4,
+        'tutorialCompleted': true,
+      }),
+    });
+
+    await tester.pumpWidget(const PlanarityApp());
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump();
+
+    expect(
+      tester.getCenter(find.byKey(const ValueKey('graph-tile-6'))).dx,
+      closeTo(
+        tester.getCenter(find.byKey(const ValueKey('graph-carousel'))).dx,
+        1,
+      ),
+    );
+  });
+
+  testWidgets('an unresolved replay disables starting another replay', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'local_guest_user_document': jsonEncode({
+        'currentLevel': 6,
+        'dailyResultsDay': _todayKey(),
+        'dailyLevelResults': [
+          {'level': 4, 'movesUsed': 2, 'score': 0},
+          {'level': 5, 'movesUsed': 2, 'score': 3},
+        ],
+        'lastPlayed': _todayKey(),
+        'locked': false,
+        'score': 3,
+        'blockedLevel': 4,
+        'activeReplayLevel': 4,
+        'replayPreviousScore': 2,
+        'tutorialCompleted': true,
+      }),
+    });
+
+    await tester.pumpWidget(const PlanarityApp());
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const ValueKey('graph-tile-5')));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('replay graph 5?'), findsNothing);
+    expect(find.text('continue'), findsNothing);
+    expect(find.byKey(const ValueKey('graph-tile-4')), findsOneWidget);
   });
 
   testWidgets('Level page subtitle changes with current score', (
@@ -715,6 +1170,7 @@ void main() {
     expect(find.text('daily score'), findsOneWidget);
     expect(find.text('0'), findsOneWidget);
     expect(find.byIcon(FontAwesomeIcons.lock.data), findsNothing);
-    expect(find.text('start'), findsOneWidget);
+    expect(find.byKey(const ValueKey('graph-tile-1')), findsOneWidget);
+    expect(find.text('start'), findsNothing);
   });
 }

@@ -182,5 +182,114 @@
   "reportReasonAbuse": "إساءة أو مضايقة",
   "reportReasonImpersonation": "انتحال شخصية",
   "reportReasonSpam": "رسائل مزعجة أو احتيال",
-  "reportReasonOther": "أخرى"
+  "reportReasonOther": "أخرى",
+  "nodesCount": "{count} عقدة",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "{count} حركة",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "النتيجة {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "الرسم البياني {level}، غير محلول، العب",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "الرسم البياني {level}، تم حله في {moves} حركة، النتيجة {score}، أعد اللعب",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "الرسم البياني {level}، غير متاح",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "الرسم البياني {level}، إعادة اللعب جارية، تابع",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "إعادة اللعب",
+  "replayGraphQuestion": "إعادة لعب الرسم البياني {level}؟",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "ستُعاد نتيجتك إلى 0 حتى تحل هذا الرسم البياني مرة أخرى. لن تتوفر الرسوم البيانية الأعلى إذا تركته دون حل.",
+  "resetAndReplay": "إعادة الضبط واللعب",
+  "unableSaveProgress": "تعذر حفظ التقدم الآن",
+  "saveYourProgress": "احفظ تقدمك",
+  "saveProgressDescription": "أنشئ حسابًا مجانًا للاحتفاظ برسوم اليوم البيانية والإنجازات على جميع أجهزتك.",
+  "achievements": "الإنجازات",
+  "achievementFirstStepTitle": "الخطوة الأولى",
+  "achievementFirstStepDescription": "حل أول رسم بياني لك",
+  "achievementPracticeTitle": "التدريب",
+  "achievementPracticeDescription": "حل 8 رسوم بيانية",
+  "achievementPersistenceTitle": "المثابرة",
+  "achievementPersistenceDescription": "حل 16 رسمًا بيانيًا",
+  "achievementDedicationTitle": "التفاني",
+  "achievementDedicationDescription": "حل 32 رسمًا بيانيًا",
+  "achievementPlanarityTitle": "الاستواء",
+  "achievementPlanarityDescription": "حل 64 رسمًا بيانيًا",
+  "achievementEfficientTitle": "الكفاءة",
+  "achievementEfficientDescription": "حل رسمًا بيانيًا مع بقاء حركتين على الأقل",
+  "achievementPreciseTitle": "الدقة",
+  "achievementPreciseDescription": "حل رسمًا بيانيًا مع بقاء 4 حركات على الأقل",
+  "achievementOptimalTitle": "الحل الأمثل",
+  "achievementOptimalDescription": "حل رسمًا بيانيًا مع بقاء أكبر عدد ممكن من الحركات",
+  "achievementCloseCallTitle": "في اللحظة الأخيرة",
+  "achievementCloseCallDescription": "حل رسمًا بيانيًا دون بقاء أي حركة",
+  "achievementSecondAttemptTitle": "المحاولة الثانية",
+  "achievementSecondAttemptDescription": "أعد لعب رسم بياني محلول",
+  "achievementImprovementTitle": "التحسن",
+  "achievementImprovementDescription": "تجاوز نتيجتك السابقة عند إعادة اللعب",
+  "achievementRedemptionTitle": "التعويض",
+  "achievementRedemptionDescription": "احصل على نتيجة أكبر من صفر عند إعادة رسم بياني سبق أن سجلت فيه 0",
+  "achievementPerfectedTitle": "الإتقان",
+  "achievementPerfectedDescription": "حسّن رسمًا بيانيًا محلولًا إلى أعلى نتيجة ممكنة عند إعادة اللعب",
+  "unableLoadProfile": "تعذر تحميل ملفك الشخصي الآن",
+  "unableShareRightNow": "تعذرت المشاركة الآن",
+  "restart": "إعادة البدء",
+  "tutorialNodeInstruction": "هذه عقدة اسحبها إلى أي مكان",
+  "tutorialEdgesInstruction": "العقد متصلة بحواف وتبقى الحواف مرتبطة بها",
+  "tutorialSolvedInstruction": "يُحل الرسم البياني عندما لا تتقاطع أي حواف وهذا الرسم محلول بالفعل"
 }

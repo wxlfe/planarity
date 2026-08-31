@@ -440,4 +440,174 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get reportReasonOther => 'altro';
+
+  @override
+  String nodesCount(int count) {
+    return '$count nodi';
+  }
+
+  @override
+  String movesCount(int count) {
+    return '$count mosse';
+  }
+
+  @override
+  String scoreValue(int score) {
+    return 'punteggio $score';
+  }
+
+  @override
+  String graphUnsolvedSemantics(int level) {
+    return 'grafo $level, irrisolto, gioca';
+  }
+
+  @override
+  String graphSolvedSemantics(int level, int moves, int score) {
+    return 'grafo $level, risolto in $moves mosse, punteggio $score, rigioca';
+  }
+
+  @override
+  String graphBlockedSemantics(int level) {
+    return 'grafo $level, bloccato';
+  }
+
+  @override
+  String graphReplayInProgressSemantics(int level) {
+    return 'grafo $level, nuovo tentativo in corso, continua';
+  }
+
+  @override
+  String get replay => 'rigioca';
+
+  @override
+  String replayGraphQuestion(int level) {
+    return 'rigiocare il grafo $level?';
+  }
+
+  @override
+  String get replayWarning =>
+      'il tuo punteggio tornerà a 0 finché non risolverai di nuovo questo grafo. i grafi successivi non saranno disponibili se lo lasci irrisolto.';
+
+  @override
+  String get resetAndReplay => 'azzera e rigioca';
+
+  @override
+  String get unableSaveProgress =>
+      'impossibile salvare i progressi in questo momento';
+
+  @override
+  String get saveYourProgress => 'salva i tuoi progressi';
+
+  @override
+  String get saveProgressDescription =>
+      'registrati gratis per conservare i grafi di oggi e i tuoi traguardi su tutti i dispositivi.';
+
+  @override
+  String get achievements => 'traguardi';
+
+  @override
+  String get achievementFirstStepTitle => 'primo passo';
+
+  @override
+  String get achievementFirstStepDescription => 'risolvi il tuo primo grafo';
+
+  @override
+  String get achievementPracticeTitle => 'pratica';
+
+  @override
+  String get achievementPracticeDescription => 'risolvi 8 grafi';
+
+  @override
+  String get achievementPersistenceTitle => 'perseveranza';
+
+  @override
+  String get achievementPersistenceDescription => 'risolvi 16 grafi';
+
+  @override
+  String get achievementDedicationTitle => 'dedizione';
+
+  @override
+  String get achievementDedicationDescription => 'risolvi 32 grafi';
+
+  @override
+  String get achievementPlanarityTitle => 'planarità';
+
+  @override
+  String get achievementPlanarityDescription => 'risolvi 64 grafi';
+
+  @override
+  String get achievementEfficientTitle => 'efficiente';
+
+  @override
+  String get achievementEfficientDescription =>
+      'risolvi un grafo con almeno 2 mosse rimaste';
+
+  @override
+  String get achievementPreciseTitle => 'preciso';
+
+  @override
+  String get achievementPreciseDescription =>
+      'risolvi un grafo con almeno 4 mosse rimaste';
+
+  @override
+  String get achievementOptimalTitle => 'ottimale';
+
+  @override
+  String get achievementOptimalDescription =>
+      'risolvi un grafo con il massimo numero possibile di mosse rimaste';
+
+  @override
+  String get achievementCloseCallTitle => 'per un soffio';
+
+  @override
+  String get achievementCloseCallDescription =>
+      'risolvi un grafo senza mosse rimaste';
+
+  @override
+  String get achievementSecondAttemptTitle => 'secondo tentativo';
+
+  @override
+  String get achievementSecondAttemptDescription => 'rigioca un grafo risolto';
+
+  @override
+  String get achievementImprovementTitle => 'miglioramento';
+
+  @override
+  String get achievementImprovementDescription =>
+      'supera il tuo punteggio precedente rigiocando';
+
+  @override
+  String get achievementRedemptionTitle => 'riscatto';
+
+  @override
+  String get achievementRedemptionDescription =>
+      'ottieni un punteggio superiore a zero rigiocando un grafo in cui avevi totalizzato 0';
+
+  @override
+  String get achievementPerfectedTitle => 'perfezionato';
+
+  @override
+  String get achievementPerfectedDescription =>
+      'porta un grafo risolto al suo punteggio massimo possibile rigiocando';
+
+  @override
+  String get unableLoadProfile =>
+      'impossibile caricare il tuo profilo in questo momento';
+
+  @override
+  String get unableShareRightNow => 'impossibile condividere in questo momento';
+
+  @override
+  String get restart => 'ricomincia';
+
+  @override
+  String get tutorialNodeInstruction => 'questo è un nodo trascinalo dove vuoi';
+
+  @override
+  String get tutorialEdgesInstruction =>
+      'i nodi sono collegati da archi gli archi rimangono collegati';
+
+  @override
+  String get tutorialSolvedInstruction =>
+      'un grafo è risolto quando nessun arco si incrocia questo è già risolto';
 }

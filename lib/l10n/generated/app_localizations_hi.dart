@@ -425,4 +425,173 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get reportReasonOther => 'अन्य';
+
+  @override
+  String nodesCount(int count) {
+    return '$count नोड';
+  }
+
+  @override
+  String movesCount(int count) {
+    return '$count चालें';
+  }
+
+  @override
+  String scoreValue(int score) {
+    return 'स्कोर $score';
+  }
+
+  @override
+  String graphUnsolvedSemantics(int level) {
+    return 'ग्राफ $level, अनसुलझा, खेलें';
+  }
+
+  @override
+  String graphSolvedSemantics(int level, int moves, int score) {
+    return 'ग्राफ $level, $moves चालों में हल किया गया, स्कोर $score, फिर से खेलें';
+  }
+
+  @override
+  String graphBlockedSemantics(int level) {
+    return 'ग्राफ $level, लॉक है';
+  }
+
+  @override
+  String graphReplayInProgressSemantics(int level) {
+    return 'ग्राफ $level, दोबारा खेलना जारी है, आगे बढ़ें';
+  }
+
+  @override
+  String get replay => 'फिर से खेलें';
+
+  @override
+  String replayGraphQuestion(int level) {
+    return 'ग्राफ $level फिर से खेलें?';
+  }
+
+  @override
+  String get replayWarning =>
+      'इस ग्राफ को दोबारा हल करने तक आपका स्कोर 0 हो जाएगा। इसे अनसुलझा छोड़ने पर आगे के ग्राफ उपलब्ध नहीं होंगे।';
+
+  @override
+  String get resetAndReplay => 'रीसेट करके फिर खेलें';
+
+  @override
+  String get unableSaveProgress => 'अभी प्रगति सहेजी नहीं जा सकी';
+
+  @override
+  String get saveYourProgress => 'अपनी प्रगति सहेजें';
+
+  @override
+  String get saveProgressDescription =>
+      'आज के ग्राफ और उपलब्धियाँ सभी डिवाइस पर बनाए रखने के लिए मुफ़्त साइन अप करें।';
+
+  @override
+  String get achievements => 'उपलब्धियाँ';
+
+  @override
+  String get achievementFirstStepTitle => 'पहला कदम';
+
+  @override
+  String get achievementFirstStepDescription => 'अपना पहला ग्राफ हल करें';
+
+  @override
+  String get achievementPracticeTitle => 'अभ्यास';
+
+  @override
+  String get achievementPracticeDescription => '8 ग्राफ हल करें';
+
+  @override
+  String get achievementPersistenceTitle => 'दृढ़ता';
+
+  @override
+  String get achievementPersistenceDescription => '16 ग्राफ हल करें';
+
+  @override
+  String get achievementDedicationTitle => 'समर्पण';
+
+  @override
+  String get achievementDedicationDescription => '32 ग्राफ हल करें';
+
+  @override
+  String get achievementPlanarityTitle => 'समतलीयता';
+
+  @override
+  String get achievementPlanarityDescription => '64 ग्राफ हल करें';
+
+  @override
+  String get achievementEfficientTitle => 'कुशल';
+
+  @override
+  String get achievementEfficientDescription =>
+      'कम से कम 2 चालें बचाकर एक ग्राफ हल करें';
+
+  @override
+  String get achievementPreciseTitle => 'सटीक';
+
+  @override
+  String get achievementPreciseDescription =>
+      'कम से कम 4 चालें बचाकर एक ग्राफ हल करें';
+
+  @override
+  String get achievementOptimalTitle => 'सर्वोत्तम';
+
+  @override
+  String get achievementOptimalDescription =>
+      'अधिकतम संभव चालें बचाकर एक ग्राफ हल करें';
+
+  @override
+  String get achievementCloseCallTitle => 'बाल-बाल';
+
+  @override
+  String get achievementCloseCallDescription =>
+      'कोई चाल बचाए बिना एक ग्राफ हल करें';
+
+  @override
+  String get achievementSecondAttemptTitle => 'दूसरा प्रयास';
+
+  @override
+  String get achievementSecondAttemptDescription =>
+      'हल किया हुआ ग्राफ फिर से खेलें';
+
+  @override
+  String get achievementImprovementTitle => 'सुधार';
+
+  @override
+  String get achievementImprovementDescription =>
+      'फिर से खेलकर अपना पिछला स्कोर पार करें';
+
+  @override
+  String get achievementRedemptionTitle => 'वापसी';
+
+  @override
+  String get achievementRedemptionDescription =>
+      'जिस ग्राफ पर पहले 0 स्कोर मिला था, उसे फिर से खेलकर शून्य से अधिक स्कोर पाएँ';
+
+  @override
+  String get achievementPerfectedTitle => 'पूर्णता';
+
+  @override
+  String get achievementPerfectedDescription =>
+      'हल किए हुए ग्राफ को फिर से खेलकर उसके अधिकतम संभव स्कोर तक सुधारें';
+
+  @override
+  String get unableLoadProfile => 'अभी आपकी प्रोफ़ाइल लोड नहीं की जा सकी';
+
+  @override
+  String get unableShareRightNow => 'अभी साझा नहीं किया जा सका';
+
+  @override
+  String get restart => 'फिर से शुरू करें';
+
+  @override
+  String get tutorialNodeInstruction => 'यह एक नोड है इसे कहीं भी खींचें';
+
+  @override
+  String get tutorialEdgesInstruction =>
+      'नोड किनारों से जुड़े होते हैं किनारे नोड से जुड़े रहते हैं';
+
+  @override
+  String get tutorialSolvedInstruction =>
+      'जब किनारे एक-दूसरे को नहीं काटते तब ग्राफ हल हो जाता है यह ग्राफ पहले से हल है';
 }

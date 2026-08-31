@@ -182,5 +182,114 @@
   "reportReasonAbuse": "lạm dụng hoặc quấy rối",
   "reportReasonImpersonation": "mạo danh",
   "reportReasonSpam": "spam hoặc lừa đảo",
-  "reportReasonOther": "khác"
+  "reportReasonOther": "khác",
+  "nodesCount": "{count} nút",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "{count} lượt",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "điểm {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "đồ thị {level}, chưa giải, chơi",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "đồ thị {level}, đã giải trong {moves} lượt, điểm {score}, chơi lại",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "đồ thị {level}, bị khóa",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "đồ thị {level}, đang chơi lại, tiếp tục",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "chơi lại",
+  "replayGraphQuestion": "chơi lại đồ thị {level}?",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "điểm của bạn sẽ được đặt lại về 0 cho đến khi bạn giải lại đồ thị này. các đồ thị tiếp theo sẽ không khả dụng nếu bạn bỏ dở.",
+  "resetAndReplay": "đặt lại và chơi lại",
+  "unableSaveProgress": "hiện không thể lưu tiến trình",
+  "saveYourProgress": "lưu tiến trình của bạn",
+  "saveProgressDescription": "đăng ký miễn phí để giữ đồ thị hôm nay và thành tích của bạn trên mọi thiết bị.",
+  "achievements": "thành tích",
+  "achievementFirstStepTitle": "bước đầu tiên",
+  "achievementFirstStepDescription": "giải đồ thị đầu tiên của bạn",
+  "achievementPracticeTitle": "luyện tập",
+  "achievementPracticeDescription": "giải 8 đồ thị",
+  "achievementPersistenceTitle": "kiên trì",
+  "achievementPersistenceDescription": "giải 16 đồ thị",
+  "achievementDedicationTitle": "tận tâm",
+  "achievementDedicationDescription": "giải 32 đồ thị",
+  "achievementPlanarityTitle": "tính phẳng",
+  "achievementPlanarityDescription": "giải 64 đồ thị",
+  "achievementEfficientTitle": "hiệu quả",
+  "achievementEfficientDescription": "giải một đồ thị khi còn ít nhất 2 lượt",
+  "achievementPreciseTitle": "chính xác",
+  "achievementPreciseDescription": "giải một đồ thị khi còn ít nhất 4 lượt",
+  "achievementOptimalTitle": "tối ưu",
+  "achievementOptimalDescription": "giải một đồ thị với số lượt còn lại tối đa có thể",
+  "achievementCloseCallTitle": "sát nút",
+  "achievementCloseCallDescription": "giải một đồ thị khi không còn lượt nào",
+  "achievementSecondAttemptTitle": "lần thử thứ hai",
+  "achievementSecondAttemptDescription": "chơi lại một đồ thị đã giải",
+  "achievementImprovementTitle": "tiến bộ",
+  "achievementImprovementDescription": "vượt qua điểm số trước đó khi chơi lại",
+  "achievementRedemptionTitle": "gỡ gạc",
+  "achievementRedemptionDescription": "đạt điểm lớn hơn 0 khi chơi lại đồ thị từng đạt 0 điểm",
+  "achievementPerfectedTitle": "hoàn thiện",
+  "achievementPerfectedDescription": "chơi lại và nâng một đồ thị đã giải lên điểm số tối đa có thể",
+  "unableLoadProfile": "hiện không thể tải hồ sơ của bạn",
+  "unableShareRightNow": "hiện không thể chia sẻ",
+  "restart": "bắt đầu lại",
+  "tutorialNodeInstruction": "đây là một đỉnh hãy kéo nó đến bất kỳ đâu",
+  "tutorialEdgesInstruction": "các đỉnh được nối bằng cạnh các cạnh luôn gắn với các đỉnh",
+  "tutorialSolvedInstruction": "đồ thị được giải khi không có cạnh nào giao nhau đồ thị này đã được giải"
 }

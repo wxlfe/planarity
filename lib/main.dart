@@ -467,8 +467,6 @@ class PlanarityHomePage extends StatefulWidget {
   State<PlanarityHomePage> createState() => _PlanarityHomePageState();
 }
 
-enum DailyPlayStatus { ready, inProgress, locked }
-
 class _PlanarityHomePageState extends State<PlanarityHomePage>
     with WidgetsBindingObserver {
   static final Uri _portfolioUri = Uri.parse(
@@ -486,10 +484,20 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
   static const _localGuestUserDocumentKey = 'local_guest_user_document';
 
   bool _isLoaded = false;
-  DailyPlayStatus _status = DailyPlayStatus.ready;
   int _currentLevel = _tutorialStartLevel;
   int _score = 0;
   bool _tutorialCompleted = false;
+  List<DailyLevelResult> _dailyLevelResults = const [];
+  int _dailyScoreCarry = 0;
+  int _blockedLevel = 0;
+  int _activeReplayLevel = 0;
+  int _replayPreviousScore = 0;
+  int _replayRestoreBlockedLevel = 0;
+  int _achievementSolveCount = 0;
+  Set<String> _unlockedAchievementIds = <String>{};
+  String? _signUpPromptShownAt;
+  String? _signUpPromptEligibleDay;
+  bool _accountMigrationInProgress = false;
   String? _previousLastPlayed;
   String? _appStoreReviewPromptedAt;
   String? _lastRankingSummaryShownFor;
@@ -593,6 +601,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
   }
 
   Future<void> _handleAuthStateChange(User? user) async {
+    if (_accountMigrationInProgress) return;
     await _reconcileUserState(user);
   }
 
@@ -604,7 +613,35 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     _activeUserId = nextUserId;
     await _analytics?.setUserId(id: nextUserId);
 
-    final profileData = await _loadActiveUserDocument(user);
+    Map<String, dynamic>? profileData;
+    try {
+      profileData = await _loadActiveUserDocument(user);
+    } catch (error, stackTrace) {
+      debugPrint('Unable to load active profile: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      if (mounted) {
+        setState(() {
+          _currentUser = user;
+          _isLoaded = true;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  sanitizedServiceErrorMessage(
+                    error,
+                    genericMessage: _l10n.unableLoadProfile,
+                    networkMessage: _l10n.networkErrorCheckConnection,
+                  ),
+                ),
+              ),
+            );
+          }
+        });
+      }
+      return;
+    }
     final signedInChanged = (_currentUser != null) != (user != null);
     final lastPlayed = _profileLastPlayed(profileData);
     final playedToday = lastPlayed == _todayKey();
@@ -616,6 +653,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       tutorialCompleted: tutorialCompleted,
     );
     final isLocked = _profileLocked(profileData);
+    final dailyLevelResults = _profileDailyLevelResults(
+      profileData,
+      playedToday: playedToday,
+    );
     final hiddenDisplayNameUserIds = _profileHiddenDisplayNameUserIds(
       profileData,
     );
@@ -629,12 +670,60 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
 
     setState(() {
       _currentUser = user;
-      _status = playedToday
-          ? (isLocked ? DailyPlayStatus.locked : DailyPlayStatus.inProgress)
-          : DailyPlayStatus.ready;
       _currentLevel = syncedLevel;
       _score = syncedScore;
       _tutorialCompleted = tutorialCompleted;
+      _dailyLevelResults = dailyLevelResults;
+      final storedCarry = _profileNonNegativeInt(
+        profileData,
+        'dailyScoreCarry',
+      );
+      _dailyScoreCarry = playedToday
+          ? (storedCarry > 0
+                ? storedCarry
+                : (dailyLevelResults.isEmpty ? syncedScore : 0))
+          : 0;
+      final storedBlockedLevel = _profileNonNegativeInt(
+        profileData,
+        'blockedLevel',
+      );
+      _blockedLevel = playedToday
+          ? (storedBlockedLevel > 0
+                ? storedBlockedLevel
+                : (isLocked ? syncedLevel : 0))
+          : 0;
+      _activeReplayLevel = playedToday
+          ? _profileNonNegativeInt(profileData, 'activeReplayLevel')
+          : 0;
+      _replayPreviousScore = playedToday
+          ? _profileNonNegativeInt(profileData, 'replayPreviousScore')
+          : 0;
+      _replayRestoreBlockedLevel = playedToday
+          ? _profileNonNegativeInt(profileData, 'replayRestoreBlockedLevel')
+          : 0;
+      _achievementSolveCount = _profileNonNegativeInt(
+        profileData,
+        'achievementSolveCount',
+      );
+      _unlockedAchievementIds = _profileStringSet(
+        profileData,
+        'unlockedAchievements',
+      );
+      _signUpPromptShownAt = _profileOptionalString(
+        profileData,
+        'signUpPromptShownAt',
+      );
+      final storedEligibleDay = _profileOptionalString(
+        profileData,
+        'signUpPromptEligibleDay',
+      );
+      _signUpPromptEligibleDay =
+          user == null &&
+              _signUpPromptShownAt == null &&
+              (storedEligibleDay == _todayKey() ||
+                  lastPlayed == previousDayKey(_todayKey()))
+          ? _todayKey()
+          : storedEligibleDay;
       _previousLastPlayed = lastPlayed;
       _appStoreReviewPromptedAt = _profileAppStoreReviewPromptedAt(profileData);
       _lastRankingSummaryShownFor = _profileLastRankingSummaryShownFor(
@@ -655,6 +744,34 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     });
     _refreshLeaderboard();
     unawaited(_refreshPreviousDayWinnerBadges(user, profileData));
+    final hasStaleDailyState =
+        !playedToday &&
+        (isLocked ||
+            syncedScore != 0 ||
+            syncedLevel != _startLevelForTutorial(tutorialCompleted) ||
+            _profileNonNegativeInt(profileData, 'blockedLevel') != 0 ||
+            _profileNonNegativeInt(profileData, 'activeReplayLevel') != 0 ||
+            _profileOptionalString(profileData, 'dailyResultsDay') != null);
+    if (hasStaleDailyState) {
+      try {
+        await _updateCurrentUserProgressFields(
+          user: user,
+          score: 0,
+          currentLevel: _startLevelForTutorial(tutorialCompleted),
+          locked: false,
+          dailyResultsDay: '',
+          dailyLevelResults: const <DailyLevelResult>[],
+          blockedLevel: 0,
+          activeReplayLevel: 0,
+          replayPreviousScore: 0,
+          replayRestoreBlockedLevel: 0,
+          dailyScoreCarry: 0,
+        );
+      } catch (error, stackTrace) {
+        debugPrint('Unable to reset stale daily progress: $error');
+        debugPrintStack(stackTrace: stackTrace);
+      }
+    }
     if (user == null) {
       _maybePromptToAuthenticateForFriendInvite();
       return;
@@ -664,18 +781,6 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     unawaited(
       _maybeShowRankingSummaryModal(user: user, profileData: profileData),
     );
-
-    if (!playedToday &&
-        (isLocked ||
-            syncedScore != 0 ||
-            syncedLevel != _startLevelForTutorial(tutorialCompleted))) {
-      await _updateCurrentUserProgressFields(
-        user: user,
-        score: 0,
-        currentLevel: _startLevelForTutorial(tutorialCompleted),
-        locked: false,
-      );
-    }
   }
 
   Map<String, dynamic> _defaultUserDocument({String? displayName}) {
@@ -691,6 +796,17 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       'lifetimeScore': 0,
       'score': 0,
       'tutorialCompleted': false,
+      'dailyResultsDay': '',
+      'dailyLevelResults': <Map<String, int>>[],
+      'dailyScoreCarry': 0,
+      'blockedLevel': 0,
+      'activeReplayLevel': 0,
+      'replayPreviousScore': 0,
+      'replayRestoreBlockedLevel': 0,
+      'achievementSolveCount': 0,
+      'unlockedAchievements': <String>[],
+      'signUpPromptShownAt': '',
+      'signUpPromptEligibleDay': '',
     };
   }
 
@@ -759,6 +875,17 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     bool? tutorialCompleted,
     String? appStoreReviewPromptedAt,
     String? lastRankingSummaryShownFor,
+    String? dailyResultsDay,
+    List<DailyLevelResult>? dailyLevelResults,
+    int? dailyScoreCarry,
+    int? blockedLevel,
+    int? activeReplayLevel,
+    int? replayPreviousScore,
+    int? replayRestoreBlockedLevel,
+    int? achievementSolveCount,
+    Set<String>? unlockedAchievementIds,
+    String? signUpPromptShownAt,
+    String? signUpPromptEligibleDay,
   }) async {
     if (user != null) {
       await _updateUserProgressFields(
@@ -771,6 +898,17 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         tutorialCompleted: tutorialCompleted,
         appStoreReviewPromptedAt: appStoreReviewPromptedAt,
         lastRankingSummaryShownFor: lastRankingSummaryShownFor,
+        dailyResultsDay: dailyResultsDay,
+        dailyLevelResults: dailyLevelResults,
+        dailyScoreCarry: dailyScoreCarry,
+        blockedLevel: blockedLevel,
+        activeReplayLevel: activeReplayLevel,
+        replayPreviousScore: replayPreviousScore,
+        replayRestoreBlockedLevel: replayRestoreBlockedLevel,
+        achievementSolveCount: achievementSolveCount,
+        unlockedAchievementIds: unlockedAchievementIds,
+        signUpPromptShownAt: signUpPromptShownAt,
+        signUpPromptEligibleDay: signUpPromptEligibleDay,
       );
       return;
     }
@@ -801,6 +939,42 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     if (lastRankingSummaryShownFor != null) {
       localDocument['lastRankingSummaryShownFor'] = lastRankingSummaryShownFor;
     }
+    if (dailyResultsDay != null) {
+      localDocument['dailyResultsDay'] = dailyResultsDay;
+    }
+    if (dailyLevelResults != null) {
+      localDocument['dailyLevelResults'] = dailyLevelResults
+          .map((result) => result.toJson())
+          .toList();
+    }
+    if (dailyScoreCarry != null) {
+      localDocument['dailyScoreCarry'] = dailyScoreCarry;
+    }
+    if (blockedLevel != null) {
+      localDocument['blockedLevel'] = blockedLevel;
+    }
+    if (activeReplayLevel != null) {
+      localDocument['activeReplayLevel'] = activeReplayLevel;
+    }
+    if (replayPreviousScore != null) {
+      localDocument['replayPreviousScore'] = replayPreviousScore;
+    }
+    if (replayRestoreBlockedLevel != null) {
+      localDocument['replayRestoreBlockedLevel'] = replayRestoreBlockedLevel;
+    }
+    if (achievementSolveCount != null) {
+      localDocument['achievementSolveCount'] = achievementSolveCount;
+    }
+    if (unlockedAchievementIds != null) {
+      localDocument['unlockedAchievements'] = unlockedAchievementIds.toList()
+        ..sort();
+    }
+    if (signUpPromptShownAt != null) {
+      localDocument['signUpPromptShownAt'] = signUpPromptShownAt;
+    }
+    if (signUpPromptEligibleDay != null) {
+      localDocument['signUpPromptEligibleDay'] = signUpPromptEligibleDay;
+    }
     await _saveLocalGuestUserDocument(localDocument);
   }
 
@@ -814,6 +988,17 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     bool? tutorialCompleted,
     String? appStoreReviewPromptedAt,
     String? lastRankingSummaryShownFor,
+    String? dailyResultsDay,
+    List<DailyLevelResult>? dailyLevelResults,
+    int? dailyScoreCarry,
+    int? blockedLevel,
+    int? activeReplayLevel,
+    int? replayPreviousScore,
+    int? replayRestoreBlockedLevel,
+    int? achievementSolveCount,
+    Set<String>? unlockedAchievementIds,
+    String? signUpPromptShownAt,
+    String? signUpPromptEligibleDay,
   }) async {
     final data = <String, Object>{};
     if (score != null) {
@@ -839,6 +1024,41 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     }
     if (lastRankingSummaryShownFor != null) {
       data['lastRankingSummaryShownFor'] = lastRankingSummaryShownFor;
+    }
+    if (dailyResultsDay != null) {
+      data['dailyResultsDay'] = dailyResultsDay;
+    }
+    if (dailyLevelResults != null) {
+      data['dailyLevelResults'] = dailyLevelResults
+          .map((result) => result.toJson())
+          .toList();
+    }
+    if (dailyScoreCarry != null) {
+      data['dailyScoreCarry'] = dailyScoreCarry;
+    }
+    if (blockedLevel != null) {
+      data['blockedLevel'] = blockedLevel;
+    }
+    if (activeReplayLevel != null) {
+      data['activeReplayLevel'] = activeReplayLevel;
+    }
+    if (replayPreviousScore != null) {
+      data['replayPreviousScore'] = replayPreviousScore;
+    }
+    if (replayRestoreBlockedLevel != null) {
+      data['replayRestoreBlockedLevel'] = replayRestoreBlockedLevel;
+    }
+    if (achievementSolveCount != null) {
+      data['achievementSolveCount'] = achievementSolveCount;
+    }
+    if (unlockedAchievementIds != null) {
+      data['unlockedAchievements'] = unlockedAchievementIds.toList()..sort();
+    }
+    if (signUpPromptShownAt != null) {
+      data['signUpPromptShownAt'] = signUpPromptShownAt;
+    }
+    if (signUpPromptEligibleDay != null) {
+      data['signUpPromptEligibleDay'] = signUpPromptEligibleDay;
     }
     if (data.isEmpty) {
       return;
@@ -915,26 +1135,43 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     if (!mounted) {
       return;
     }
-    if (_status == DailyPlayStatus.locked) {
-      setState(() {});
-      return;
-    }
-
     final today = _todayKey();
-    final startLevel = _currentLevel;
+    final startLevel = _blockedLevel > 0 ? _blockedLevel : _currentLevel;
     final startScore = _score;
+    final isReplay = _activeReplayLevel == startLevel;
+    final shouldOfferSignUp = shouldPromptForSignUp(
+      signedIn: _currentUser != null,
+      previousLastPlayed: _signUpPromptEligibleDay == today
+          ? previousDayKey(today)
+          : _previousLastPlayed,
+      todayKey: today,
+      solvedLevelsToday: _dailyLevelResults.length,
+      signUpPromptShownAt: _signUpPromptShownAt,
+    );
     setState(() {
-      _status = DailyPlayStatus.inProgress;
-      _currentLevel = startLevel;
       _score = startScore;
     });
-    await _updateCurrentUserProgressFields(
-      user: _currentUser,
-      score: _score,
-      currentLevel: _currentLevel,
-      lastPlayed: today,
-      locked: false,
-    );
+    try {
+      await _updateCurrentUserProgressFields(
+        user: _currentUser,
+        score: _score,
+        currentLevel: _currentLevel,
+        lastPlayed: today,
+        locked: false,
+        dailyResultsDay: today,
+        dailyScoreCarry: _dailyScoreCarry,
+        signUpPromptEligibleDay: _signUpPromptEligibleDay ?? '',
+      );
+    } catch (error, stackTrace) {
+      debugPrint('Unable to start challenge: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(_l10n.unableSaveProgress)));
+      }
+      return;
+    }
     final currentUser = _currentUser;
     if (currentUser != null) {
       await _writeDailyScoreSnapshotBestEffort(
@@ -955,6 +1192,9 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           startLevel: startLevel,
           startScore: startScore,
           tutorialCompleted: _tutorialCompleted,
+          isReplay: isReplay,
+          replayPreviousScore: isReplay ? _replayPreviousScore : 0,
+          showSignUpPrompt: shouldOfferSignUp,
           onLevelProgressed: _handleLevelProgressed,
         ),
       ),
@@ -967,27 +1207,39 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       return;
     }
 
-    final previousScore = _score;
     setState(() {
       _score = result.score;
       if (result.locked) {
-        _status = DailyPlayStatus.locked;
-        _currentLevel = result.level;
+        if (!result.isReplay) _currentLevel = result.level;
+        _blockedLevel = result.level;
       } else {
-        _status = DailyPlayStatus.inProgress;
-        _currentLevel = result.level;
+        if (!result.isReplay) _currentLevel = result.level;
       }
       _tutorialCompleted = result.tutorialCompleted;
     });
-    await _updateCurrentUserProgressFields(
-      user: _currentUser,
-      score: _score,
-      currentLevel: result.level,
-      lastPlayed: result.dayKey,
-      locked: result.locked,
-      lifetimeScoreIncrement: max(0, result.score - previousScore),
-      tutorialCompleted: result.tutorialCompleted,
-    );
+    try {
+      await _updateCurrentUserProgressFields(
+        user: _currentUser,
+        score: _score,
+        currentLevel: _currentLevel,
+        lastPlayed: result.dayKey,
+        locked: result.locked,
+        tutorialCompleted: result.tutorialCompleted,
+        blockedLevel: _blockedLevel,
+        activeReplayLevel: _activeReplayLevel,
+        replayPreviousScore: _replayPreviousScore,
+        replayRestoreBlockedLevel: _replayRestoreBlockedLevel,
+        dailyScoreCarry: _dailyScoreCarry,
+      );
+    } catch (error, stackTrace) {
+      debugPrint('Unable to save game result: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(_l10n.unableSaveProgress)));
+      }
+    }
     final resultUser = _currentUser;
     if (resultUser != null) {
       await _writeDailyScoreSnapshotBestEffort(
@@ -999,41 +1251,106 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     }
     await _logPostScoreEvent(score: result.score, level: result.level);
     _refreshLeaderboard();
+    if (result.requestSignUp && mounted) {
+      await _showAuthModal(isSignIn: false);
+    }
   }
 
   Future<void> _handleLevelProgressed(SolvedLevelProgress progress) async {
-    final previousScore = _score;
-    if (mounted) {
-      setState(() {
-        _score = progress.score;
-        _currentLevel = progress.nextLevel;
-        _status = progress.locked
-            ? DailyPlayStatus.locked
-            : DailyPlayStatus.inProgress;
-        _tutorialCompleted = progress.tutorialCompleted;
-      });
-    } else {
-      _score = progress.score;
-      _currentLevel = progress.nextLevel;
-      _tutorialCompleted = progress.tutorialCompleted;
-    }
-
+    final results = <int, DailyLevelResult>{
+      for (final result in _dailyLevelResults) result.level: result,
+    };
+    results[progress.solvedLevel] = DailyLevelResult(
+      level: progress.solvedLevel,
+      movesUsed: progress.movesUsed,
+      score: progress.levelScore,
+    );
+    final nextResults = results.values.toList()
+      ..sort((a, b) => a.level.compareTo(b.level));
+    final nextScore = dailyScoreFor(nextResults, carry: _dailyScoreCarry);
+    final nextCurrentLevel = progress.isReplay
+        ? _currentLevel
+        : max(_currentLevel, progress.nextLevel);
+    final nextSolveCount = _achievementSolveCount + 1;
+    final nextAchievements = <String>{
+      ..._unlockedAchievementIds,
+      ...achievementIdsForSolve(
+        solveCount: nextSolveCount,
+        level: progress.solvedLevel,
+        movesUsed: progress.movesUsed,
+        isReplay: progress.isReplay,
+        previousScore: progress.previousScore,
+      ),
+    };
+    final nextBlockedLevel = blockedLevelAfterSolve(
+      solvedLevel: progress.solvedLevel,
+      blockedLevel: _blockedLevel,
+      isReplay: progress.isReplay,
+      replayRestoreBlockedLevel: _replayRestoreBlockedLevel,
+    );
+    final promptShownAt = progress.showSignUpPrompt
+        ? progress.dayKey
+        : _signUpPromptShownAt;
     await _updateCurrentUserProgressFields(
       user: _currentUser,
-      score: progress.score,
-      currentLevel: progress.nextLevel,
+      score: nextScore,
+      currentLevel: nextCurrentLevel,
       lastPlayed: progress.dayKey,
-      locked: progress.locked,
-      lifetimeScoreIncrement: max(0, progress.score - previousScore),
+      locked: false,
+      lifetimeScoreIncrement: lifetimeScoreIncrementForSolve(
+        levelScore: progress.levelScore,
+        isReplay: progress.isReplay,
+        previousScore: progress.previousScore,
+      ),
       tutorialCompleted: progress.tutorialCompleted,
+      dailyResultsDay: progress.dayKey,
+      dailyLevelResults: nextResults,
+      dailyScoreCarry: _dailyScoreCarry,
+      blockedLevel: nextBlockedLevel,
+      activeReplayLevel: 0,
+      replayPreviousScore: 0,
+      replayRestoreBlockedLevel: 0,
+      achievementSolveCount: nextSolveCount,
+      unlockedAchievementIds: nextAchievements,
+      signUpPromptShownAt: promptShownAt,
+      signUpPromptEligibleDay: '',
     );
+    if (mounted) {
+      setState(() {
+        _score = nextScore;
+        _currentLevel = nextCurrentLevel;
+        _tutorialCompleted = progress.tutorialCompleted;
+        _dailyLevelResults = nextResults;
+        _blockedLevel = nextBlockedLevel;
+        _activeReplayLevel = 0;
+        _replayPreviousScore = 0;
+        _replayRestoreBlockedLevel = 0;
+        _achievementSolveCount = nextSolveCount;
+        _unlockedAchievementIds = nextAchievements;
+        _signUpPromptShownAt = promptShownAt;
+        _signUpPromptEligibleDay = null;
+      });
+    } else {
+      _score = nextScore;
+      _currentLevel = nextCurrentLevel;
+      _tutorialCompleted = progress.tutorialCompleted;
+      _dailyLevelResults = nextResults;
+      _blockedLevel = nextBlockedLevel;
+      _activeReplayLevel = 0;
+      _replayPreviousScore = 0;
+      _replayRestoreBlockedLevel = 0;
+      _achievementSolveCount = nextSolveCount;
+      _unlockedAchievementIds = nextAchievements;
+      _signUpPromptShownAt = promptShownAt;
+      _signUpPromptEligibleDay = null;
+    }
     final currentUser = _currentUser;
     if (currentUser != null) {
       await _writeDailyScoreSnapshotBestEffort(
         user: currentUser,
         dayKey: progress.dayKey,
-        score: progress.score,
-        locked: progress.locked,
+        score: nextScore,
+        locked: false,
       );
     }
     await _handleLevelSolved(progress.solvedLevel);
@@ -1285,6 +1602,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       return _l10n.authConfigurationMissing;
     }
 
+    final guestDocument = isSignIn ? null : await _loadLocalGuestUserDocument();
+    _accountMigrationInProgress = !isSignIn;
     try {
       if (isSignIn) {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -1304,7 +1623,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         }
 
         try {
-          await _ensureUserDocument(user);
+          await _createUserDocumentWithGuestProgress(user, guestDocument!);
         } on FirebaseException catch (error) {
           await user.delete().catchError((_) {});
           return _firestoreErrorMessage(error);
@@ -1331,6 +1650,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       debugPrint('Unexpected auth failure: $error');
       debugPrintStack(stackTrace: stackTrace);
       return _l10n.unableAuthenticateRightNow;
+    } finally {
+      if (!isSignIn) _accountMigrationInProgress = false;
     }
   }
 
@@ -1384,6 +1705,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       );
     }
 
+    final guestDocument = await _loadLocalGuestUserDocument();
+    _accountMigrationInProgress = true;
     try {
       final credential = await _signInWithGoogle();
       final user = credential.user;
@@ -1394,12 +1717,13 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       }
 
       if (credential.additionalUserInfo?.isNewUser ?? false) {
-        await _ensureUserDocument(user);
+        await _createUserDocumentWithGuestProgress(user, guestDocument);
       }
       if (credential.additionalUserInfo?.isNewUser ?? false) {
         await _logSignUpEvent('google');
       } else {
         await _logLoginEvent('google');
+        await _reconcileUserState(user, force: true);
       }
 
       return _AuthSubmissionResult(
@@ -1437,6 +1761,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       debugPrint('Unexpected Google auth failure: $error');
       debugPrintStack(stackTrace: stackTrace);
       return _AuthSubmissionResult(errorText: _l10n.unableAuthenticateRightNow);
+    } finally {
+      _accountMigrationInProgress = false;
     }
   }
 
@@ -1450,6 +1776,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       );
     }
 
+    final guestDocument = await _loadLocalGuestUserDocument();
+    _accountMigrationInProgress = true;
     try {
       final credential = await _signInWithApple();
       final user = credential.user;
@@ -1460,12 +1788,13 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       }
 
       if (credential.additionalUserInfo?.isNewUser ?? false) {
-        await _ensureUserDocument(user);
+        await _createUserDocumentWithGuestProgress(user, guestDocument);
       }
       if (credential.additionalUserInfo?.isNewUser ?? false) {
         await _logSignUpEvent('apple');
       } else {
         await _logLoginEvent('apple');
+        await _reconcileUserState(user, force: true);
       }
 
       return _AuthSubmissionResult(
@@ -1509,6 +1838,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       debugPrint('Unexpected Apple auth failure: $error');
       debugPrintStack(stackTrace: stackTrace);
       return _AuthSubmissionResult(errorText: _l10n.unableAuthenticateRightNow);
+    } finally {
+      _accountMigrationInProgress = false;
     }
   }
 
@@ -1568,14 +1899,48 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     return FirebaseAuth.instance.signInWithCredential(credential);
   }
 
-  Future<void> _ensureUserDocument(User user) async {
+  Future<void> _ensureUserDocument(
+    User user, {
+    Map<String, dynamic>? document,
+  }) async {
     return FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
         .set(
-          _defaultUserDocument(displayName: _defaultDisplayName(user)),
+          document ??
+              _defaultUserDocument(displayName: _defaultDisplayName(user)),
           SetOptions(merge: true),
         );
+  }
+
+  Future<void> _createUserDocumentWithGuestProgress(
+    User user,
+    Map<String, dynamic> guestDocument,
+  ) async {
+    final document = mergeGuestProgressForNewAccount(
+      defaultDocument: _defaultUserDocument(
+        displayName: _defaultDisplayName(user),
+      ),
+      guestDocument: guestDocument,
+    );
+    try {
+      await _ensureUserDocument(user, document: document);
+    } catch (_) {
+      await user.delete().catchError((_) {});
+      rethrow;
+    }
+    try {
+      await _saveLocalGuestUserDocument(_defaultUserDocument());
+    } catch (error, stackTrace) {
+      debugPrint('Unable to clear migrated guest profile: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+    try {
+      await _reconcileUserState(user, force: true);
+    } catch (error, stackTrace) {
+      debugPrint('Unable to refresh migrated profile: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
   }
 
   String _defaultDisplayName(User user) {
@@ -1621,9 +1986,6 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       case GoogleSignInExceptionCode.clientConfigurationError:
         return _l10n.googleSignInNotConfigured;
       default:
-        if (error.description != null && error.description!.isNotEmpty) {
-          return error.description;
-        }
         return _l10n.unableAuthenticateRightNow;
     }
   }
@@ -1633,9 +1995,6 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     if (message != null &&
         message.contains('missing support for the following URL schemes')) {
       return _l10n.googleSignInNotConfiguredIos;
-    }
-    if (message != null && message.isNotEmpty) {
-      return message;
     }
     return _l10n.unableAuthenticateRightNow;
   }
@@ -1648,18 +2007,11 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       case AuthorizationErrorCode.notInteractive:
         return _l10n.appleSignInUnavailableRightNow;
       default:
-        if (error.message.isNotEmpty) {
-          return error.message;
-        }
         return _l10n.unableAuthenticateRightNow;
     }
   }
 
   String _applePlatformAuthErrorMessage(PlatformException error) {
-    final message = error.message;
-    if (message != null && message.isNotEmpty) {
-      return message;
-    }
     return _l10n.unableAuthenticateRightNow;
   }
 
@@ -1728,6 +2080,10 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
           initialDisplayName: initialDisplayName,
           initialFriendIds: initialFriendIds,
           lifetimeScore: lifetimeScore,
+          unlockedAchievementIds: _profileStringSet(
+            profileData,
+            'unlockedAchievements',
+          ),
           loadFriends: (friendIds) => _loadFriendProfiles(user.uid, friendIds),
           removeFriend: (friendUid) =>
               _removeFriendPair(userId: user.uid, friendUid: friendUid),
@@ -2019,6 +2375,50 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       return locked;
     }
     return false;
+  }
+
+  int _profileNonNegativeInt(Map<String, dynamic>? profileData, String field) {
+    final value = profileData?[field];
+    return value is num ? max(0, value.toInt()) : 0;
+  }
+
+  String? _profileOptionalString(
+    Map<String, dynamic>? profileData,
+    String field,
+  ) {
+    final value = profileData?[field];
+    return value is String && value.isNotEmpty ? value : null;
+  }
+
+  Set<String> _profileStringSet(
+    Map<String, dynamic>? profileData,
+    String field,
+  ) {
+    final values = profileData?[field];
+    if (values is! List) return <String>{};
+    return values
+        .whereType<String>()
+        .where((value) => value.isNotEmpty)
+        .toSet();
+  }
+
+  List<DailyLevelResult> _profileDailyLevelResults(
+    Map<String, dynamic>? profileData, {
+    required bool playedToday,
+  }) {
+    if (!playedToday || profileData?['dailyResultsDay'] != _todayKey()) {
+      return const <DailyLevelResult>[];
+    }
+    final values = profileData?['dailyLevelResults'];
+    if (values is! List) return const <DailyLevelResult>[];
+    final byLevel = <int, DailyLevelResult>{};
+    for (final value in values) {
+      final result = DailyLevelResult.fromJson(value);
+      if (result != null) byLevel[result.level] = result;
+    }
+    final results = byLevel.values.toList()
+      ..sort((a, b) => a.level.compareTo(b.level));
+    return results;
   }
 
   List<String> _profileFriendIds(Map<String, dynamic>? profileData) {
@@ -2679,6 +3079,90 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     }
   }
 
+  Future<void> _confirmReplay(DailyLevelResult result) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        final theme = Theme.of(dialogContext);
+        final l10n = dialogContext.l10n;
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+            side: BorderSide(
+              color: theme.colorScheme.onSurface.withOpacity(0.35),
+            ),
+          ),
+          title: Text(l10n.replayGraphQuestion(result.level)),
+          content: Text(l10n.replayWarning),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(l10n.resetAndReplay),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirmed != true || !mounted) return;
+
+    final resetResults = _dailyLevelResults
+        .map(
+          (entry) => entry.level == result.level
+              ? DailyLevelResult(
+                  level: entry.level,
+                  movesUsed: entry.movesUsed,
+                  score: 0,
+                )
+              : entry,
+        )
+        .toList(growable: false);
+    final resetScore = dailyScoreFor(resetResults, carry: _dailyScoreCarry);
+    final replayRestoreBlockedLevel = _blockedLevel;
+    final nextAchievements = <String>{
+      ..._unlockedAchievementIds,
+      'second_attempt',
+    };
+    try {
+      await _updateCurrentUserProgressFields(
+        user: _currentUser,
+        score: resetScore,
+        locked: false,
+        dailyResultsDay: _todayKey(),
+        dailyLevelResults: resetResults,
+        dailyScoreCarry: _dailyScoreCarry,
+        blockedLevel: result.level,
+        activeReplayLevel: result.level,
+        replayPreviousScore: result.score,
+        replayRestoreBlockedLevel: replayRestoreBlockedLevel,
+        unlockedAchievementIds: nextAchievements,
+      );
+    } catch (error, stackTrace) {
+      debugPrint('Unable to start replay: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(_l10n.unableSaveProgress)));
+      }
+      return;
+    }
+    if (!mounted) return;
+    setState(() {
+      _dailyLevelResults = resetResults;
+      _score = resetScore;
+      _blockedLevel = result.level;
+      _activeReplayLevel = result.level;
+      _replayPreviousScore = result.score;
+      _replayRestoreBlockedLevel = replayRestoreBlockedLevel;
+      _unlockedAchievementIds = nextAchievements;
+    });
+    await _openChallenge();
+  }
+
   @override
   Widget build(BuildContext context) {
     return _buildHomeScaffold(context, _currentUser);
@@ -2689,13 +3173,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final isLocked = _status == DailyPlayStatus.locked;
-    final isWide = MediaQuery.of(context).size.width >= 900;
-    final buttonLabel = switch (_status) {
-      DailyPlayStatus.ready => _l10n.start,
-      DailyPlayStatus.inProgress => _l10n.continueLabel,
-      DailyPlayStatus.locked => _l10n.locked,
-    };
+    final mediaSize = MediaQuery.sizeOf(context);
+    final isWide = mediaSize.width >= 900 && mediaSize.height >= 700;
     final leaderboardKey = ValueKey(
       'leaderboard-${user?.uid ?? 'guest'}-$_leaderboardRefreshTick',
     );
@@ -2703,10 +3182,13 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         _selectedLeaderboardTab ??
         (user != null ? _LeaderboardTab.friends : _LeaderboardTab.global);
     final homeContent = _HomeHeroContent(
-      buttonLabel: buttonLabel,
       scoreLabel: '$_score',
-      isLocked: isLocked,
+      currentLevel: _currentLevel,
       onPlayPressed: _openChallenge,
+      dailyLevelResults: _dailyLevelResults,
+      blockedLevel: _blockedLevel,
+      activeReplayLevel: _activeReplayLevel,
+      onReplayPressed: _confirmReplay,
       showAppStoreDownloadButton: kIsWeb || debugShowAppStoreDownloadButton,
       onAppStoreTap: () async {
         await launchUrl(_appStoreUri, mode: LaunchMode.externalApplication);
@@ -2853,10 +3335,13 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
 
 class _HomeHeroContent extends StatelessWidget {
   const _HomeHeroContent({
-    required this.buttonLabel,
     required this.scoreLabel,
-    required this.isLocked,
+    required this.currentLevel,
     required this.onPlayPressed,
+    required this.dailyLevelResults,
+    required this.blockedLevel,
+    required this.activeReplayLevel,
+    required this.onReplayPressed,
     required this.showAppStoreDownloadButton,
     required this.onAppStoreTap,
     required this.showLeaderboardBelowButton,
@@ -2865,10 +3350,13 @@ class _HomeHeroContent extends StatelessWidget {
     required this.onOriginalGameTap,
   });
 
-  final String buttonLabel;
   final String scoreLabel;
-  final bool isLocked;
+  final int currentLevel;
   final VoidCallback onPlayPressed;
+  final List<DailyLevelResult> dailyLevelResults;
+  final int blockedLevel;
+  final int activeReplayLevel;
+  final ValueChanged<DailyLevelResult> onReplayPressed;
   final bool showAppStoreDownloadButton;
   final VoidCallback onAppStoreTap;
   final bool showLeaderboardBelowButton;
@@ -2880,22 +3368,6 @@ class _HomeHeroContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final outlineButtonStyle = ButtonStyle(
-      side: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.disabled)) {
-          return BorderSide(
-            color: theme.colorScheme.onSurface.withOpacity(0.3),
-          );
-        }
-        return BorderSide(color: theme.colorScheme.onSurface);
-      }),
-      foregroundColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.disabled)) {
-          return theme.colorScheme.onSurface.withOpacity(0.3);
-        }
-        return theme.colorScheme.onSurface;
-      }),
-    );
     return LayoutBuilder(
       builder: (context, constraints) {
         final hasBoundedHeight = constraints.hasBoundedHeight;
@@ -2940,15 +3412,13 @@ class _HomeHeroContent extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 21),
-            OutlinedButton(
-              onPressed: isLocked ? null : onPlayPressed,
-              style: outlineButtonStyle,
-              child: Text(
-                buttonLabel,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+            _GraphCarousel(
+              currentLevel: currentLevel,
+              dailyLevelResults: dailyLevelResults,
+              blockedLevel: blockedLevel,
+              activeReplayLevel: activeReplayLevel,
+              onPlayPressed: onPlayPressed,
+              onReplayPressed: onReplayPressed,
             ),
             if (showAppStoreDownloadButton) ...[
               const SizedBox(height: 12),
@@ -2995,6 +3465,266 @@ class _HomeHeroContent extends StatelessWidget {
       },
     );
   }
+}
+
+class _GraphCarousel extends StatefulWidget {
+  const _GraphCarousel({
+    required this.currentLevel,
+    required this.dailyLevelResults,
+    required this.blockedLevel,
+    required this.activeReplayLevel,
+    required this.onPlayPressed,
+    required this.onReplayPressed,
+  });
+
+  final int currentLevel;
+  final List<DailyLevelResult> dailyLevelResults;
+  final int blockedLevel;
+  final int activeReplayLevel;
+  final VoidCallback onPlayPressed;
+  final ValueChanged<DailyLevelResult> onReplayPressed;
+
+  @override
+  State<_GraphCarousel> createState() => _GraphCarouselState();
+}
+
+class _GraphCarouselState extends State<_GraphCarousel> {
+  static const _baseTileExtent = 112.0;
+  static const _gap = 10.0;
+
+  final ScrollController _scrollController = ScrollController();
+  bool _centerScheduled = false;
+  int? _centeredLevel;
+  double? _centeredViewportWidth;
+  double? _centeredTileExtent;
+
+  int get _actionableLevel {
+    if (widget.activeReplayLevel > 0) return widget.activeReplayLevel;
+    if (widget.blockedLevel > 0) return widget.blockedLevel;
+    return widget.currentLevel;
+  }
+
+  List<_GraphCarouselEntry> get _entries {
+    final entries = <int, DailyLevelResult?>{
+      for (final result in widget.dailyLevelResults) result.level: result,
+    };
+    entries.putIfAbsent(_actionableLevel, () => null);
+    final levels = entries.keys.toList()..sort();
+    return levels
+        .map(
+          (level) => _GraphCarouselEntry(
+            level: level,
+            result: entries[level],
+            isActionable: level == _actionableLevel,
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scheduleCenter(
+    List<_GraphCarouselEntry> entries,
+    double viewportWidth,
+    double tileExtent,
+  ) {
+    if (_centerScheduled ||
+        (_centeredLevel == _actionableLevel &&
+            _centeredViewportWidth == viewportWidth &&
+            _centeredTileExtent == tileExtent)) {
+      return;
+    }
+    _centerScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _centerScheduled = false;
+      if (!mounted || !_scrollController.hasClients) return;
+      final index = entries.indexWhere(
+        (entry) => entry.level == _actionableLevel,
+      );
+      if (index < 0) return;
+      final offset = (index * (tileExtent + _gap)).clamp(
+        _scrollController.position.minScrollExtent,
+        _scrollController.position.maxScrollExtent,
+      );
+      _scrollController.jumpTo(offset);
+      _centeredLevel = _actionableLevel;
+      _centeredViewportWidth = viewportWidth;
+      _centeredTileExtent = tileExtent;
+    });
+  }
+
+  String _semanticLabel(
+    AppLocalizations l10n,
+    _GraphCarouselEntry entry,
+    bool enabled,
+  ) {
+    if (entry.isActionable) {
+      return widget.activeReplayLevel == entry.level
+          ? l10n.graphReplayInProgressSemantics(entry.level)
+          : l10n.graphUnsolvedSemantics(entry.level);
+    }
+    final result = entry.result;
+    if (!enabled || result == null) {
+      return l10n.graphBlockedSemantics(entry.level);
+    }
+    return l10n.graphSolvedSemantics(
+      entry.level,
+      result.movesUsed,
+      result.score,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final entries = _entries;
+    final textScale = MediaQuery.textScalerOf(context).scale(14) / 14;
+    final tileExtent = _baseTileExtent * textScale.clamp(1.0, 1.6);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final viewportWidth = constraints.maxWidth;
+        final edgePadding = max(0.0, (viewportWidth - tileExtent) / 2);
+        _scheduleCenter(entries, viewportWidth, tileExtent);
+
+        return SizedBox(
+          key: const ValueKey('graph-carousel'),
+          height: tileExtent,
+          width: double.infinity,
+          child: ListView.separated(
+            key: const ValueKey('graph-carousel-scroll'),
+            controller: _scrollController,
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.symmetric(horizontal: edgePadding),
+            itemCount: entries.length,
+            separatorBuilder: (_, _) => const SizedBox(width: _gap),
+            itemBuilder: (context, index) {
+              final entry = entries[index];
+              final result = entry.result;
+              final isSolved = result != null && !entry.isActionable;
+              final enabled =
+                  entry.isActionable ||
+                  (widget.activeReplayLevel == 0 &&
+                      isSolved &&
+                      canOpenLevel(
+                        level: entry.level,
+                        blockedLevel: widget.blockedLevel,
+                      ));
+              final VoidCallback? onTap = entry.isActionable
+                  ? widget.onPlayPressed
+                  : enabled && result != null
+                  ? () => widget.onReplayPressed(result)
+                  : null;
+              final foreground = theme.colorScheme.onSurface.withValues(
+                alpha: enabled ? 1 : 0.34,
+              );
+              final borderColor = theme.colorScheme.onSurface.withValues(
+                alpha: entry.isActionable ? 1 : (enabled ? 0.34 : 0.14),
+              );
+
+              return SizedBox.square(
+                key: ValueKey('graph-tile-${entry.level}'),
+                dimension: tileExtent,
+                child: Semantics(
+                  button: true,
+                  enabled: enabled,
+                  label: _semanticLabel(l10n, entry, enabled),
+                  onTap: onTap,
+                  child: ExcludeSemantics(
+                    child: Material(
+                      color: entry.isActionable
+                          ? theme.colorScheme.onSurface.withValues(alpha: 0.055)
+                          : Colors.transparent,
+                      child: InkWell(
+                        onTap: onTap,
+                        child: Ink(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: borderColor,
+                              width: entry.isActionable ? 2 : 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      l10n.nodesCount(entry.level),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color: foreground,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                    ),
+                                  ),
+                                  Icon(
+                                    entry.isActionable
+                                        ? Icons.play_arrow
+                                        : enabled
+                                        ? Icons.check
+                                        : Icons.lock_outline,
+                                    size: 16,
+                                    color: foreground,
+                                  ),
+                                ],
+                              ),
+                              const Spacer(),
+                              if (isSolved) ...[
+                                Text(
+                                  l10n.movesCount(result.movesUsed),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: foreground,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  l10n.scoreValue(result.score),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: foreground,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _GraphCarouselEntry {
+  const _GraphCarouselEntry({
+    required this.level,
+    required this.result,
+    required this.isActionable,
+  });
+
+  final int level;
+  final DailyLevelResult? result;
+  final bool isActionable;
 }
 
 class _AuthDialogResult {
@@ -3345,11 +4075,14 @@ class _AuthDialogState extends State<_AuthDialog> {
   }
 }
 
+enum _ProfileSection { overview, friends, achievements }
+
 class _ProfileDialog extends StatefulWidget {
   const _ProfileDialog({
     required this.initialDisplayName,
     required this.initialFriendIds,
     required this.lifetimeScore,
+    required this.unlockedAchievementIds,
     required this.loadFriends,
     required this.removeFriend,
     required this.reportUser,
@@ -3363,6 +4096,7 @@ class _ProfileDialog extends StatefulWidget {
   final String initialDisplayName;
   final List<String> initialFriendIds;
   final int lifetimeScore;
+  final Set<String> unlockedAchievementIds;
   final Future<List<_FriendProfile>> Function(List<String> friendIds)
   loadFriends;
   final Future<void> Function(String friendUid) removeFriend;
@@ -3395,6 +4129,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
   bool _friendsLoading = true;
   bool _deleteAccountConfirming = false;
   String? _displayNameErrorText;
+  _ProfileSection _section = _ProfileSection.overview;
 
   String get _initialDisplayNameTrimmed => widget.initialDisplayName.trim();
 
@@ -3599,11 +4334,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-
+  Widget _buildProfileOverview(ThemeData theme, AppLocalizations l10n) {
     return Dialog(
       backgroundColor: theme.colorScheme.surface,
       surfaceTintColor: Colors.transparent,
@@ -3624,6 +4355,175 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _displayNameController,
+                decoration: InputDecoration(
+                  labelText: l10n.displayName,
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
+                  errorText: _displayNameErrorText,
+                ),
+                onChanged: _updateDisplayNameValidation,
+              ),
+              const SizedBox(height: 14),
+              Text(
+                l10n.lifetimeScoreValue(widget.lifetimeScore),
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => setState(() {
+                    _section = _ProfileSection.achievements;
+                  }),
+                  icon: const Icon(Icons.workspace_premium_outlined),
+                  label: Text(l10n.achievements),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => setState(() {
+                    _section = _ProfileSection.friends;
+                  }),
+                  icon: const FaIcon(FontAwesomeIcons.userGroup, size: 15),
+                  label: Text(l10n.friends),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => _submitProfileDialog(
+                    shouldPersist: true,
+                    signOutRequested: false,
+                    deleteAccountRequested: false,
+                  ),
+                  child: Text(l10n.submit),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => _submitProfileDialog(
+                    shouldPersist: false,
+                    signOutRequested: true,
+                    deleteAccountRequested: false,
+                  ),
+                  child: Text(l10n.signOut),
+                ),
+              ),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: _handleDeleteAccountPressed,
+                  child: Text(
+                    _deleteAccountConfirming
+                        ? l10n.pressAgainToDelete
+                        : l10n.deleteAccount,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAchievements(ThemeData theme, AppLocalizations l10n) {
+    return Dialog(
+      backgroundColor: theme.colorScheme.surface,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+        side: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.35)),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 460, maxHeight: 620),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => setState(() {
+                      _section = _ProfileSection.overview;
+                    }),
+                    icon: const Icon(Icons.arrow_back),
+                    tooltip: l10n.back,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    l10n.achievements,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Expanded(
+                child: AchievementList(
+                  unlockedIds: widget.unlockedAchievementIds,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    if (_section == _ProfileSection.overview) {
+      return _buildProfileOverview(theme, l10n);
+    }
+    if (_section == _ProfileSection.achievements) {
+      return _buildAchievements(theme, l10n);
+    }
+
+    return Dialog(
+      backgroundColor: theme.colorScheme.surface,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+        side: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.35)),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 460),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => setState(() {
+                      _section = _ProfileSection.overview;
+                    }),
+                    icon: const Icon(Icons.arrow_back),
+                    tooltip: l10n.back,
+                  ),
+                  Text(
+                    l10n.friends,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               Text(
@@ -5503,25 +6403,9 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
     }
 
     if (_loadError != null) {
-      final errorDetail = _loadError.toString().trim();
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            l10n.unableLoadGlobalLeaderboard,
-            style: theme.textTheme.bodyMedium,
-          ),
-          if (errorDetail.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              errorDetail,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.72),
-              ),
-            ),
-          ],
-        ],
+      return Text(
+        l10n.unableLoadGlobalLeaderboard,
+        style: theme.textTheme.bodyMedium,
       );
     }
 
@@ -5983,6 +6867,9 @@ class PlanarityGamePage extends StatefulWidget {
     required this.startLevel,
     required this.startScore,
     required this.tutorialCompleted,
+    this.isReplay = false,
+    this.replayPreviousScore = 0,
+    this.showSignUpPrompt = false,
     this.onLevelProgressed,
     this.onLevelSolved,
   });
@@ -5991,6 +6878,9 @@ class PlanarityGamePage extends StatefulWidget {
   final int startLevel;
   final int startScore;
   final bool tutorialCompleted;
+  final bool isReplay;
+  final int replayPreviousScore;
+  final bool showSignUpPrompt;
   final Future<void> Function(SolvedLevelProgress progress)? onLevelProgressed;
   final Future<void> Function(int level)? onLevelSolved;
 
@@ -6171,6 +7061,8 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
         level: _level,
         locked: true,
         tutorialCompleted: _tutorialCompleted,
+        requestSignUp: false,
+        isReplay: widget.isReplay,
       ),
     );
   }
@@ -6183,6 +7075,8 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
         level: level ?? _level,
         locked: false,
         tutorialCompleted: _tutorialCompleted,
+        requestSignUp: false,
+        isReplay: widget.isReplay,
       ),
     );
   }
@@ -6200,9 +7094,9 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
 
   String? _tutorialTextForLevel(int level) {
     return switch (level) {
-      1 => 'this is a node drag it anywhere',
-      2 => 'nodes are connected by edges edges stay attached',
-      3 => 'a graph is solved when no edges cross this one is already solved',
+      1 => _l10n.tutorialNodeInstruction,
+      2 => _l10n.tutorialEdgesInstruction,
+      3 => _l10n.tutorialSolvedInstruction,
       _ => null,
     };
   }
@@ -6268,17 +7162,48 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       if (completedTutorialWithThisLevel) {
         _tutorialCompleted = true;
       }
-      await widget.onLevelProgressed?.call(
-        SolvedLevelProgress(
-          dayKey: widget.dayKey,
-          solvedLevel: _level,
-          nextLevel: _level + 1,
-          score: _totalScore,
-          locked: false,
-          tutorialCompleted: _tutorialCompleted,
-        ),
-      );
-      await widget.onLevelSolved?.call(_level);
+      try {
+        await widget.onLevelProgressed?.call(
+          SolvedLevelProgress(
+            dayKey: widget.dayKey,
+            solvedLevel: _level,
+            nextLevel: _level + 1,
+            score: _totalScore,
+            locked: false,
+            tutorialCompleted: _tutorialCompleted,
+            movesUsed: _movesUsed,
+            levelScore: levelScore,
+            isReplay: widget.isReplay,
+            previousScore: widget.replayPreviousScore,
+            showSignUpPrompt: widget.showSignUpPrompt,
+          ),
+        );
+        await widget.onLevelSolved?.call(_level);
+      } catch (error, stackTrace) {
+        debugPrint('Unable to persist solved graph: $error');
+        debugPrintStack(stackTrace: stackTrace);
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(_l10n.unableSaveProgress)));
+          setState(() {
+            _totalScore -= levelScore;
+            _movesUsed = 0;
+            _activeNode = null;
+            _dragStart = null;
+            _current = PlanarityGenerator.generate(
+              dayKey: widget.dayKey,
+              level: _level,
+            );
+            _tutorialCompleted = completedTutorialWithThisLevel
+                ? false
+                : _tutorialCompleted;
+            _needsCentering = true;
+            _resolvingLevel = false;
+          });
+        }
+        return;
+      }
       final solvedNodes = List<Offset>.from(_current.nodes);
       final solvedEdges = List<Edge>.from(_current.edges);
       await _showInterstitialAdIfNeeded();
@@ -6289,12 +7214,27 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
         totalScore: _totalScore,
         nodes: solvedNodes,
         edges: solvedEdges,
+        showSignUpPrompt: widget.showSignUpPrompt,
       );
       _resolvingLevel = false;
       if (!mounted) {
         return;
       }
-      if (!proceed) {
+      if (proceed == _CompletionAction.signUp) {
+        Navigator.of(context).pop(
+          GameSessionResult(
+            dayKey: widget.dayKey,
+            score: _totalScore,
+            level: _level + 1,
+            locked: false,
+            tutorialCompleted: _tutorialCompleted,
+            requestSignUp: true,
+            isReplay: widget.isReplay,
+          ),
+        );
+        return;
+      }
+      if (proceed == _CompletionAction.home || widget.isReplay) {
         _exitToHome(level: _level + 1);
         return;
       }
@@ -6317,6 +7257,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
         totalScore: _totalScore,
         nodes: finalNodes,
         edges: finalEdges,
+        showSignUpPrompt: false,
       );
       _resolvingLevel = false;
       if (!mounted) {
@@ -6372,7 +7313,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                           IconButton(
                             onPressed: _restartCurrentGraph,
                             icon: const Icon(Icons.restart_alt, size: 22),
-                            tooltip: 'restart',
+                            tooltip: _l10n.restart,
                           ),
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
@@ -6546,15 +7487,16 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
     }
   }
 
-  Future<bool> _showCompletionModal({
+  Future<_CompletionAction> _showCompletionModal({
     required bool solved,
     required int totalMoves,
     required int movesUsed,
     required int totalScore,
     required List<Offset> nodes,
     required List<Edge> edges,
+    required bool showSignUpPrompt,
   }) async {
-    final continuePlay = await showDialog<bool>(
+    final action = await showDialog<_CompletionAction>(
       context: context,
       barrierDismissible: false,
       builder: (context) {
@@ -6653,16 +7595,52 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
                     ),
                   ),
                   const SizedBox(height: 10),
+                  if (solved && showSignUpPrompt) ...[
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.25),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _l10n.saveYourProgress,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(_l10n.saveProgressDescription),
+                          const SizedBox(height: 8),
+                          OutlinedButton(
+                            onPressed: () => Navigator.of(
+                              context,
+                            ).pop(_CompletionAction.signUp),
+                            child: Text(_l10n.signUp),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
                   Row(
                     children: [
                       const Spacer(),
                       TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
+                        onPressed: () =>
+                            Navigator.of(context).pop(_CompletionAction.home),
                         child: Text(_l10n.home),
                       ),
                       if (solved)
                         FilledButton(
-                          onPressed: () => Navigator.of(context).pop(true),
+                          onPressed: () => Navigator.of(
+                            context,
+                          ).pop(_CompletionAction.continuePlay),
                           child: Text(_l10n.continueWithScore(totalScore)),
                         ),
                     ],
@@ -6675,7 +7653,7 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       },
     );
 
-    return continuePlay ?? false;
+    return action ?? _CompletionAction.home;
   }
 
   Future<void> _shareSolvedCard({
@@ -6718,6 +7696,14 @@ class _PlanarityGamePageState extends State<PlanarityGamePage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(_l10n.shareUnavailableBuild)));
+    } catch (error, stackTrace) {
+      debugPrint('Unable to share result: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(_l10n.unableShareRightNow)));
+      }
     }
   }
 
@@ -7502,6 +8488,8 @@ class GameSessionResult {
     required this.level,
     required this.locked,
     required this.tutorialCompleted,
+    this.requestSignUp = false,
+    this.isReplay = false,
   });
 
   final String dayKey;
@@ -7509,6 +8497,8 @@ class GameSessionResult {
   final int level;
   final bool locked;
   final bool tutorialCompleted;
+  final bool requestSignUp;
+  final bool isReplay;
 }
 
 class SolvedLevelProgress {
@@ -7519,6 +8509,11 @@ class SolvedLevelProgress {
     required this.score,
     required this.locked,
     required this.tutorialCompleted,
+    required this.movesUsed,
+    required this.levelScore,
+    required this.isReplay,
+    required this.previousScore,
+    required this.showSignUpPrompt,
   });
 
   final String dayKey;
@@ -7527,6 +8522,280 @@ class SolvedLevelProgress {
   final int score;
   final bool locked;
   final bool tutorialCompleted;
+  final int movesUsed;
+  final int levelScore;
+  final bool isReplay;
+  final int previousScore;
+  final bool showSignUpPrompt;
+}
+
+enum _CompletionAction { home, continuePlay, signUp }
+
+@visibleForTesting
+class DailyLevelResult {
+  const DailyLevelResult({
+    required this.level,
+    required this.movesUsed,
+    required this.score,
+  });
+
+  final int level;
+  final int movesUsed;
+  final int score;
+
+  Map<String, int> toJson() => <String, int>{
+    'level': level,
+    'movesUsed': movesUsed,
+    'score': score,
+  };
+
+  static DailyLevelResult? fromJson(Object? value) {
+    if (value is! Map) {
+      return null;
+    }
+    final level = value['level'];
+    final movesUsed = value['movesUsed'];
+    final score = value['score'];
+    if (level is! num || movesUsed is! num || score is! num) {
+      return null;
+    }
+    final parsed = DailyLevelResult(
+      level: level.toInt(),
+      movesUsed: movesUsed.toInt(),
+      score: score.toInt(),
+    );
+    if (parsed.level < 1 || parsed.movesUsed < 0 || parsed.score < 0) {
+      return null;
+    }
+    return parsed;
+  }
+}
+
+class AchievementList extends StatelessWidget {
+  const AchievementList({super.key, required this.unlockedIds});
+
+  final Set<String> unlockedIds;
+
+  static const ids = <String>[
+    'first_step',
+    'practice',
+    'persistence',
+    'dedication',
+    'planarity',
+    'efficient',
+    'precise',
+    'optimal',
+    'close_call',
+    'second_attempt',
+    'improvement',
+    'redemption',
+    'perfected',
+  ];
+
+  String _title(AppLocalizations l10n, String id) => switch (id) {
+    'first_step' => l10n.achievementFirstStepTitle,
+    'practice' => l10n.achievementPracticeTitle,
+    'persistence' => l10n.achievementPersistenceTitle,
+    'dedication' => l10n.achievementDedicationTitle,
+    'planarity' => l10n.achievementPlanarityTitle,
+    'efficient' => l10n.achievementEfficientTitle,
+    'precise' => l10n.achievementPreciseTitle,
+    'optimal' => l10n.achievementOptimalTitle,
+    'close_call' => l10n.achievementCloseCallTitle,
+    'second_attempt' => l10n.achievementSecondAttemptTitle,
+    'improvement' => l10n.achievementImprovementTitle,
+    'redemption' => l10n.achievementRedemptionTitle,
+    'perfected' => l10n.achievementPerfectedTitle,
+    _ => id,
+  };
+
+  String _description(AppLocalizations l10n, String id) => switch (id) {
+    'first_step' => l10n.achievementFirstStepDescription,
+    'practice' => l10n.achievementPracticeDescription,
+    'persistence' => l10n.achievementPersistenceDescription,
+    'dedication' => l10n.achievementDedicationDescription,
+    'planarity' => l10n.achievementPlanarityDescription,
+    'efficient' => l10n.achievementEfficientDescription,
+    'precise' => l10n.achievementPreciseDescription,
+    'optimal' => l10n.achievementOptimalDescription,
+    'close_call' => l10n.achievementCloseCallDescription,
+    'second_attempt' => l10n.achievementSecondAttemptDescription,
+    'improvement' => l10n.achievementImprovementDescription,
+    'redemption' => l10n.achievementRedemptionDescription,
+    'perfected' => l10n.achievementPerfectedDescription,
+    _ => id,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return ListView(
+      padding: EdgeInsets.zero,
+      children: ids
+          .map((id) {
+            final unlocked = unlockedIds.contains(id);
+            final color = theme.colorScheme.onSurface.withOpacity(
+              unlocked ? 1 : 0.38,
+            );
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: color.withOpacity(unlocked ? 0.3 : 0.16),
+                ),
+              ),
+              child: ExpansionTile(
+                tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+                childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                iconColor: color,
+                collapsedIconColor: color,
+                title: Text(
+                  _title(l10n, id),
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      _description(l10n, id),
+                      style: theme.textTheme.bodyMedium?.copyWith(color: color),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          })
+          .toList(growable: false),
+    );
+  }
+}
+
+@visibleForTesting
+int dailyScoreFor(Iterable<DailyLevelResult> results, {int carry = 0}) =>
+    max(0, carry) +
+    results.fold<int>(0, (total, result) => total + max(0, result.score));
+
+@visibleForTesting
+bool canOpenLevel({required int level, required int blockedLevel}) =>
+    blockedLevel <= 0 || level <= blockedLevel;
+
+@visibleForTesting
+int blockedLevelAfterSolve({
+  required int solvedLevel,
+  required int blockedLevel,
+  required bool isReplay,
+  required int replayRestoreBlockedLevel,
+}) {
+  if (solvedLevel != blockedLevel) return blockedLevel;
+  return isReplay ? replayRestoreBlockedLevel : 0;
+}
+
+@visibleForTesting
+int lifetimeScoreIncrementForSolve({
+  required int levelScore,
+  required bool isReplay,
+  required int previousScore,
+}) => isReplay ? max(0, levelScore - previousScore) : max(0, levelScore);
+
+@visibleForTesting
+bool shouldPromptForSignUp({
+  required bool signedIn,
+  required String? previousLastPlayed,
+  required String todayKey,
+  required int solvedLevelsToday,
+  required String? signUpPromptShownAt,
+}) {
+  return !signedIn &&
+      solvedLevelsToday == 0 &&
+      (signUpPromptShownAt == null || signUpPromptShownAt.isEmpty) &&
+      previousLastPlayed == previousDayKey(todayKey);
+}
+
+@visibleForTesting
+Map<String, dynamic> mergeGuestProgressForNewAccount({
+  required Map<String, dynamic> defaultDocument,
+  required Map<String, dynamic> guestDocument,
+}) {
+  const progressFields = <String>{
+    'currentLevel',
+    'lastPlayed',
+    'locked',
+    'lifetimeScore',
+    'score',
+    'tutorialCompleted',
+    'dailyResultsDay',
+    'dailyLevelResults',
+    'dailyScoreCarry',
+    'blockedLevel',
+    'activeReplayLevel',
+    'replayPreviousScore',
+    'replayRestoreBlockedLevel',
+    'achievementSolveCount',
+    'unlockedAchievements',
+    'signUpPromptShownAt',
+    'signUpPromptEligibleDay',
+  };
+  return <String, dynamic>{
+    ...defaultDocument,
+    for (final field in progressFields)
+      if (guestDocument.containsKey(field)) field: guestDocument[field],
+  };
+}
+
+@visibleForTesting
+String sanitizedServiceErrorMessage(
+  Object error, {
+  required String genericMessage,
+  required String networkMessage,
+}) {
+  if (error is FirebaseException &&
+      const {
+        'network-request-failed',
+        'unavailable',
+        'deadline-exceeded',
+      }.contains(error.code)) {
+    return networkMessage;
+  }
+  return genericMessage;
+}
+
+@visibleForTesting
+Set<String> achievementIdsForSolve({
+  required int solveCount,
+  required int level,
+  required int movesUsed,
+  required bool isReplay,
+  required int previousScore,
+}) {
+  final result = <String>{};
+  if (solveCount >= 1) result.add('first_step');
+  if (solveCount >= 8) result.add('practice');
+  if (solveCount >= 16) result.add('persistence');
+  if (solveCount >= 32) result.add('dedication');
+  if (solveCount >= 64) result.add('planarity');
+
+  final levelScore = scoreForSolvedLevel(level: level, movesUsed: movesUsed);
+  if (level > 3) {
+    final movesRemaining = max(0, level - movesUsed);
+    if (movesRemaining >= 2) result.add('efficient');
+    if (movesRemaining >= 4) result.add('precise');
+    if (movesUsed == 1) result.add('optimal');
+    if (movesRemaining == 0) result.add('close_call');
+  }
+
+  if (isReplay) {
+    result.add('second_attempt');
+    if (levelScore > previousScore) result.add('improvement');
+    if (previousScore == 0 && levelScore > 0) result.add('redemption');
+    if (levelScore > previousScore && level > 3 && movesUsed == 1) {
+      result.add('perfected');
+    }
+  }
+  return result;
 }
 
 int scoreForSolvedLevel({required int level, required int movesUsed}) {

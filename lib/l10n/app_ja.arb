@@ -182,5 +182,114 @@
   "reportReasonAbuse": "虐待または嫌がらせ",
   "reportReasonImpersonation": "なりすまし",
   "reportReasonSpam": "スパムまたは詐欺",
-  "reportReasonOther": "その他"
+  "reportReasonOther": "その他",
+  "nodesCount": "{count}個のノード",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "{count}手",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "スコア {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "グラフ {level}、未クリア、プレイ",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "グラフ {level}、{moves} 手でクリア、スコア {score}、リプレイ",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "グラフ {level}、ロック中",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "グラフ {level}、リプレイ中、続ける",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "リプレイ",
+  "replayGraphQuestion": "グラフ{level}をもう一度プレイしますか？",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "このグラフを再び解くまで、スコアは0にリセットされます。未クリアのまま終了すると、以降のグラフはプレイできません。",
+  "resetAndReplay": "リセットしてリプレイ",
+  "unableSaveProgress": "現在、進行状況を保存できません",
+  "saveYourProgress": "進行状況を保存",
+  "saveProgressDescription": "無料登録すると、今日のグラフと実績をすべてのデバイスで引き継げます。",
+  "achievements": "実績",
+  "achievementFirstStepTitle": "はじめの一歩",
+  "achievementFirstStepDescription": "最初のグラフを解く",
+  "achievementPracticeTitle": "練習",
+  "achievementPracticeDescription": "グラフを8個解く",
+  "achievementPersistenceTitle": "粘り強さ",
+  "achievementPersistenceDescription": "グラフを16個解く",
+  "achievementDedicationTitle": "ひたむきさ",
+  "achievementDedicationDescription": "グラフを32個解く",
+  "achievementPlanarityTitle": "プラナリティ",
+  "achievementPlanarityDescription": "グラフを64個解く",
+  "achievementEfficientTitle": "効率的",
+  "achievementEfficientDescription": "2手以上残してグラフを解く",
+  "achievementPreciseTitle": "正確無比",
+  "achievementPreciseDescription": "4手以上残してグラフを解く",
+  "achievementOptimalTitle": "最適解",
+  "achievementOptimalDescription": "残り手数を最大限残してグラフを解く",
+  "achievementCloseCallTitle": "間一髪",
+  "achievementCloseCallDescription": "残り0手でグラフを解く",
+  "achievementSecondAttemptTitle": "再挑戦",
+  "achievementSecondAttemptDescription": "クリア済みのグラフをリプレイする",
+  "achievementImprovementTitle": "自己ベスト更新",
+  "achievementImprovementDescription": "リプレイで以前のスコアを上回る",
+  "achievementRedemptionTitle": "雪辱",
+  "achievementRedemptionDescription": "以前のスコアが0だったグラフをリプレイし、1点以上獲得する",
+  "achievementPerfectedTitle": "完全攻略",
+  "achievementPerfectedDescription": "クリア済みのグラフをリプレイし、最高スコアまで更新する",
+  "unableLoadProfile": "現在、プロフィールを読み込めません",
+  "unableShareRightNow": "現在、共有できません",
+  "restart": "やり直す",
+  "tutorialNodeInstruction": "これは頂点です好きな場所にドラッグしてください",
+  "tutorialEdgesInstruction": "頂点は辺でつながっています辺は頂点につながったままです",
+  "tutorialSolvedInstruction": "どの辺も交差していなければグラフはクリアですこれはすでにクリアしています"
 }

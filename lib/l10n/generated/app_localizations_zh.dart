@@ -405,4 +405,161 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reportReasonOther => '其他';
+
+  @override
+  String nodesCount(int count) {
+    return '$count 个节点';
+  }
+
+  @override
+  String movesCount(int count) {
+    return '$count 步';
+  }
+
+  @override
+  String scoreValue(int score) {
+    return '得分 $score';
+  }
+
+  @override
+  String graphUnsolvedSemantics(int level) {
+    return '图形 $level，未解开，开始';
+  }
+
+  @override
+  String graphSolvedSemantics(int level, int moves, int score) {
+    return '图形 $level，已用 $moves 步解开，得分 $score，重新挑战';
+  }
+
+  @override
+  String graphBlockedSemantics(int level) {
+    return '图形 $level，已锁定';
+  }
+
+  @override
+  String graphReplayInProgressSemantics(int level) {
+    return '图形 $level，正在重新挑战，继续';
+  }
+
+  @override
+  String get replay => '重新挑战';
+
+  @override
+  String replayGraphQuestion(int level) {
+    return '重新挑战图形 $level？';
+  }
+
+  @override
+  String get replayWarning => '在你再次解开此图形前，分数将重置为 0。如果离开时仍未解开，后续图形将不可用。';
+
+  @override
+  String get resetAndReplay => '重置并重新挑战';
+
+  @override
+  String get unableSaveProgress => '目前无法保存进度';
+
+  @override
+  String get saveYourProgress => '保存你的进度';
+
+  @override
+  String get saveProgressDescription => '免费注册，即可在所有设备上保留今日图形和成就。';
+
+  @override
+  String get achievements => '成就';
+
+  @override
+  String get achievementFirstStepTitle => '第一步';
+
+  @override
+  String get achievementFirstStepDescription => '解开你的第一个图形';
+
+  @override
+  String get achievementPracticeTitle => '练习';
+
+  @override
+  String get achievementPracticeDescription => '解开 8 个图形';
+
+  @override
+  String get achievementPersistenceTitle => '坚持不懈';
+
+  @override
+  String get achievementPersistenceDescription => '解开 16 个图形';
+
+  @override
+  String get achievementDedicationTitle => '全心投入';
+
+  @override
+  String get achievementDedicationDescription => '解开 32 个图形';
+
+  @override
+  String get achievementPlanarityTitle => '平面性';
+
+  @override
+  String get achievementPlanarityDescription => '解开 64 个图形';
+
+  @override
+  String get achievementEfficientTitle => '高效';
+
+  @override
+  String get achievementEfficientDescription => '至少剩余 2 步时解开一个图形';
+
+  @override
+  String get achievementPreciseTitle => '精准';
+
+  @override
+  String get achievementPreciseDescription => '至少剩余 4 步时解开一个图形';
+
+  @override
+  String get achievementOptimalTitle => '最优';
+
+  @override
+  String get achievementOptimalDescription => '以尽可能多的剩余步数解开一个图形';
+
+  @override
+  String get achievementCloseCallTitle => '险胜';
+
+  @override
+  String get achievementCloseCallDescription => '剩余 0 步时解开一个图形';
+
+  @override
+  String get achievementSecondAttemptTitle => '再次尝试';
+
+  @override
+  String get achievementSecondAttemptDescription => '重新挑战一个已解开的图形';
+
+  @override
+  String get achievementImprovementTitle => '更进一步';
+
+  @override
+  String get achievementImprovementDescription => '重新挑战时超过之前的分数';
+
+  @override
+  String get achievementRedemptionTitle => '扳回一局';
+
+  @override
+  String get achievementRedemptionDescription => '重新挑战一个之前得分为 0 的图形，并取得非零分数';
+
+  @override
+  String get achievementPerfectedTitle => '臻于完美';
+
+  @override
+  String get achievementPerfectedDescription => '重新挑战一个已解开的图形，将其提升至最高可能分数';
+
+  @override
+  String get unableLoadProfile => '目前无法加载你的个人资料';
+
+  @override
+  String get unableShareRightNow => '目前无法分享';
+
+  @override
+  String get restart => '重新开始';
+
+  @override
+  String get tutorialNodeInstruction => '这是一个顶点可将它拖到任意位置';
+
+  @override
+  String get tutorialEdgesInstruction => '顶点由边连接移动时边会保持连接';
+
+  @override
+  String get tutorialSolvedInstruction => '所有边都不相交时图形即为解开状态这个图形已经解开';
 }

@@ -431,4 +431,172 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reportReasonOther => 'أخرى';
+
+  @override
+  String nodesCount(int count) {
+    return '$count عقدة';
+  }
+
+  @override
+  String movesCount(int count) {
+    return '$count حركة';
+  }
+
+  @override
+  String scoreValue(int score) {
+    return 'النتيجة $score';
+  }
+
+  @override
+  String graphUnsolvedSemantics(int level) {
+    return 'الرسم البياني $level، غير محلول، العب';
+  }
+
+  @override
+  String graphSolvedSemantics(int level, int moves, int score) {
+    return 'الرسم البياني $level، تم حله في $moves حركة، النتيجة $score، أعد اللعب';
+  }
+
+  @override
+  String graphBlockedSemantics(int level) {
+    return 'الرسم البياني $level، غير متاح';
+  }
+
+  @override
+  String graphReplayInProgressSemantics(int level) {
+    return 'الرسم البياني $level، إعادة اللعب جارية، تابع';
+  }
+
+  @override
+  String get replay => 'إعادة اللعب';
+
+  @override
+  String replayGraphQuestion(int level) {
+    return 'إعادة لعب الرسم البياني $level؟';
+  }
+
+  @override
+  String get replayWarning =>
+      'ستُعاد نتيجتك إلى 0 حتى تحل هذا الرسم البياني مرة أخرى. لن تتوفر الرسوم البيانية الأعلى إذا تركته دون حل.';
+
+  @override
+  String get resetAndReplay => 'إعادة الضبط واللعب';
+
+  @override
+  String get unableSaveProgress => 'تعذر حفظ التقدم الآن';
+
+  @override
+  String get saveYourProgress => 'احفظ تقدمك';
+
+  @override
+  String get saveProgressDescription =>
+      'أنشئ حسابًا مجانًا للاحتفاظ برسوم اليوم البيانية والإنجازات على جميع أجهزتك.';
+
+  @override
+  String get achievements => 'الإنجازات';
+
+  @override
+  String get achievementFirstStepTitle => 'الخطوة الأولى';
+
+  @override
+  String get achievementFirstStepDescription => 'حل أول رسم بياني لك';
+
+  @override
+  String get achievementPracticeTitle => 'التدريب';
+
+  @override
+  String get achievementPracticeDescription => 'حل 8 رسوم بيانية';
+
+  @override
+  String get achievementPersistenceTitle => 'المثابرة';
+
+  @override
+  String get achievementPersistenceDescription => 'حل 16 رسمًا بيانيًا';
+
+  @override
+  String get achievementDedicationTitle => 'التفاني';
+
+  @override
+  String get achievementDedicationDescription => 'حل 32 رسمًا بيانيًا';
+
+  @override
+  String get achievementPlanarityTitle => 'الاستواء';
+
+  @override
+  String get achievementPlanarityDescription => 'حل 64 رسمًا بيانيًا';
+
+  @override
+  String get achievementEfficientTitle => 'الكفاءة';
+
+  @override
+  String get achievementEfficientDescription =>
+      'حل رسمًا بيانيًا مع بقاء حركتين على الأقل';
+
+  @override
+  String get achievementPreciseTitle => 'الدقة';
+
+  @override
+  String get achievementPreciseDescription =>
+      'حل رسمًا بيانيًا مع بقاء 4 حركات على الأقل';
+
+  @override
+  String get achievementOptimalTitle => 'الحل الأمثل';
+
+  @override
+  String get achievementOptimalDescription =>
+      'حل رسمًا بيانيًا مع بقاء أكبر عدد ممكن من الحركات';
+
+  @override
+  String get achievementCloseCallTitle => 'في اللحظة الأخيرة';
+
+  @override
+  String get achievementCloseCallDescription =>
+      'حل رسمًا بيانيًا دون بقاء أي حركة';
+
+  @override
+  String get achievementSecondAttemptTitle => 'المحاولة الثانية';
+
+  @override
+  String get achievementSecondAttemptDescription => 'أعد لعب رسم بياني محلول';
+
+  @override
+  String get achievementImprovementTitle => 'التحسن';
+
+  @override
+  String get achievementImprovementDescription =>
+      'تجاوز نتيجتك السابقة عند إعادة اللعب';
+
+  @override
+  String get achievementRedemptionTitle => 'التعويض';
+
+  @override
+  String get achievementRedemptionDescription =>
+      'احصل على نتيجة أكبر من صفر عند إعادة رسم بياني سبق أن سجلت فيه 0';
+
+  @override
+  String get achievementPerfectedTitle => 'الإتقان';
+
+  @override
+  String get achievementPerfectedDescription =>
+      'حسّن رسمًا بيانيًا محلولًا إلى أعلى نتيجة ممكنة عند إعادة اللعب';
+
+  @override
+  String get unableLoadProfile => 'تعذر تحميل ملفك الشخصي الآن';
+
+  @override
+  String get unableShareRightNow => 'تعذرت المشاركة الآن';
+
+  @override
+  String get restart => 'إعادة البدء';
+
+  @override
+  String get tutorialNodeInstruction => 'هذه عقدة اسحبها إلى أي مكان';
+
+  @override
+  String get tutorialEdgesInstruction =>
+      'العقد متصلة بحواف وتبقى الحواف مرتبطة بها';
+
+  @override
+  String get tutorialSolvedInstruction =>
+      'يُحل الرسم البياني عندما لا تتقاطع أي حواف وهذا الرسم محلول بالفعل';
 }

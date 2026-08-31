@@ -441,4 +441,175 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reportReasonOther => 'autre';
+
+  @override
+  String nodesCount(int count) {
+    return '$count nœuds';
+  }
+
+  @override
+  String movesCount(int count) {
+    return '$count coups';
+  }
+
+  @override
+  String scoreValue(int score) {
+    return 'score $score';
+  }
+
+  @override
+  String graphUnsolvedSemantics(int level) {
+    return 'graphe $level, non résolu, jouer';
+  }
+
+  @override
+  String graphSolvedSemantics(int level, int moves, int score) {
+    return 'graphe $level, résolu en $moves coups, score $score, rejouer';
+  }
+
+  @override
+  String graphBlockedSemantics(int level) {
+    return 'graphe $level, bloqué';
+  }
+
+  @override
+  String graphReplayInProgressSemantics(int level) {
+    return 'graphe $level, nouvelle tentative en cours, continuer';
+  }
+
+  @override
+  String get replay => 'rejouer';
+
+  @override
+  String replayGraphQuestion(int level) {
+    return 'rejouer le graphe $level ?';
+  }
+
+  @override
+  String get replayWarning =>
+      'ton score sera remis à 0 jusqu\'à ce que tu résolves à nouveau ce graphe. les graphes suivants seront indisponibles si tu le laisses non résolu.';
+
+  @override
+  String get resetAndReplay => 'réinitialiser et rejouer';
+
+  @override
+  String get unableSaveProgress =>
+      'impossible d\'enregistrer la progression pour le moment';
+
+  @override
+  String get saveYourProgress => 'enregistre ta progression';
+
+  @override
+  String get saveProgressDescription =>
+      'inscris-toi gratuitement pour conserver les graphes du jour et tes succès sur tous tes appareils.';
+
+  @override
+  String get achievements => 'succès';
+
+  @override
+  String get achievementFirstStepTitle => 'premier pas';
+
+  @override
+  String get achievementFirstStepDescription => 'résous ton premier graphe';
+
+  @override
+  String get achievementPracticeTitle => 'entraînement';
+
+  @override
+  String get achievementPracticeDescription => 'résous 8 graphes';
+
+  @override
+  String get achievementPersistenceTitle => 'persévérance';
+
+  @override
+  String get achievementPersistenceDescription => 'résous 16 graphes';
+
+  @override
+  String get achievementDedicationTitle => 'dévouement';
+
+  @override
+  String get achievementDedicationDescription => 'résous 32 graphes';
+
+  @override
+  String get achievementPlanarityTitle => 'planarité';
+
+  @override
+  String get achievementPlanarityDescription => 'résous 64 graphes';
+
+  @override
+  String get achievementEfficientTitle => 'efficace';
+
+  @override
+  String get achievementEfficientDescription =>
+      'résous un graphe avec au moins 2 coups restants';
+
+  @override
+  String get achievementPreciseTitle => 'précis';
+
+  @override
+  String get achievementPreciseDescription =>
+      'résous un graphe avec au moins 4 coups restants';
+
+  @override
+  String get achievementOptimalTitle => 'optimal';
+
+  @override
+  String get achievementOptimalDescription =>
+      'résous un graphe avec le maximum de coups restants possible';
+
+  @override
+  String get achievementCloseCallTitle => 'de justesse';
+
+  @override
+  String get achievementCloseCallDescription =>
+      'résous un graphe sans aucun coup restant';
+
+  @override
+  String get achievementSecondAttemptTitle => 'deuxième essai';
+
+  @override
+  String get achievementSecondAttemptDescription => 'rejoue un graphe résolu';
+
+  @override
+  String get achievementImprovementTitle => 'progression';
+
+  @override
+  String get achievementImprovementDescription =>
+      'bats ton score précédent en rejouant';
+
+  @override
+  String get achievementRedemptionTitle => 'rédemption';
+
+  @override
+  String get achievementRedemptionDescription =>
+      'obtiens un score supérieur à zéro en rejouant un graphe précédemment noté 0';
+
+  @override
+  String get achievementPerfectedTitle => 'perfectionné';
+
+  @override
+  String get achievementPerfectedDescription =>
+      'améliore un graphe résolu jusqu\'à son score maximal possible en rejouant';
+
+  @override
+  String get unableLoadProfile =>
+      'impossible de charger ton profil pour le moment';
+
+  @override
+  String get unableShareRightNow => 'impossible de partager pour le moment';
+
+  @override
+  String get restart => 'recommencer';
+
+  @override
+  String get tutorialNodeInstruction =>
+      'ceci est un sommet déplace-le où tu veux';
+
+  @override
+  String get tutorialEdgesInstruction =>
+      'les sommets sont reliés par des arêtes les arêtes restent attachées';
+
+  @override
+  String get tutorialSolvedInstruction =>
+      'un graphe est résolu quand les arêtes ne se croisent pas celui-ci est déjà résolu';
 }
