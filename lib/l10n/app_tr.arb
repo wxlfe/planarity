@@ -112,6 +112,9 @@
   "passwordTooWeak": "Şifre çok zayıf",
   "planarity": "planarity",
   "privacyOptions": "gizlilik seçenekleri",
+  "rankingUpdate": "sıralama güncellemesi",
+  "rankingGlobalResult": "{date} tarihinde global sıralamada #{globalRank} oldun",
+  "rankingFriendsAndGlobalResult": "{date} tarihinde arkadaşların arasında #{friendRank}, global sıralamada #{globalRank} oldun",
   "planarGraphWikipedia": "wikipedia: düzlemsel grafik",
   "pressAgainToDelete": "silmek için tekrar basın",
   "profile": "profil",
@@ -246,7 +249,7 @@
     }
   },
   "replay": "yeniden oyna",
-  "replayGraphQuestion": "{level}. grafi yeniden oyna?",
+  "replayGraphQuestion": "{level}. grafi yeniden oyna",
   "@replayGraphQuestion": {
     "placeholders": {
       "level": {
@@ -254,7 +257,7 @@
       }
     }
   },
-  "replayWarning": "bu grafi tekrar çözene kadar puanın 0'a sıfırlanacak. çözmeden ayrılırsan sonraki grafikler kullanılamayacak.",
+  "replayWarning": "çözülene kadar - puan 0'a sıfırlanacak ve sonraki grafikler kilitlenecek",
   "resetAndReplay": "sıfırla ve yeniden oyna",
   "unableSaveProgress": "ilerleme şu anda kaydedilemiyor",
   "saveYourProgress": "ilerlemeni kaydet",

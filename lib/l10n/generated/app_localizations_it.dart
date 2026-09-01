@@ -246,6 +246,29 @@ class AppLocalizationsIt extends AppLocalizations {
   String get privacyOptions => 'opzioni privacy';
 
   @override
+  String get rankingUpdate => 'aggiornamento classifica';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'ti sei classificato #$globalRank a livello globale il $dateString';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'ti sei classificato #$friendRank tra gli amici e #$globalRank a livello globale il $dateString';
+  }
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: grafico planare';
 
   @override
@@ -481,12 +504,12 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String replayGraphQuestion(int level) {
-    return 'rigiocare il grafo $level?';
+    return 'rigiocare il grafo $level';
   }
 
   @override
   String get replayWarning =>
-      'il tuo punteggio tornerà a 0 finché non risolverai di nuovo questo grafo. i grafi successivi non saranno disponibili se lo lasci irrisolto.';
+      'fino alla risoluzione - il punteggio verrà azzerato e i grafi successivi saranno bloccati';
 
   @override
   String get resetAndReplay => 'azzera e rigioca';

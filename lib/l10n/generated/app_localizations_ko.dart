@@ -233,6 +233,29 @@ class AppLocalizationsKo extends AppLocalizations {
   String get privacyOptions => '개인정보 옵션';
 
   @override
+  String get rankingUpdate => '순위 업데이트';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString에 전 세계 #$globalRank위를 기록했습니다';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString에 친구 중 #$friendRank위, 전 세계 #$globalRank위를 기록했습니다';
+  }
+
+  @override
   String get planarGraphWikipedia => '위키백과: 평면 그래프';
 
   @override
@@ -448,12 +471,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String replayGraphQuestion(int level) {
-    return '그래프 $level을(를) 다시 플레이할까요?';
+    return '그래프 $level 다시 플레이';
   }
 
   @override
-  String get replayWarning =>
-      '이 그래프를 다시 풀 때까지 점수가 0으로 초기화됩니다. 풀지 않은 채 나가면 이후 그래프를 이용할 수 없습니다.';
+  String get replayWarning => '해결할 때까지 - 점수는 0으로 초기화되고 이후 그래프는 잠깁니다';
 
   @override
   String get resetAndReplay => '초기화하고 다시 플레이';

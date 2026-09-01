@@ -112,6 +112,9 @@
   "passwordTooWeak": "kata sandi terlalu lemah",
   "planarity": "planarity",
   "privacyOptions": "opsi privasi",
+  "rankingUpdate": "pembaruan peringkat",
+  "rankingGlobalResult": "kamu mendapat peringkat #{globalRank} secara global pada {date}",
+  "rankingFriendsAndGlobalResult": "kamu mendapat peringkat #{friendRank} di antara teman dan #{globalRank} secara global pada {date}",
   "planarGraphWikipedia": "wikipedia: grafik planar",
   "pressAgainToDelete": "tekan lagi untuk menghapus",
   "profile": "profil",
@@ -246,7 +249,7 @@
     }
   },
   "replay": "mainkan ulang",
-  "replayGraphQuestion": "mainkan ulang graf {level}?",
+  "replayGraphQuestion": "mainkan ulang graf {level}",
   "@replayGraphQuestion": {
     "placeholders": {
       "level": {
@@ -254,7 +257,7 @@
       }
     }
   },
-  "replayWarning": "skor Anda akan kembali ke 0 sampai Anda menyelesaikan graf ini lagi. graf yang lebih tinggi tidak akan tersedia jika Anda membiarkannya belum selesai.",
+  "replayWarning": "sampai diselesaikan - skor akan diatur ulang ke 0 dan graf yang lebih tinggi akan dikunci",
   "resetAndReplay": "atur ulang dan mainkan lagi",
   "unableSaveProgress": "tidak dapat menyimpan progres saat ini",
   "saveYourProgress": "simpan progres Anda",

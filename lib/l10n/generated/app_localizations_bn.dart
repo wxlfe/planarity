@@ -241,6 +241,29 @@ class AppLocalizationsBn extends AppLocalizations {
   String get privacyOptions => 'গোপনীয়তার বিকল্প';
 
   @override
+  String get rankingUpdate => 'র‍্যাঙ্কিং আপডেট';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'আপনি $dateString তারিখে বিশ্বব্যাপী #$globalRank স্থান অর্জন করেছেন';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'আপনি $dateString তারিখে বন্ধুদের মধ্যে #$friendRank এবং বিশ্বব্যাপী #$globalRank স্থান অর্জন করেছেন';
+  }
+
+  @override
   String get planarGraphWikipedia => 'উইকিপিডিয়া: প্ল্যানার গ্রাফ';
 
   @override
@@ -469,12 +492,12 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String replayGraphQuestion(int level) {
-    return 'গ্রাফ $level আবার খেলবেন?';
+    return 'গ্রাফ $level আবার খেলুন';
   }
 
   @override
   String get replayWarning =>
-      'এই গ্রাফটি আবার সমাধান না করা পর্যন্ত আপনার স্কোর 0 হয়ে যাবে। এটি অসমাধিত রেখে গেলে পরবর্তী গ্রাফগুলো পাওয়া যাবে না।';
+      'সমাধান না হওয়া পর্যন্ত - স্কোর 0-তে রিসেট হবে এবং পরবর্তী গ্রাফগুলো লক থাকবে';
 
   @override
   String get resetAndReplay => 'রিসেট করে আবার খেলুন';

@@ -112,6 +112,9 @@
   "passwordTooWeak": "пароль слишком слабый",
   "planarity": "planarity",
   "privacyOptions": "настройки конфиденциальности",
+  "rankingUpdate": "обновление рейтинга",
+  "rankingGlobalResult": "ваше место в мировом рейтинге за {date}: #{globalRank}",
+  "rankingFriendsAndGlobalResult": "ваше место среди друзей за {date}: #{friendRank}, в мировом рейтинге: #{globalRank}",
   "planarGraphWikipedia": "википедия: планарный граф",
   "pressAgainToDelete": "нажмите еще раз, чтобы удалить",
   "profile": "профиль",
@@ -246,7 +249,7 @@
     }
   },
   "replay": "переиграть",
-  "replayGraphQuestion": "переиграть граф {level}?",
+  "replayGraphQuestion": "переиграть граф {level}",
   "@replayGraphQuestion": {
     "placeholders": {
       "level": {
@@ -254,7 +257,7 @@
       }
     }
   },
-  "replayWarning": "ваш результат обнулится, пока вы снова не решите этот граф. если оставить его нерешённым, следующие графы будут недоступны.",
+  "replayWarning": "до решения - результат будет сброшен до 0, а следующие графы будут заблокированы",
   "resetAndReplay": "сбросить и переиграть",
   "unableSaveProgress": "сейчас не удаётся сохранить прогресс",
   "saveYourProgress": "сохраните свой прогресс",

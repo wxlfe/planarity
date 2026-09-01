@@ -244,6 +244,29 @@ class AppLocalizationsVi extends AppLocalizations {
   String get privacyOptions => 'tùy chọn quyền riêng tư';
 
   @override
+  String get rankingUpdate => 'cập nhật thứ hạng';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'bạn xếp hạng #$globalRank toàn cầu vào $dateString';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'bạn xếp hạng #$friendRank trong nhóm bạn và #$globalRank toàn cầu vào $dateString';
+  }
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: đồ thị phẳng';
 
   @override
@@ -477,12 +500,12 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String replayGraphQuestion(int level) {
-    return 'chơi lại đồ thị $level?';
+    return 'chơi lại đồ thị $level';
   }
 
   @override
   String get replayWarning =>
-      'điểm của bạn sẽ được đặt lại về 0 cho đến khi bạn giải lại đồ thị này. các đồ thị tiếp theo sẽ không khả dụng nếu bạn bỏ dở.';
+      'cho đến khi giải xong - điểm sẽ được đặt lại về 0 và các đồ thị tiếp theo sẽ bị khóa';
 
   @override
   String get resetAndReplay => 'đặt lại và chơi lại';

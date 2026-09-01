@@ -231,6 +231,29 @@ class AppLocalizationsZh extends AppLocalizations {
   String get privacyOptions => '隐私选项';
 
   @override
+  String get rankingUpdate => '排名更新';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '你在 $dateString 的全球排名为第 #$globalRank 名';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '你在 $dateString 的好友排名为第 #$friendRank 名，全球排名为第 #$globalRank 名';
+  }
+
+  @override
   String get planarGraphWikipedia => '维基百科：平面图';
 
   @override
@@ -446,11 +469,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String replayGraphQuestion(int level) {
-    return '重新挑战图形 $level？';
+    return '重新挑战图形 $level';
   }
 
   @override
-  String get replayWarning => '在你再次解开此图形前，分数将重置为 0。如果离开时仍未解开，后续图形将不可用。';
+  String get replayWarning => '直到解开 - 分数将重置为 0，更高关卡的图形将被锁定';
 
   @override
   String get resetAndReplay => '重置并重新挑战';

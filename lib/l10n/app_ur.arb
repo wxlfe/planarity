@@ -112,6 +112,9 @@
   "passwordTooWeak": "پاس ورڈ بہت کمزور ہے",
   "planarity": "planarity",
   "privacyOptions": "رازداری کے اختیارات",
+  "rankingUpdate": "درجہ بندی کی تازہ کاری",
+  "rankingGlobalResult": "آپ نے {date} کو عالمی سطح پر #{globalRank} مقام حاصل کیا",
+  "rankingFriendsAndGlobalResult": "آپ نے {date} کو دوستوں میں #{friendRank} اور عالمی سطح پر #{globalRank} مقام حاصل کیا",
   "planarGraphWikipedia": "ویکیپیڈیا: پلینار گراف",
   "pressAgainToDelete": "حذف کرنے کے لیے دوبارہ دبائیں",
   "profile": "پروفائل",
@@ -246,7 +249,7 @@
     }
   },
   "replay": "دوبارہ کھیلیں",
-  "replayGraphQuestion": "گراف {level} دوبارہ کھیلیں؟",
+  "replayGraphQuestion": "گراف {level} دوبارہ کھیلیں",
   "@replayGraphQuestion": {
     "placeholders": {
       "level": {
@@ -254,7 +257,7 @@
       }
     }
   },
-  "replayWarning": "جب تک آپ یہ گراف دوبارہ حل نہیں کرتے، آپ کا اسکور 0 ہو جائے گا۔ اگر آپ اسے حل کیے بغیر چھوڑ دیں تو اگلے گراف دستیاب نہیں ہوں گے۔",
+  "replayWarning": "حل ہونے تک - اسکور 0 پر ری سیٹ ہو جائے گا اور اگلے گراف مقفل رہیں گے",
   "resetAndReplay": "ری سیٹ کرکے دوبارہ کھیلیں",
   "unableSaveProgress": "اس وقت پیش رفت محفوظ نہیں کی جا سکتی",
   "saveYourProgress": "اپنی پیش رفت محفوظ کریں",

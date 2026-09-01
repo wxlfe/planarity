@@ -242,6 +242,29 @@ class AppLocalizationsId extends AppLocalizations {
   String get privacyOptions => 'opsi privasi';
 
   @override
+  String get rankingUpdate => 'pembaruan peringkat';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'kamu mendapat peringkat #$globalRank secara global pada $dateString';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'kamu mendapat peringkat #$friendRank di antara teman dan #$globalRank secara global pada $dateString';
+  }
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: grafik planar';
 
   @override
@@ -474,12 +497,12 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String replayGraphQuestion(int level) {
-    return 'mainkan ulang graf $level?';
+    return 'mainkan ulang graf $level';
   }
 
   @override
   String get replayWarning =>
-      'skor Anda akan kembali ke 0 sampai Anda menyelesaikan graf ini lagi. graf yang lebih tinggi tidak akan tersedia jika Anda membiarkannya belum selesai.';
+      'sampai diselesaikan - skor akan diatur ulang ke 0 dan graf yang lebih tinggi akan dikunci';
 
   @override
   String get resetAndReplay => 'atur ulang dan mainkan lagi';

@@ -548,6 +548,28 @@ abstract class AppLocalizations {
   /// **'privacy options'**
   String get privacyOptions;
 
+  /// No description provided for @rankingUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'ranking update'**
+  String get rankingUpdate;
+
+  /// No description provided for @rankingGlobalResult.
+  ///
+  /// In en, this message translates to:
+  /// **'you ranked #{globalRank} globally on {date}'**
+  String rankingGlobalResult(int globalRank, DateTime date);
+
+  /// No description provided for @rankingFriendsAndGlobalResult.
+  ///
+  /// In en, this message translates to:
+  /// **'you ranked #{friendRank} among friends and #{globalRank} globally on {date}'**
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  );
+
   /// No description provided for @planarGraphWikipedia.
   ///
   /// In en, this message translates to:
@@ -941,13 +963,13 @@ abstract class AppLocalizations {
   /// No description provided for @replayGraphQuestion.
   ///
   /// In en, this message translates to:
-  /// **'replay graph {level}?'**
+  /// **'replay graph {level}'**
   String replayGraphQuestion(int level);
 
   /// No description provided for @replayWarning.
   ///
   /// In en, this message translates to:
-  /// **'your score will reset to 0 until you solve this graph again. higher graphs will be unavailable if you leave it unsolved.'**
+  /// **'until solved - score will reset to 0 and higher graphs will be locked'**
   String get replayWarning;
 
   /// No description provided for @resetAndReplay.

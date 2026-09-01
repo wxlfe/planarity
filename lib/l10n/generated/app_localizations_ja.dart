@@ -232,6 +232,29 @@ class AppLocalizationsJa extends AppLocalizations {
   String get privacyOptions => 'プライバシー設定';
 
   @override
+  String get rankingUpdate => 'ランキング更新';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateStringの世界ランキングは#$globalRank位でした';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateStringのフレンドランキングは#$friendRank位、世界ランキングは#$globalRank位でした';
+  }
+
+  @override
   String get planarGraphWikipedia => 'wikipedia:平面グラフ';
 
   @override
@@ -447,12 +470,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String replayGraphQuestion(int level) {
-    return 'グラフ$levelをもう一度プレイしますか？';
+    return 'グラフ$levelをもう一度プレイ';
   }
 
   @override
-  String get replayWarning =>
-      'このグラフを再び解くまで、スコアは0にリセットされます。未クリアのまま終了すると、以降のグラフはプレイできません。';
+  String get replayWarning => '解くまで - スコアは0にリセットされ、以降のグラフはロックされます';
 
   @override
   String get resetAndReplay => 'リセットしてリプレイ';

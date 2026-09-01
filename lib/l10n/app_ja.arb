@@ -112,6 +112,9 @@
   "passwordTooWeak": "パスワードが弱すぎます",
   "planarity": "planarity",
   "privacyOptions": "プライバシー設定",
+  "rankingUpdate": "ランキング更新",
+  "rankingGlobalResult": "{date}の世界ランキングは#{globalRank}位でした",
+  "rankingFriendsAndGlobalResult": "{date}のフレンドランキングは#{friendRank}位、世界ランキングは#{globalRank}位でした",
   "planarGraphWikipedia": "wikipedia:平面グラフ",
   "pressAgainToDelete": "もう一度押すと削除されます",
   "profile": "プロフィール",
@@ -246,7 +249,7 @@
     }
   },
   "replay": "リプレイ",
-  "replayGraphQuestion": "グラフ{level}をもう一度プレイしますか？",
+  "replayGraphQuestion": "グラフ{level}をもう一度プレイ",
   "@replayGraphQuestion": {
     "placeholders": {
       "level": {
@@ -254,7 +257,7 @@
       }
     }
   },
-  "replayWarning": "このグラフを再び解くまで、スコアは0にリセットされます。未クリアのまま終了すると、以降のグラフはプレイできません。",
+  "replayWarning": "解くまで - スコアは0にリセットされ、以降のグラフはロックされます",
   "resetAndReplay": "リセットしてリプレイ",
   "unableSaveProgress": "現在、進行状況を保存できません",
   "saveYourProgress": "進行状況を保存",

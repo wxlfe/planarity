@@ -246,6 +246,29 @@ class AppLocalizationsTr extends AppLocalizations {
   String get privacyOptions => 'gizlilik seçenekleri';
 
   @override
+  String get rankingUpdate => 'sıralama güncellemesi';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString tarihinde global sıralamada #$globalRank oldun';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString tarihinde arkadaşların arasında #$friendRank, global sıralamada #$globalRank oldun';
+  }
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: düzlemsel grafik';
 
   @override
@@ -474,12 +497,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String replayGraphQuestion(int level) {
-    return '$level. grafi yeniden oyna?';
+    return '$level. grafi yeniden oyna';
   }
 
   @override
   String get replayWarning =>
-      'bu grafi tekrar çözene kadar puanın 0\'a sıfırlanacak. çözmeden ayrılırsan sonraki grafikler kullanılamayacak.';
+      'çözülene kadar - puan 0\'a sıfırlanacak ve sonraki grafikler kilitlenecek';
 
   @override
   String get resetAndReplay => 'sıfırla ve yeniden oyna';

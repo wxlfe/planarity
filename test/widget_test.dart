@@ -81,6 +81,45 @@ void main() {
     expect(dailyScoreFor(results, carry: 9), 16);
   });
 
+  test('guest projection shifts only lower published ranks', () {
+    expect(
+      projectedGlobalRank(
+        remoteRank: 4,
+        standingScore: 8,
+        guestScore: 10,
+        isGuest: false,
+      ),
+      5,
+    );
+    expect(
+      projectedGlobalRank(
+        remoteRank: 2,
+        standingScore: 10,
+        guestScore: 10,
+        isGuest: false,
+      ),
+      2,
+    );
+    expect(
+      projectedGlobalRank(
+        remoteRank: 1,
+        standingScore: 12,
+        guestScore: 10,
+        isGuest: false,
+      ),
+      1,
+    );
+    expect(
+      projectedGlobalRank(
+        remoteRank: 3,
+        standingScore: 10,
+        guestScore: 10,
+        isGuest: true,
+      ),
+      3,
+    );
+  });
+
   test('blocked levels permit the gate and lower levels only', () {
     expect(canOpenLevel(level: 5, blockedLevel: 0), isTrue);
     expect(canOpenLevel(level: 5, blockedLevel: 5), isTrue);
@@ -323,6 +362,59 @@ void main() {
 
     expect(l10n.solvedNodes(8), 'graph 8 solved');
     expect(l10n.failedNodes(8), 'graph 8 failed');
+  });
+
+  testWidgets('ranking summary localizes global rank and date', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('es'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) => Text(
+            rankingSummaryMessage(
+              l10n: context.l10n,
+              dayKey: '2026-05-27',
+              friendRank: null,
+              globalRank: 12,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.text('quedaste #12 a nivel global el 27/5/2026'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('ranking summary includes friend and global ranks', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) => Text(
+            rankingSummaryMessage(
+              l10n: context.l10n,
+              dayKey: '2026-05-27',
+              friendRank: 3,
+              globalRank: 12,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.text('you ranked #3 among friends and #12 globally on 5/27/2026'),
+      findsOneWidget,
+    );
   });
 
   test('display name validation blocks unsafe personal info and profanity', () {
@@ -687,7 +779,11 @@ void main() {
     expect(find.text('global'), findsOneWidget);
     expect(find.text('no global scores yet'), findsOneWidget);
     expect(find.text('daily score'), findsOneWidget);
-    expect(find.text('0'), findsOneWidget);
+    expect(find.text('0'), findsNWidgets(2));
+    expect(
+      find.byKey(const ValueKey('guest-global-leaderboard-row')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Home page shows leaderboard alongside hero on wide screens', (
@@ -788,6 +884,43 @@ void main() {
     expect(find.text('global'), findsOneWidget);
     expect(find.text('puntuación diaria'), findsOneWidget);
     expect(find.text('aún no hay puntuaciones globales'), findsOneWidget);
+  });
+
+  testWidgets('App Store badge shows its localized visible label', (
+    WidgetTester tester,
+  ) async {
+    debugShowAppStoreDownloadButton = true;
+    tester.binding.platformDispatcher.localesTestValue = const [Locale('es')];
+    addTearDown(() {
+      debugShowAppStoreDownloadButton = false;
+      tester.binding.platformDispatcher.clearLocalesTestValue();
+    });
+
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(const PlanarityApp());
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('descargar en App Store'), findsOneWidget);
+    expect(find.text('Download on the'), findsNothing);
+  });
+
+  testWidgets('App Store badge supports a right-to-left locale', (
+    WidgetTester tester,
+  ) async {
+    debugShowAppStoreDownloadButton = true;
+    tester.binding.platformDispatcher.localesTestValue = const [Locale('ar')];
+    addTearDown(() {
+      debugShowAppStoreDownloadButton = false;
+      tester.binding.platformDispatcher.clearLocalesTestValue();
+    });
+
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(const PlanarityApp());
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final label = find.text('تنزيل من App Store');
+    expect(label, findsOneWidget);
+    expect(Directionality.of(tester.element(label)), TextDirection.rtl);
   });
 
   testWidgets('Home page follows a Chinese system locale', (
@@ -952,9 +1085,51 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('daily score'), findsOneWidget);
-    expect(find.text('7'), findsOneWidget);
+    expect(find.text('7'), findsNWidgets(2));
+    final dailyScoreLabel = tester.widget<Text>(find.text('daily score'));
+    final dailyScoreValue = tester
+        .widgetList<Text>(find.text('7'))
+        .firstWhere((text) => (text.style?.fontSize ?? 0) >= 28);
+    expect(dailyScoreLabel.style?.fontSize, greaterThanOrEqualTo(18));
+    expect(dailyScoreValue.style?.fontSize, greaterThanOrEqualTo(28));
     expect(find.byKey(const ValueKey('graph-tile-8')), findsOneWidget);
     expect(find.text('continue'), findsNothing);
+  });
+
+  testWidgets('Guest daily score appears in the global leaderboard offline', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'local_guest_user_document': jsonEncode({
+        'currentLevel': 8,
+        'lastPlayed': _todayKey(),
+        'locked': true,
+        'score': 7,
+      }),
+    });
+
+    await tester.pumpWidget(const PlanarityApp());
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final guestRow = find.byKey(const ValueKey('guest-global-leaderboard-row'));
+    expect(guestRow, findsOneWidget);
+    expect(
+      find.descendant(of: guestRow, matching: find.text('you')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: guestRow, matching: find.text('7')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: guestRow, matching: find.text('#--')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: guestRow, matching: find.byType(FaIcon)),
+      findsOneWidget,
+    );
+    expect(find.text('your global position'), findsOneWidget);
   });
 
   testWidgets('Home page lists today solved graphs with replay details', (
@@ -965,12 +1140,12 @@ void main() {
         'currentLevel': 6,
         'dailyResultsDay': _todayKey(),
         'dailyLevelResults': [
-          {'level': 4, 'movesUsed': 2, 'score': 2},
+          {'level': 4, 'movesUsed': 1, 'score': 3},
           {'level': 5, 'movesUsed': 5, 'score': 0},
         ],
         'lastPlayed': _todayKey(),
         'locked': false,
-        'score': 2,
+        'score': 3,
         'tutorialCompleted': true,
       }),
     });
@@ -980,13 +1155,17 @@ void main() {
     await tester.pump();
 
     expect(find.text("today's graphs"), findsNothing);
-    expect(find.text('4 nodes'), findsOneWidget);
-    expect(find.textContaining('2 moves'), findsOneWidget);
-    expect(find.text('score 2'), findsOneWidget);
+    expect(find.text('4 nodes'), findsNothing);
+    expect(find.text('4'), findsOneWidget);
+    expect(find.textContaining('1 moves'), findsNothing);
+    expect(find.text('score 3'), findsNothing);
+    expect(find.text('+3'), findsOneWidget);
+    expect(find.byIcon(Icons.done_all), findsOneWidget);
+    expect(find.byIcon(Icons.check), findsOneWidget);
     expect(find.byKey(const ValueKey('graph-tile-6')), findsOneWidget);
     expect(find.text('continue'), findsNothing);
     expect(
-      find.bySemanticsLabel('graph 4, solved in 2 moves, score 2, replay'),
+      find.bySemanticsLabel('graph 4, solved in 1 moves, score 3, replay'),
       findsOneWidget,
     );
     expect(find.bySemanticsLabel('graph 6, unsolved, play'), findsOneWidget);
@@ -994,8 +1173,23 @@ void main() {
       find.byKey(const ValueKey('graph-carousel-scroll')),
     );
     expect(carousel.scrollDirection, Axis.horizontal);
+    expect(
+      tester.getTopLeft(find.byKey(const ValueKey('graph-carousel'))).dx,
+      closeTo(0, 1),
+    );
+    expect(
+      tester.getSize(find.byKey(const ValueKey('graph-carousel'))).width,
+      closeTo(tester.view.physicalSize.width / tester.view.devicePixelRatio, 1),
+    );
 
     final tile4 = tester.getSize(find.byKey(const ValueKey('graph-tile-4')));
+    final tile4Label = tester.widget<Text>(
+      find.descendant(
+        of: find.byKey(const ValueKey('graph-tile-4')),
+        matching: find.text('4'),
+      ),
+    );
+    expect(tile4Label.style?.fontSize, greaterThanOrEqualTo(28));
     expect(tile4.width, tile4.height);
     expect(
       tester.getCenter(find.byKey(const ValueKey('graph-tile-4'))).dx,
@@ -1036,8 +1230,16 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('graph-tile-4')));
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('replay graph 4?'), findsOneWidget);
-    expect(find.textContaining('score will reset to 0'), findsOneWidget);
+    expect(find.text('replay graph 4'), findsOneWidget);
+    expect(
+      find.text(
+        'until solved - score will reset to 0 and higher graphs will be locked',
+      ),
+      findsOneWidget,
+    );
+    final replayDialog = tester.widget<AlertDialog>(find.byType(AlertDialog));
+    final dialogTheme = Theme.of(tester.element(find.byType(AlertDialog)));
+    expect(replayDialog.backgroundColor, dialogTheme.colorScheme.surface);
 
     await tester.tap(find.text('reset and replay'));
     await tester.pump(const Duration(seconds: 1));
@@ -1112,7 +1314,7 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('graph-tile-5')));
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('replay graph 5?'), findsNothing);
+    expect(find.text('replay graph 5'), findsNothing);
     expect(find.text('continue'), findsNothing);
     expect(find.byKey(const ValueKey('graph-tile-4')), findsOneWidget);
   });
@@ -1168,7 +1370,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('daily score'), findsOneWidget);
-    expect(find.text('0'), findsOneWidget);
+    expect(find.text('0'), findsNWidgets(2));
     expect(find.byIcon(FontAwesomeIcons.lock.data), findsNothing);
     expect(find.byKey(const ValueKey('graph-tile-1')), findsOneWidget);
     expect(find.text('start'), findsNothing);

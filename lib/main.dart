@@ -98,6 +98,29 @@ String _dayKeyForDate(DateTime date) {
 }
 
 @visibleForTesting
+int projectedGlobalRank({
+  required int remoteRank,
+  required int standingScore,
+  required int guestScore,
+  required bool isGuest,
+}) {
+  return !isGuest && standingScore < guestScore ? remoteRank + 1 : remoteRank;
+}
+
+@visibleForTesting
+String rankingSummaryMessage({
+  required AppLocalizations l10n,
+  required String dayKey,
+  required int? friendRank,
+  required int globalRank,
+}) {
+  final date = DateTime.parse(dayKey);
+  return friendRank == null
+      ? l10n.rankingGlobalResult(globalRank, date)
+      : l10n.rankingFriendsAndGlobalResult(friendRank, globalRank, date);
+}
+
+@visibleForTesting
 class DailyScoreSnapshotEntry {
   const DailyScoreSnapshotEntry({
     required this.uid,
@@ -3086,6 +3109,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         final theme = Theme.of(dialogContext);
         final l10n = dialogContext.l10n;
         return AlertDialog(
+          backgroundColor: theme.colorScheme.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
             side: BorderSide(
@@ -3184,6 +3208,7 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     final homeContent = _HomeHeroContent(
       scoreLabel: '$_score',
       currentLevel: _currentLevel,
+      horizontalBleed: isWide ? 0 : 24,
       onPlayPressed: _openChallenge,
       dailyLevelResults: _dailyLevelResults,
       blockedLevel: _blockedLevel,
@@ -3197,6 +3222,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       leaderboard: _LeaderboardCard(
         key: leaderboardKey,
         user: user,
+        guestScore: _score,
+        guestLocked: _blockedLevel > 0,
         refreshToken: _leaderboardRefreshTick,
         onSignUpTap: () => _showAuthModal(isSignIn: false),
         onReportUser: _showReportUserDialog,
@@ -3239,6 +3266,8 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
                                 child: _LeaderboardCard(
                                   key: leaderboardKey,
                                   user: user,
+                                  guestScore: _score,
+                                  guestLocked: _blockedLevel > 0,
                                   refreshToken: _leaderboardRefreshTick,
                                   onSignUpTap: () =>
                                       _showAuthModal(isSignIn: false),
@@ -3337,6 +3366,7 @@ class _HomeHeroContent extends StatelessWidget {
   const _HomeHeroContent({
     required this.scoreLabel,
     required this.currentLevel,
+    required this.horizontalBleed,
     required this.onPlayPressed,
     required this.dailyLevelResults,
     required this.blockedLevel,
@@ -3352,6 +3382,7 @@ class _HomeHeroContent extends StatelessWidget {
 
   final String scoreLabel;
   final int currentLevel;
+  final double horizontalBleed;
   final VoidCallback onPlayPressed;
   final List<DailyLevelResult> dailyLevelResults;
   final int blockedLevel;
@@ -3400,20 +3431,21 @@ class _HomeHeroContent extends StatelessWidget {
             const SizedBox(height: 21),
             Text(
               l10n.dailyScore,
-              style: theme.textTheme.bodySmall?.copyWith(
+              style: theme.textTheme.titleLarge?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
             const SizedBox(height: 4),
             Text(
               scoreLabel,
-              style: theme.textTheme.headlineSmall?.copyWith(
+              style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 21),
             _GraphCarousel(
               currentLevel: currentLevel,
+              horizontalBleed: horizontalBleed,
               dailyLevelResults: dailyLevelResults,
               blockedLevel: blockedLevel,
               activeReplayLevel: activeReplayLevel,
@@ -3470,6 +3502,7 @@ class _HomeHeroContent extends StatelessWidget {
 class _GraphCarousel extends StatefulWidget {
   const _GraphCarousel({
     required this.currentLevel,
+    required this.horizontalBleed,
     required this.dailyLevelResults,
     required this.blockedLevel,
     required this.activeReplayLevel,
@@ -3478,6 +3511,7 @@ class _GraphCarousel extends StatefulWidget {
   });
 
   final int currentLevel;
+  final double horizontalBleed;
   final List<DailyLevelResult> dailyLevelResults;
   final int blockedLevel;
   final int activeReplayLevel;
@@ -3588,126 +3622,143 @@ class _GraphCarouselState extends State<_GraphCarousel> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final viewportWidth = constraints.maxWidth;
+        final viewportWidth = constraints.maxWidth + widget.horizontalBleed * 2;
         final edgePadding = max(0.0, (viewportWidth - tileExtent) / 2);
         _scheduleCenter(entries, viewportWidth, tileExtent);
 
         return SizedBox(
-          key: const ValueKey('graph-carousel'),
           height: tileExtent,
           width: double.infinity,
-          child: ListView.separated(
-            key: const ValueKey('graph-carousel-scroll'),
-            controller: _scrollController,
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: edgePadding),
-            itemCount: entries.length,
-            separatorBuilder: (_, _) => const SizedBox(width: _gap),
-            itemBuilder: (context, index) {
-              final entry = entries[index];
-              final result = entry.result;
-              final isSolved = result != null && !entry.isActionable;
-              final enabled =
-                  entry.isActionable ||
-                  (widget.activeReplayLevel == 0 &&
-                      isSolved &&
-                      canOpenLevel(
-                        level: entry.level,
-                        blockedLevel: widget.blockedLevel,
-                      ));
-              final VoidCallback? onTap = entry.isActionable
-                  ? widget.onPlayPressed
-                  : enabled && result != null
-                  ? () => widget.onReplayPressed(result)
-                  : null;
-              final foreground = theme.colorScheme.onSurface.withValues(
-                alpha: enabled ? 1 : 0.34,
-              );
-              final borderColor = theme.colorScheme.onSurface.withValues(
-                alpha: entry.isActionable ? 1 : (enabled ? 0.34 : 0.14),
-              );
+          child: OverflowBox(
+            minWidth: viewportWidth,
+            maxWidth: viewportWidth,
+            minHeight: tileExtent,
+            maxHeight: tileExtent,
+            alignment: Alignment.center,
+            child: SizedBox(
+              key: const ValueKey('graph-carousel'),
+              height: tileExtent,
+              width: viewportWidth,
+              child: ListView.separated(
+                key: const ValueKey('graph-carousel-scroll'),
+                controller: _scrollController,
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: edgePadding),
+                itemCount: entries.length,
+                separatorBuilder: (_, _) => const SizedBox(width: _gap),
+                itemBuilder: (context, index) {
+                  final entry = entries[index];
+                  final result = entry.result;
+                  final isSolved = result != null && !entry.isActionable;
+                  final hasPerfectScore =
+                      isSolved && result.score == entry.level - 1;
+                  final enabled =
+                      entry.isActionable ||
+                      (widget.activeReplayLevel == 0 &&
+                          isSolved &&
+                          canOpenLevel(
+                            level: entry.level,
+                            blockedLevel: widget.blockedLevel,
+                          ));
+                  final VoidCallback? onTap = entry.isActionable
+                      ? widget.onPlayPressed
+                      : enabled && result != null
+                      ? () => widget.onReplayPressed(result)
+                      : null;
+                  final foreground = theme.colorScheme.onSurface.withValues(
+                    alpha: enabled ? 1 : 0.34,
+                  );
+                  final borderColor = theme.colorScheme.onSurface.withValues(
+                    alpha: entry.isActionable ? 1 : (enabled ? 0.34 : 0.14),
+                  );
 
-              return SizedBox.square(
-                key: ValueKey('graph-tile-${entry.level}'),
-                dimension: tileExtent,
-                child: Semantics(
-                  button: true,
-                  enabled: enabled,
-                  label: _semanticLabel(l10n, entry, enabled),
-                  onTap: onTap,
-                  child: ExcludeSemantics(
-                    child: Material(
-                      color: entry.isActionable
-                          ? theme.colorScheme.onSurface.withValues(alpha: 0.055)
-                          : Colors.transparent,
-                      child: InkWell(
-                        onTap: onTap,
-                        child: Ink(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: borderColor,
-                              width: entry.isActionable ? 2 : 1,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                  return SizedBox.square(
+                    key: ValueKey('graph-tile-${entry.level}'),
+                    dimension: tileExtent,
+                    child: Semantics(
+                      button: true,
+                      enabled: enabled,
+                      label: _semanticLabel(l10n, entry, enabled),
+                      onTap: onTap,
+                      child: ExcludeSemantics(
+                        child: Material(
+                          color: entry.isActionable
+                              ? theme.colorScheme.onSurface.withValues(
+                                  alpha: 0.055,
+                                )
+                              : Colors.transparent,
+                          child: InkWell(
+                            onTap: onTap,
+                            child: Ink(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: borderColor,
+                                  width: entry.isActionable ? 2 : 1,
+                                ),
+                              ),
+                              child: Stack(
                                 children: [
-                                  Expanded(
-                                    child: Text(
-                                      l10n.nodesCount(entry.level),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            color: foreground,
-                                            fontWeight: FontWeight.w700,
+                                  Positioned(
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            '${entry.level}',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: theme
+                                                .textTheme
+                                                .headlineMedium
+                                                ?.copyWith(
+                                                  color: foreground,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
                                           ),
+                                        ),
+                                        Icon(
+                                          entry.isActionable
+                                              ? Icons.play_arrow
+                                              : hasPerfectScore
+                                              ? Icons.done_all
+                                              : enabled
+                                              ? Icons.check
+                                              : Icons.lock_outline,
+                                          size: 18,
+                                          color: foreground,
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  Icon(
-                                    entry.isActionable
-                                        ? Icons.play_arrow
-                                        : enabled
-                                        ? Icons.check
-                                        : Icons.lock_outline,
-                                    size: 16,
-                                    color: foreground,
-                                  ),
+                                  if (isSolved)
+                                    Positioned(
+                                      right: 0,
+                                      bottom: 0,
+                                      child: Text(
+                                        '+${result.score}',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                              color: foreground,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                      ),
+                                    ),
                                 ],
                               ),
-                              const Spacer(),
-                              if (isSolved) ...[
-                                Text(
-                                  l10n.movesCount(result.movesUsed),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: foreground,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  l10n.scoreValue(result.score),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: foreground,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-              );
-            },
+                  );
+                },
+              ),
+            ),
           ),
         );
       },
@@ -5445,10 +5496,14 @@ bool _leaderboardLockedFromData(Map<String, dynamic>? profileData) {
 
 enum _LeaderboardTab { friends, global }
 
+const _guestLeaderboardUid = 'local-guest';
+
 class _LeaderboardCard extends StatelessWidget {
   const _LeaderboardCard({
     super.key,
     this.user,
+    required this.guestScore,
+    required this.guestLocked,
     required this.refreshToken,
     required this.onSignUpTap,
     required this.onReportUser,
@@ -5462,6 +5517,8 @@ class _LeaderboardCard extends StatelessWidget {
   });
 
   final User? user;
+  final int guestScore;
+  final bool guestLocked;
   final int refreshToken;
   final VoidCallback onSignUpTap;
   final Future<bool> Function({
@@ -5493,6 +5550,8 @@ class _LeaderboardCard extends StatelessWidget {
       ),
       child: _LeaderboardCardContents(
         user: user,
+        guestScore: guestScore,
+        guestLocked: guestLocked,
         refreshToken: refreshToken,
         onSignUpTap: onSignUpTap,
         onReportUser: onReportUser,
@@ -5511,6 +5570,8 @@ class _LeaderboardCard extends StatelessWidget {
 class _LeaderboardCardContents extends StatelessWidget {
   const _LeaderboardCardContents({
     required this.user,
+    required this.guestScore,
+    required this.guestLocked,
     required this.refreshToken,
     required this.onSignUpTap,
     required this.onReportUser,
@@ -5524,6 +5585,8 @@ class _LeaderboardCardContents extends StatelessWidget {
   });
 
   final User? user;
+  final int guestScore;
+  final bool guestLocked;
   final int refreshToken;
   final VoidCallback onSignUpTap;
   final Future<bool> Function({
@@ -5594,6 +5657,8 @@ class _LeaderboardCardContents extends StatelessWidget {
               : _GlobalLeaderboardView(
                   key: const ValueKey('global'),
                   user: user,
+                  guestScore: guestScore,
+                  guestLocked: guestLocked,
                   onReportUser: onReportUser,
                   reportedUserIds: reportedUserIds,
                   hiddenDisplayNameUserIds: hiddenDisplayNameUserIds,
@@ -5994,6 +6059,8 @@ class _GlobalLeaderboardView extends StatefulWidget {
   const _GlobalLeaderboardView({
     super.key,
     required this.user,
+    required this.guestScore,
+    required this.guestLocked,
     required this.onReportUser,
     required this.reportedUserIds,
     required this.hiddenDisplayNameUserIds,
@@ -6002,6 +6069,8 @@ class _GlobalLeaderboardView extends StatefulWidget {
   });
 
   final User? user;
+  final int guestScore;
+  final bool guestLocked;
   final Future<bool> Function({
     required String reportedUid,
     required String reportedDisplayName,
@@ -6047,6 +6116,11 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.user?.uid != widget.user?.uid) {
       _startListening();
+    } else if (widget.user == null &&
+        (oldWidget.guestScore != widget.guestScore ||
+            oldWidget.guestLocked != widget.guestLocked) &&
+        _firebaseReady) {
+      unawaited(_refreshGlobalRanks());
     }
   }
 
@@ -6274,6 +6348,14 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
           isCurrentUser: false,
         );
       }
+    } else {
+      standingsByUid[_guestLeaderboardUid] = _LeaderboardStanding(
+        uid: _guestLeaderboardUid,
+        name: l10n.you,
+        score: widget.guestScore,
+        isLocked: widget.guestLocked,
+        isCurrentUser: true,
+      );
     }
 
     final standings = standingsByUid.values.toList(growable: false);
@@ -6349,9 +6431,20 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
       _globalRanks
         ..clear()
         ..addEntries(
-          standings.map(
-            (entry) => MapEntry(entry.uid, ranksByScore[entry.score] ?? 1),
-          ),
+          standings.map((entry) {
+            final remoteRank = ranksByScore[entry.score] ?? 1;
+            return MapEntry(
+              entry.uid,
+              _user == null
+                  ? projectedGlobalRank(
+                      remoteRank: remoteRank,
+                      standingScore: entry.score,
+                      guestScore: widget.guestScore,
+                      isGuest: entry.uid == _guestLeaderboardUid,
+                    )
+                  : remoteRank,
+            );
+          }),
         );
       _isLoading = false;
     });
@@ -6376,7 +6469,7 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
         .map(
           (standing) => _LeaderboardEntry(
             uid: standing.uid,
-            rank: _globalRanks[standing.uid] ?? 0,
+            rank: _globalRanks[standing.uid],
             name: standing.name,
             score: standing.score,
             isLocked: standing.isLocked,
@@ -6395,21 +6488,21 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
       }
     }
 
-    if (_isLoading) {
+    if (_isLoading && _user != null) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 12),
         child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (_loadError != null) {
+    if (_loadError != null && _user != null) {
       return Text(
         l10n.unableLoadGlobalLeaderboard,
         style: theme.textTheme.bodyMedium,
       );
     }
 
-    if (topStanding == null || entries.isEmpty) {
+    if ((topStanding == null || entries.isEmpty) && _user != null) {
       return Text(l10n.noGlobalScoresYet, style: theme.textTheme.bodyMedium);
     }
 
@@ -6417,21 +6510,21 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        _LeaderboardMetric(
-          label: l10n.globalTopScore,
-          value: '${topStanding.score}',
-          detail: _displayNameForViewer(
-            uid: topStanding.uid,
-            displayName: topStanding.name,
-            hiddenUserIds: widget.hiddenDisplayNameUserIds,
+        if (topStanding != null) ...[
+          _LeaderboardMetric(
+            label: l10n.globalTopScore,
+            value: '${topStanding.score}',
+            detail: _displayNameForViewer(
+              uid: topStanding.uid,
+              displayName: topStanding.name,
+              hiddenUserIds: widget.hiddenDisplayNameUserIds,
+            ),
           ),
-        ),
-        const SizedBox(height: 14),
+          const SizedBox(height: 14),
+        ],
         _LeaderboardTable(
           entries: entries,
-          subtitle: _user == null
-              ? l10n.globalSnapshot
-              : l10n.yourGlobalPosition,
+          subtitle: l10n.yourGlobalPosition,
           reportedUserIds: widget.reportedUserIds,
           hiddenDisplayNameUserIds: widget.hiddenDisplayNameUserIds,
           onToggleHiddenDisplayName: widget.onToggleHiddenDisplayName,
@@ -6444,6 +6537,19 @@ class _GlobalLeaderboardViewState extends State<_GlobalLeaderboardView> {
                   source: 'global_leaderboard',
                 ),
         ),
+        if (_isLoading) ...[
+          const SizedBox(height: 4),
+          const Center(child: CircularProgressIndicator()),
+        ] else if (_loadError != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            l10n.unableLoadGlobalLeaderboard,
+            style: theme.textTheme.bodySmall,
+          ),
+        ] else if (topStanding == null) ...[
+          const SizedBox(height: 4),
+          Text(l10n.noGlobalScoresYet, style: theme.textTheme.bodySmall),
+        ],
       ],
     );
   }
@@ -6511,6 +6617,7 @@ class _RankingSummaryDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Dialog(
       backgroundColor: theme.colorScheme.surface,
       surfaceTintColor: Colors.transparent,
@@ -6527,29 +6634,32 @@ class _RankingSummaryDialog extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'ranking update',
+                l10n.rankingUpdate,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 10),
               Text(
-                friendRank == null
-                    ? 'you ranked #$globalRank globally on $dayKey'
-                    : 'you ranked #$friendRank among friends and #$globalRank globally on $dayKey',
+                rankingSummaryMessage(
+                  l10n: l10n,
+                  dayKey: dayKey,
+                  friendRank: friendRank,
+                  globalRank: globalRank,
+                ),
                 style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: 18),
               if (friendEntries.isNotEmpty) ...[
                 _DailyScoreSnapshotTable(
-                  title: 'friends',
+                  title: l10n.friends,
                   entries: friendEntries,
                   currentUserId: currentUserId,
                 ),
                 const SizedBox(height: 18),
               ],
               _DailyScoreSnapshotTable(
-                title: 'global',
+                title: l10n.global,
                 entries: globalEntries,
                 currentUserId: currentUserId,
               ),
@@ -6558,7 +6668,7 @@ class _RankingSummaryDialog extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: FilledButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('continue'),
+                  child: Text(l10n.continueLabel),
                 ),
               ),
             ],
@@ -6705,6 +6815,9 @@ class _LeaderboardTable extends StatelessWidget {
           );
 
           return Container(
+            key: entry.uid == _guestLeaderboardUid
+                ? const ValueKey('guest-global-leaderboard-row')
+                : null,
             margin: const EdgeInsets.only(bottom: 10),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
             decoration: BoxDecoration(
@@ -6720,7 +6833,7 @@ class _LeaderboardTable extends StatelessWidget {
                 SizedBox(
                   width: 34,
                   child: Text(
-                    '#${entry.rank}',
+                    '#${entry.rank ?? '--'}',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: isCurrentUser
                           ? rowForeground
@@ -6809,7 +6922,7 @@ class _LeaderboardEntry {
   });
 
   final String uid;
-  final int rank;
+  final int? rank;
   final String name;
   final int score;
   final bool isLocked;
@@ -7986,43 +8099,31 @@ class _AppStoreBadge extends StatelessWidget {
               border: Border.all(color: const Color(0xffa6a6a6)),
               borderRadius: borderRadius,
             ),
-            child: const ExcludeSemantics(
+            child: ExcludeSemantics(
               child: Center(
-                child: FittedBox(
-                  fit: BoxFit.contain,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      FaIcon(
+                      const FaIcon(
                         FontAwesomeIcons.apple,
                         color: Colors.white,
                         size: 31,
                       ),
-                      SizedBox(width: 9),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Download on the',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 9.5,
-                              height: 1,
-                              letterSpacing: -0.1,
-                            ),
+                      const SizedBox(width: 9),
+                      Expanded(
+                        child: Text(
+                          label,
+                          maxLines: 2,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10.5,
+                            height: 1.15,
+                            fontWeight: FontWeight.w600,
                           ),
-                          SizedBox(height: 2),
-                          Text(
-                            'App Store',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 22.5,
-                              height: 1,
-                              letterSpacing: -0.35,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),

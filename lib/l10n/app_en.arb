@@ -112,6 +112,22 @@
   "passwordTooWeak": "password is too weak",
   "planarity": "planarity",
   "privacyOptions": "privacy options",
+  "rankingUpdate": "ranking update",
+  "rankingGlobalResult": "you ranked #{globalRank} globally on {date}",
+  "@rankingGlobalResult": {
+    "placeholders": {
+      "globalRank": {"type": "int"},
+      "date": {"type": "DateTime", "format": "yMd"}
+    }
+  },
+  "rankingFriendsAndGlobalResult": "you ranked #{friendRank} among friends and #{globalRank} globally on {date}",
+  "@rankingFriendsAndGlobalResult": {
+    "placeholders": {
+      "friendRank": {"type": "int"},
+      "globalRank": {"type": "int"},
+      "date": {"type": "DateTime", "format": "yMd"}
+    }
+  },
   "planarGraphWikipedia": "wikipedia: planar graph",
   "pressAgainToDelete": "press again to delete",
   "profile": "profile",
@@ -246,7 +262,7 @@
     }
   },
   "replay": "replay",
-  "replayGraphQuestion": "replay graph {level}?",
+  "replayGraphQuestion": "replay graph {level}",
   "@replayGraphQuestion": {
     "placeholders": {
       "level": {
@@ -254,7 +270,7 @@
       }
     }
   },
-  "replayWarning": "your score will reset to 0 until you solve this graph again. higher graphs will be unavailable if you leave it unsolved.",
+  "replayWarning": "until solved - score will reset to 0 and higher graphs will be locked",
   "resetAndReplay": "reset and replay",
   "unableSaveProgress": "unable to save progress right now",
   "saveYourProgress": "save your progress",

@@ -112,6 +112,9 @@
   "passwordTooWeak": "كلمة المرور ضعيفة جدًا",
   "planarity": "planarity",
   "privacyOptions": "خيارات الخصوصية",
+  "rankingUpdate": "تحديث الترتيب",
+  "rankingGlobalResult": "حصلت على المرتبة #{globalRank} عالميًا في {date}",
+  "rankingFriendsAndGlobalResult": "حصلت على المرتبة #{friendRank} بين الأصدقاء والمرتبة #{globalRank} عالميًا في {date}",
   "planarGraphWikipedia": "ويكيبيديا: رسم بياني مستوٍ",
   "pressAgainToDelete": "اضغط مرة أخرى للحذف",
   "profile": "الملف الشخصي",
@@ -246,7 +249,7 @@
     }
   },
   "replay": "إعادة اللعب",
-  "replayGraphQuestion": "إعادة لعب الرسم البياني {level}؟",
+  "replayGraphQuestion": "إعادة لعب الرسم البياني {level}",
   "@replayGraphQuestion": {
     "placeholders": {
       "level": {
@@ -254,7 +257,7 @@
       }
     }
   },
-  "replayWarning": "ستُعاد نتيجتك إلى 0 حتى تحل هذا الرسم البياني مرة أخرى. لن تتوفر الرسوم البيانية الأعلى إذا تركته دون حل.",
+  "replayWarning": "حتى الحل - ستُعاد النتيجة إلى 0 وستُقفل الرسوم البيانية الأعلى",
   "resetAndReplay": "إعادة الضبط واللعب",
   "unableSaveProgress": "تعذر حفظ التقدم الآن",
   "saveYourProgress": "احفظ تقدمك",

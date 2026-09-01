@@ -242,6 +242,29 @@ class AppLocalizationsHi extends AppLocalizations {
   String get privacyOptions => 'गोपनीयता विकल्प';
 
   @override
+  String get rankingUpdate => 'रैंकिंग अपडेट';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'आपने $dateString को वैश्विक स्तर पर #$globalRank स्थान प्राप्त किया';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'आपने $dateString को दोस्तों में #$friendRank और वैश्विक स्तर पर #$globalRank स्थान प्राप्त किया';
+  }
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: समतलीय ग्राफ';
 
   @override
@@ -466,12 +489,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String replayGraphQuestion(int level) {
-    return 'ग्राफ $level फिर से खेलें?';
+    return 'ग्राफ $level फिर से खेलें';
   }
 
   @override
   String get replayWarning =>
-      'इस ग्राफ को दोबारा हल करने तक आपका स्कोर 0 हो जाएगा। इसे अनसुलझा छोड़ने पर आगे के ग्राफ उपलब्ध नहीं होंगे।';
+      'हल होने तक - स्कोर 0 पर रीसेट होगा और आगे के ग्राफ लॉक रहेंगे';
 
   @override
   String get resetAndReplay => 'रीसेट करके फिर खेलें';

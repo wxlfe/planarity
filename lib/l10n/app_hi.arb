@@ -112,6 +112,9 @@
   "passwordTooWeak": "पासवर्ड बहुत कमजोर है",
   "planarity": "planarity",
   "privacyOptions": "गोपनीयता विकल्प",
+  "rankingUpdate": "रैंकिंग अपडेट",
+  "rankingGlobalResult": "आपने {date} को वैश्विक स्तर पर #{globalRank} स्थान प्राप्त किया",
+  "rankingFriendsAndGlobalResult": "आपने {date} को दोस्तों में #{friendRank} और वैश्विक स्तर पर #{globalRank} स्थान प्राप्त किया",
   "planarGraphWikipedia": "wikipedia: समतलीय ग्राफ",
   "pressAgainToDelete": "हटाने के लिए फिर दबाएँ",
   "profile": "प्रोफ़ाइल",
@@ -246,7 +249,7 @@
     }
   },
   "replay": "फिर से खेलें",
-  "replayGraphQuestion": "ग्राफ {level} फिर से खेलें?",
+  "replayGraphQuestion": "ग्राफ {level} फिर से खेलें",
   "@replayGraphQuestion": {
     "placeholders": {
       "level": {
@@ -254,7 +257,7 @@
       }
     }
   },
-  "replayWarning": "इस ग्राफ को दोबारा हल करने तक आपका स्कोर 0 हो जाएगा। इसे अनसुलझा छोड़ने पर आगे के ग्राफ उपलब्ध नहीं होंगे।",
+  "replayWarning": "हल होने तक - स्कोर 0 पर रीसेट होगा और आगे के ग्राफ लॉक रहेंगे",
   "resetAndReplay": "रीसेट करके फिर खेलें",
   "unableSaveProgress": "अभी प्रगति सहेजी नहीं जा सकी",
   "saveYourProgress": "अपनी प्रगति सहेजें",

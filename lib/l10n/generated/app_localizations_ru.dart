@@ -247,6 +247,29 @@ class AppLocalizationsRu extends AppLocalizations {
   String get privacyOptions => 'настройки конфиденциальности';
 
   @override
+  String get rankingUpdate => 'обновление рейтинга';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'ваше место в мировом рейтинге за $dateString: #$globalRank';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'ваше место среди друзей за $dateString: #$friendRank, в мировом рейтинге: #$globalRank';
+  }
+
+  @override
   String get planarGraphWikipedia => 'википедия: планарный граф';
 
   @override
@@ -478,12 +501,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String replayGraphQuestion(int level) {
-    return 'переиграть граф $level?';
+    return 'переиграть граф $level';
   }
 
   @override
   String get replayWarning =>
-      'ваш результат обнулится, пока вы снова не решите этот граф. если оставить его нерешённым, следующие графы будут недоступны.';
+      'до решения - результат будет сброшен до 0, а следующие графы будут заблокированы';
 
   @override
   String get resetAndReplay => 'сбросить и переиграть';

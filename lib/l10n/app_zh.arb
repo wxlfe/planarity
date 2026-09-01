@@ -112,6 +112,9 @@
   "passwordTooWeak": "密码太弱",
   "planarity": "planarity",
   "privacyOptions": "隐私选项",
+  "rankingUpdate": "排名更新",
+  "rankingGlobalResult": "你在 {date} 的全球排名为第 #{globalRank} 名",
+  "rankingFriendsAndGlobalResult": "你在 {date} 的好友排名为第 #{friendRank} 名，全球排名为第 #{globalRank} 名",
   "planarGraphWikipedia": "维基百科：平面图",
   "pressAgainToDelete": "再次按下以删除",
   "profile": "个人资料",
@@ -246,7 +249,7 @@
     }
   },
   "replay": "重新挑战",
-  "replayGraphQuestion": "重新挑战图形 {level}？",
+  "replayGraphQuestion": "重新挑战图形 {level}",
   "@replayGraphQuestion": {
     "placeholders": {
       "level": {
@@ -254,7 +257,7 @@
       }
     }
   },
-  "replayWarning": "在你再次解开此图形前，分数将重置为 0。如果离开时仍未解开，后续图形将不可用。",
+  "replayWarning": "直到解开 - 分数将重置为 0，更高关卡的图形将被锁定",
   "resetAndReplay": "重置并重新挑战",
   "unableSaveProgress": "目前无法保存进度",
   "saveYourProgress": "保存你的进度",

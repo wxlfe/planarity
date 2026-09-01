@@ -112,6 +112,9 @@
   "passwordTooWeak": "le mot de passe est trop faible",
   "planarity": "planarity",
   "privacyOptions": "options de confidentialité",
+  "rankingUpdate": "mise à jour du classement",
+  "rankingGlobalResult": "vous avez terminé #{globalRank} au classement mondial le {date}",
+  "rankingFriendsAndGlobalResult": "vous avez terminé #{friendRank} parmi vos amis et #{globalRank} au classement mondial le {date}",
   "planarGraphWikipedia": "wikipedia : graphe planaire",
   "pressAgainToDelete": "appuyez à nouveau pour supprimer",
   "profile": "profil",
@@ -246,7 +249,7 @@
     }
   },
   "replay": "rejouer",
-  "replayGraphQuestion": "rejouer le graphe {level} ?",
+  "replayGraphQuestion": "rejouer le graphe {level}",
   "@replayGraphQuestion": {
     "placeholders": {
       "level": {
@@ -254,7 +257,7 @@
       }
     }
   },
-  "replayWarning": "ton score sera remis à 0 jusqu'à ce que tu résolves à nouveau ce graphe. les graphes suivants seront indisponibles si tu le laisses non résolu.",
+  "replayWarning": "jusqu'à résolution - le score sera remis à 0 et les graphes suivants seront verrouillés",
   "resetAndReplay": "réinitialiser et rejouer",
   "unableSaveProgress": "impossible d'enregistrer la progression pour le moment",
   "saveYourProgress": "enregistre ta progression",

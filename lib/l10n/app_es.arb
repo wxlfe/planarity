@@ -112,6 +112,9 @@
   "passwordTooWeak": "la contraseña es demasiado débil",
   "planarity": "planarity",
   "privacyOptions": "opciones de privacidad",
+  "rankingUpdate": "actualización de clasificación",
+  "rankingGlobalResult": "quedaste #{globalRank} a nivel global el {date}",
+  "rankingFriendsAndGlobalResult": "quedaste #{friendRank} entre amigos y #{globalRank} a nivel global el {date}",
   "planarGraphWikipedia": "wikipedia: grafo planar",
   "pressAgainToDelete": "presiona de nuevo para eliminar",
   "profile": "perfil",
@@ -246,7 +249,7 @@
     }
   },
   "replay": "volver a jugar",
-  "replayGraphQuestion": "¿volver a jugar el grafo {level}?",
+  "replayGraphQuestion": "volver a jugar el grafo {level}",
   "@replayGraphQuestion": {
     "placeholders": {
       "level": {
@@ -254,7 +257,7 @@
       }
     }
   },
-  "replayWarning": "tu puntuación volverá a 0 hasta que resuelvas este grafo de nuevo. los grafos superiores no estarán disponibles si lo dejas sin resolver.",
+  "replayWarning": "hasta resolverlo - la puntuación volverá a 0 y los grafos superiores quedarán bloqueados",
   "resetAndReplay": "reiniciar y volver a jugar",
   "unableSaveProgress": "no se puede guardar el progreso en este momento",
   "saveYourProgress": "guarda tu progreso",

@@ -252,6 +252,29 @@ class AppLocalizationsAr extends AppLocalizations {
   String get privacyOptions => 'خيارات الخصوصية';
 
   @override
+  String get rankingUpdate => 'تحديث الترتيب';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'حصلت على المرتبة #$globalRank عالميًا في $dateString';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'حصلت على المرتبة #$friendRank بين الأصدقاء والمرتبة #$globalRank عالميًا في $dateString';
+  }
+
+  @override
   String get planarGraphWikipedia => 'ويكيبيديا: رسم بياني مستوٍ';
 
   @override
@@ -472,12 +495,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String replayGraphQuestion(int level) {
-    return 'إعادة لعب الرسم البياني $level؟';
+    return 'إعادة لعب الرسم البياني $level';
   }
 
   @override
   String get replayWarning =>
-      'ستُعاد نتيجتك إلى 0 حتى تحل هذا الرسم البياني مرة أخرى. لن تتوفر الرسوم البيانية الأعلى إذا تركته دون حل.';
+      'حتى الحل - ستُعاد النتيجة إلى 0 وستُقفل الرسوم البيانية الأعلى';
 
   @override
   String get resetAndReplay => 'إعادة الضبط واللعب';

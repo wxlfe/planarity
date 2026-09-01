@@ -112,6 +112,9 @@
   "passwordTooWeak": "mật khẩu quá yếu",
   "planarity": "planarity",
   "privacyOptions": "tùy chọn quyền riêng tư",
+  "rankingUpdate": "cập nhật thứ hạng",
+  "rankingGlobalResult": "bạn xếp hạng #{globalRank} toàn cầu vào {date}",
+  "rankingFriendsAndGlobalResult": "bạn xếp hạng #{friendRank} trong nhóm bạn và #{globalRank} toàn cầu vào {date}",
   "planarGraphWikipedia": "wikipedia: đồ thị phẳng",
   "pressAgainToDelete": "nhấn lại để xóa",
   "profile": "hồ sơ",
@@ -246,7 +249,7 @@
     }
   },
   "replay": "chơi lại",
-  "replayGraphQuestion": "chơi lại đồ thị {level}?",
+  "replayGraphQuestion": "chơi lại đồ thị {level}",
   "@replayGraphQuestion": {
     "placeholders": {
       "level": {
@@ -254,7 +257,7 @@
       }
     }
   },
-  "replayWarning": "điểm của bạn sẽ được đặt lại về 0 cho đến khi bạn giải lại đồ thị này. các đồ thị tiếp theo sẽ không khả dụng nếu bạn bỏ dở.",
+  "replayWarning": "cho đến khi giải xong - điểm sẽ được đặt lại về 0 và các đồ thị tiếp theo sẽ bị khóa",
   "resetAndReplay": "đặt lại và chơi lại",
   "unableSaveProgress": "hiện không thể lưu tiến trình",
   "saveYourProgress": "lưu tiến trình của bạn",
