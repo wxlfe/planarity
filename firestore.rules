@@ -145,7 +145,8 @@ service cloud.firestore {
       return isOwner(uid) &&
         validUserDocument(request.resource.data) &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(userFields()) &&
-        request.resource.data.lifetimeScore >= resource.data.lifetimeScore &&
+        (!('lifetimeScore' in resource.data.keys()) ||
+          request.resource.data.lifetimeScore >= resource.data.lifetimeScore) &&
         (!('achievementSolveCount' in resource.data.keys()) ||
           request.resource.data.achievementSolveCount >= resource.data.achievementSolveCount) &&
         (!('unlockedAchievements' in resource.data.keys()) ||

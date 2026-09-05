@@ -245,6 +245,72 @@ void main() {
     expect(merged['unlockedAchievements'], ['first_step', 'practice']);
   });
 
+  test(
+    'user document backfill adds missing defaults and preserves profile',
+    () {
+      final defaultDocument = {
+        'displayName': 'anonymous player',
+        'friends': <String>[],
+        'hiddenDisplayNameUserIds': <String>[],
+        'currentLevel': 1,
+        'lastPlayed': '',
+        'locked': false,
+        'lifetimeScore': 0,
+        'score': 0,
+        'signUpPromptEligibleDay': '',
+      };
+      final profileData = {
+        'displayName': 'Ada',
+        'currentLevel': 7,
+        'lastPlayed': '2026-05-28',
+        'locked': true,
+        'score': 9,
+      };
+
+      final backfilled = backfillUserDocumentDefaults(
+        defaultDocument: defaultDocument,
+        profileData: profileData,
+      );
+
+      expect(backfilled['displayName'], 'Ada');
+      expect(backfilled['currentLevel'], 7);
+      expect(backfilled['lastPlayed'], '2026-05-28');
+      expect(backfilled['locked'], isTrue);
+      expect(backfilled['score'], 9);
+      expect(backfilled['friends'], isEmpty);
+      expect(backfilled['hiddenDisplayNameUserIds'], isEmpty);
+      expect(backfilled['lifetimeScore'], 0);
+      expect(backfilled['signUpPromptEligibleDay'], '');
+    },
+  );
+
+  test('user document backfill detection only checks missing fields', () {
+    final defaultDocument = {
+      'displayName': 'anonymous player',
+      'friends': <String>[],
+      'score': 0,
+    };
+
+    expect(
+      userDocumentNeedsBackfill(
+        defaultDocument: defaultDocument,
+        profileData: {'displayName': 'Ada', 'score': 9},
+      ),
+      isTrue,
+    );
+    expect(
+      userDocumentNeedsBackfill(
+        defaultDocument: defaultDocument,
+        profileData: {
+          'displayName': 'Ada',
+          'friends': ['friend-uid'],
+          'score': 9,
+        },
+      ),
+      isFalse,
+    );
+  });
+
   test('service errors are classified without exposing raw messages', () {
     expect(
       sanitizedServiceErrorMessage(

@@ -879,9 +879,22 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       return _loadLocalGuestUserDocument();
     }
 
-    var profileData = await _loadUserDocument(user.uid);
+    final profileData = await _loadUserDocument(user.uid);
     if (profileData != null) {
-      return profileData;
+      final defaultDocument = _defaultUserDocument(
+        displayName: _defaultDisplayName(user),
+      );
+      final backfilledProfileData = backfillUserDocumentDefaults(
+        defaultDocument: defaultDocument,
+        profileData: profileData,
+      );
+      if (userDocumentNeedsBackfill(
+        defaultDocument: defaultDocument,
+        profileData: profileData,
+      )) {
+        await _ensureUserDocument(user, document: backfilledProfileData);
+      }
+      return backfilledProfileData;
     }
 
     await _ensureUserDocument(user);
@@ -8845,6 +8858,22 @@ Map<String, dynamic> mergeGuestProgressForNewAccount({
     for (final field in progressFields)
       if (guestDocument.containsKey(field)) field: guestDocument[field],
   };
+}
+
+@visibleForTesting
+Map<String, dynamic> backfillUserDocumentDefaults({
+  required Map<String, dynamic> defaultDocument,
+  required Map<String, dynamic> profileData,
+}) {
+  return <String, dynamic>{...defaultDocument, ...profileData};
+}
+
+@visibleForTesting
+bool userDocumentNeedsBackfill({
+  required Map<String, dynamic> defaultDocument,
+  required Map<String, dynamic> profileData,
+}) {
+  return defaultDocument.keys.any((key) => !profileData.containsKey(key));
 }
 
 @visibleForTesting
