@@ -2106,45 +2106,89 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
     if (!mounted) {
       return;
     }
-    final initialDisplayName = _profileDisplayName(profileData, user);
-    final lifetimeScore = _profileLifetimeScore(profileData);
-    final initialFriendIds = _profileFriendIds(profileData);
-    final result = await showDialog<_ProfileDialogResult>(
+    final displayName = _profileDisplayName(profileData, user);
+    final destination = await showDialog<_ProfileDestination>(
       context: context,
       builder: (dialogContext) {
-        return _ProfileDialog(
-          initialDisplayName: initialDisplayName,
-          initialFriendIds: initialFriendIds,
-          lifetimeScore: lifetimeScore,
-          unlockedAchievementIds: _profileStringSet(
-            profileData,
-            'unlockedAchievements',
-          ),
-          loadFriends: (friendIds) => _loadFriendProfiles(user.uid, friendIds),
-          removeFriend: (friendUid) =>
-              _removeFriendPair(userId: user.uid, friendUid: friendUid),
-          reportUser: ({required reportedUid, required reportedDisplayName}) =>
-              _showReportUserDialog(
-                reportedUid: reportedUid,
-                reportedDisplayName: reportedDisplayName,
-                source: 'friends',
-              ),
-          hasReportedUser: _reportedUserIdsThisSession.contains,
-          hiddenDisplayNameUserIds: _hiddenDisplayNameUserIds,
-          toggleHiddenDisplayName: _toggleHiddenDisplayName,
-          buildInviteLink: () => _friendInvitePath(user.uid),
-          shareInvite: (inviteLink, isDark, sharePositionOrigin) =>
-              _shareFriendInviteCard(
-                inviteLink: inviteLink,
-                isDark: isDark,
-                sharePositionOrigin: sharePositionOrigin,
-              ),
+        return ProfileDialog(
+          displayName: displayName,
+          lifetimeScore: _profileLifetimeScore(profileData),
+          onAchievements: () =>
+              Navigator.of(dialogContext).pop(_ProfileDestination.achievements),
+          onFriends: () =>
+              Navigator.of(dialogContext).pop(_ProfileDestination.friends),
+          onAccountSettings: () => Navigator.of(
+            dialogContext,
+          ).pop(_ProfileDestination.accountSettings),
         );
       },
     );
 
-    if (result == null || !mounted) {
+    if (destination == null || !mounted) {
       _refreshLeaderboard();
+      return;
+    }
+
+    switch (destination) {
+      case _ProfileDestination.achievements:
+        await showDialog<void>(
+          context: context,
+          builder: (dialogContext) => _AchievementsDialog(
+            unlockedAchievementIds: _profileStringSet(
+              profileData,
+              'unlockedAchievements',
+            ),
+          ),
+        );
+      case _ProfileDestination.friends:
+        await showDialog<void>(
+          context: context,
+          builder: (dialogContext) => _FriendsDialog(
+            initialFriendIds: _profileFriendIds(profileData),
+            loadFriends: (friendIds) =>
+                _loadFriendProfiles(user.uid, friendIds),
+            removeFriend: (friendUid) =>
+                _removeFriendPair(userId: user.uid, friendUid: friendUid),
+            reportUser:
+                ({required reportedUid, required reportedDisplayName}) =>
+                    _showReportUserDialog(
+                      reportedUid: reportedUid,
+                      reportedDisplayName: reportedDisplayName,
+                      source: 'friends',
+                    ),
+            hasReportedUser: _reportedUserIdsThisSession.contains,
+            hiddenDisplayNameUserIds: _hiddenDisplayNameUserIds,
+            toggleHiddenDisplayName: _toggleHiddenDisplayName,
+            buildInviteLink: () => _friendInvitePath(user.uid),
+            shareInvite: (inviteLink, isDark, sharePositionOrigin) =>
+                _shareFriendInviteCard(
+                  inviteLink: inviteLink,
+                  isDark: isDark,
+                  sharePositionOrigin: sharePositionOrigin,
+                ),
+          ),
+        );
+      case _ProfileDestination.accountSettings:
+        await _showAccountSettingsModal(
+          user: user,
+          profileData: profileData,
+          initialDisplayName: displayName,
+        );
+    }
+    _refreshLeaderboard();
+  }
+
+  Future<void> _showAccountSettingsModal({
+    required User user,
+    required Map<String, dynamic>? profileData,
+    required String initialDisplayName,
+  }) async {
+    final result = await showDialog<_AccountSettingsDialogResult>(
+      context: context,
+      builder: (dialogContext) =>
+          _AccountSettingsDialog(initialDisplayName: initialDisplayName),
+    );
+    if (result == null || !mounted) {
       return;
     }
 
@@ -2161,7 +2205,6 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
         await GoogleSignIn.instance.signOut().catchError((_) {});
       }
       await FirebaseAuth.instance.signOut();
-      _refreshLeaderboard();
       return;
     }
 
@@ -2176,14 +2219,12 @@ class _PlanarityHomePageState extends State<PlanarityHomePage>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorText ?? _l10n.accountDeleted)),
       );
-      _refreshLeaderboard();
       return;
     }
 
     if (result.shouldPersist) {
       await _saveDisplayName(user: user, displayName: result.displayName);
     }
-    _refreshLeaderboard();
   }
 
   Future<String?> _deleteAccount({
@@ -3805,8 +3846,8 @@ class _AuthSubmissionResult {
   final User? userToEdit;
 }
 
-class _ProfileDialogResult {
-  const _ProfileDialogResult({
+class _AccountSettingsDialogResult {
+  const _AccountSettingsDialogResult({
     required this.displayName,
     required this.shouldPersist,
     required this.signOutRequested,
@@ -4139,14 +4180,190 @@ class _AuthDialogState extends State<_AuthDialog> {
   }
 }
 
-enum _ProfileSection { overview, friends, achievements }
+enum _ProfileDestination { achievements, friends, accountSettings }
 
-class _ProfileDialog extends StatefulWidget {
-  const _ProfileDialog({
-    required this.initialDisplayName,
-    required this.initialFriendIds,
+class ProfileDialog extends StatelessWidget {
+  const ProfileDialog({
+    super.key,
+    required this.displayName,
     required this.lifetimeScore,
-    required this.unlockedAchievementIds,
+    required this.onAchievements,
+    required this.onFriends,
+    required this.onAccountSettings,
+  });
+
+  final String displayName;
+  final int lifetimeScore;
+  final VoidCallback onAchievements;
+  final VoidCallback onFriends;
+  final VoidCallback onAccountSettings;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return Dialog(
+      backgroundColor: theme.colorScheme.surface,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+        side: BorderSide(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.35),
+        ),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 460),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.profile,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                displayName,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                l10n.lifetimeScoreValue(lifetimeScore),
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: _ProfileActionTile(
+                      icon: const Icon(Icons.workspace_premium_outlined),
+                      label: l10n.achievements,
+                      onPressed: onAchievements,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _ProfileActionTile(
+                      icon: const FaIcon(FontAwesomeIcons.userGroup, size: 17),
+                      label: l10n.friends,
+                      onPressed: onFriends,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _ProfileActionTile(
+                      icon: const Icon(Icons.settings_outlined),
+                      label: l10n.accountSettings,
+                      onPressed: onAccountSettings,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileActionTile extends StatelessWidget {
+  const _ProfileActionTile({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final Widget icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      key: const ValueKey('profile-action-tile'),
+      aspectRatio: 1,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.all(10),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        ),
+        onPressed: onPressed,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Align(alignment: Alignment.topLeft, child: icon),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Text(
+                label,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AchievementsDialog extends StatelessWidget {
+  const _AchievementsDialog({required this.unlockedAchievementIds});
+
+  final Set<String> unlockedAchievementIds;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return Dialog(
+      backgroundColor: theme.colorScheme.surface,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+        side: BorderSide(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.35),
+        ),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 460, maxHeight: 620),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.achievements,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Expanded(
+                child: AchievementList(unlockedIds: unlockedAchievementIds),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FriendsDialog extends StatefulWidget {
+  const _FriendsDialog({
+    required this.initialFriendIds,
     required this.loadFriends,
     required this.removeFriend,
     required this.reportUser,
@@ -4157,10 +4374,7 @@ class _ProfileDialog extends StatefulWidget {
     required this.shareInvite,
   });
 
-  final String initialDisplayName;
   final List<String> initialFriendIds;
-  final int lifetimeScore;
-  final Set<String> unlockedAchievementIds;
   final Future<List<_FriendProfile>> Function(List<String> friendIds)
   loadFriends;
   final Future<void> Function(String friendUid) removeFriend;
@@ -4181,109 +4395,20 @@ class _ProfileDialog extends StatefulWidget {
   shareInvite;
 
   @override
-  State<_ProfileDialog> createState() => _ProfileDialogState();
+  State<_FriendsDialog> createState() => _FriendsDialogState();
 }
 
-class _ProfileDialogState extends State<_ProfileDialog> {
-  late final TextEditingController _displayNameController;
+class _FriendsDialogState extends State<_FriendsDialog> {
   late List<String> _friendIds;
   List<_FriendProfile> _friends = const <_FriendProfile>[];
   final Set<String> _removingFriendIds = <String>{};
-  Timer? _deleteAccountResetTimer;
   bool _friendsLoading = true;
-  bool _deleteAccountConfirming = false;
-  String? _displayNameErrorText;
-  _ProfileSection _section = _ProfileSection.overview;
-
-  String get _initialDisplayNameTrimmed => widget.initialDisplayName.trim();
-
-  String? _displayNameErrorForInput(String value) {
-    if (value.trim() == _initialDisplayNameTrimmed) {
-      return null;
-    }
-    return _localizedDisplayNameValidationMessage(value, context.l10n);
-  }
-
-  void _updateDisplayNameValidation(String value) {
-    final nextErrorText = _displayNameErrorForInput(value);
-    if (_displayNameErrorText == nextErrorText) {
-      return;
-    }
-    setState(() {
-      _displayNameErrorText = nextErrorText;
-    });
-  }
-
-  void _submitProfileDialog({
-    required bool shouldPersist,
-    required bool signOutRequested,
-    required bool deleteAccountRequested,
-  }) {
-    final errorText = shouldPersist
-        ? _localizedDisplayNameValidationMessage(
-            _displayNameController.text,
-            context.l10n,
-          )
-        : null;
-    if (errorText != null) {
-      setState(() {
-        _displayNameErrorText = errorText;
-      });
-      return;
-    }
-    Navigator.of(context).pop(
-      _ProfileDialogResult(
-        displayName: _displayNameController.text,
-        shouldPersist: shouldPersist,
-        signOutRequested: signOutRequested,
-        deleteAccountRequested: deleteAccountRequested,
-      ),
-    );
-  }
-
-  void _handleDeleteAccountPressed() {
-    if (_deleteAccountConfirming) {
-      _deleteAccountResetTimer?.cancel();
-      Navigator.of(context).pop(
-        _ProfileDialogResult(
-          displayName: _displayNameController.text,
-          shouldPersist: false,
-          signOutRequested: false,
-          deleteAccountRequested: true,
-        ),
-      );
-      return;
-    }
-
-    _deleteAccountResetTimer?.cancel();
-    setState(() {
-      _deleteAccountConfirming = true;
-    });
-    _deleteAccountResetTimer = Timer(const Duration(seconds: 15), () {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _deleteAccountConfirming = false;
-      });
-    });
-  }
 
   @override
   void initState() {
     super.initState();
-    _displayNameController = TextEditingController(
-      text: widget.initialDisplayName,
-    );
     _friendIds = List<String>.from(widget.initialFriendIds);
     _refreshFriends();
-  }
-
-  @override
-  void dispose() {
-    _deleteAccountResetTimer?.cancel();
-    _displayNameController.dispose();
-    super.dispose();
   }
 
   Future<void> _refreshFriends() async {
@@ -4318,7 +4443,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
             side: BorderSide(
-              color: theme.colorScheme.onSurface.withOpacity(0.35),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.35),
             ),
           ),
           child: ConstrainedBox(
@@ -4398,171 +4523,18 @@ class _ProfileDialogState extends State<_ProfileDialog> {
     );
   }
 
-  Widget _buildProfileOverview(ThemeData theme, AppLocalizations l10n) {
-    return Dialog(
-      backgroundColor: theme.colorScheme.surface,
-      surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-        side: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.35)),
-      ),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 460),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.profile,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: _displayNameController,
-                decoration: InputDecoration(
-                  labelText: l10n.displayName,
-                  border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.zero,
-                  ),
-                  errorText: _displayNameErrorText,
-                ),
-                onChanged: _updateDisplayNameValidation,
-              ),
-              const SizedBox(height: 14),
-              Text(
-                l10n.lifetimeScoreValue(widget.lifetimeScore),
-                style: theme.textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 18),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => setState(() {
-                    _section = _ProfileSection.achievements;
-                  }),
-                  icon: const Icon(Icons.workspace_premium_outlined),
-                  label: Text(l10n.achievements),
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => setState(() {
-                    _section = _ProfileSection.friends;
-                  }),
-                  icon: const FaIcon(FontAwesomeIcons.userGroup, size: 15),
-                  label: Text(l10n.friends),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () => _submitProfileDialog(
-                    shouldPersist: true,
-                    signOutRequested: false,
-                    deleteAccountRequested: false,
-                  ),
-                  child: Text(l10n.submit),
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: () => _submitProfileDialog(
-                    shouldPersist: false,
-                    signOutRequested: true,
-                    deleteAccountRequested: false,
-                  ),
-                  child: Text(l10n.signOut),
-                ),
-              ),
-              SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: _handleDeleteAccountPressed,
-                  child: Text(
-                    _deleteAccountConfirming
-                        ? l10n.pressAgainToDelete
-                        : l10n.deleteAccount,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAchievements(ThemeData theme, AppLocalizations l10n) {
-    return Dialog(
-      backgroundColor: theme.colorScheme.surface,
-      surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-        side: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.35)),
-      ),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 460, maxHeight: 620),
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => setState(() {
-                      _section = _ProfileSection.overview;
-                    }),
-                    icon: const Icon(Icons.arrow_back),
-                    tooltip: l10n.back,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    l10n.achievements,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Expanded(
-                child: AchievementList(
-                  unlockedIds: widget.unlockedAchievementIds,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    if (_section == _ProfileSection.overview) {
-      return _buildProfileOverview(theme, l10n);
-    }
-    if (_section == _ProfileSection.achievements) {
-      return _buildAchievements(theme, l10n);
-    }
-
     return Dialog(
       backgroundColor: theme.colorScheme.surface,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.zero,
-        side: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.35)),
+        side: BorderSide(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.35),
+        ),
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 460),
@@ -4572,69 +4544,12 @@ class _ProfileDialogState extends State<_ProfileDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => setState(() {
-                      _section = _ProfileSection.overview;
-                    }),
-                    icon: const Icon(Icons.arrow_back),
-                    tooltip: l10n.back,
-                  ),
-                  Text(
-                    l10n.friends,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.profileSubtitle,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.72),
-                ),
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: _displayNameController,
-                textInputAction: TextInputAction.done,
-                decoration: InputDecoration(
-                  labelText: l10n.displayName,
-                  border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.zero,
-                  ),
-                  errorText: _displayNameErrorText,
-                ),
-                onChanged: _updateDisplayNameValidation,
-                onSubmitted: (_) => _submitProfileDialog(
-                  shouldPersist: true,
-                  signOutRequested: false,
-                  deleteAccountRequested: false,
-                ),
-              ),
-              const SizedBox(height: 14),
-              Text(
-                l10n.lifetimeScore,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${widget.lifetimeScore}',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 18),
               Row(
                 children: [
                   Expanded(
                     child: Text(
                       l10n.friends,
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -4658,7 +4573,9 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: theme.colorScheme.onSurface.withOpacity(0.22),
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.22,
+                      ),
                     ),
                   ),
                   child: Text(
@@ -4682,7 +4599,9 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: theme.colorScheme.onSurface.withOpacity(0.22),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.22,
+                        ),
                       ),
                     ),
                     child: Row(
@@ -4701,8 +4620,9 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                               Text(
                                 l10n.lifetimeScoreValue(friend.lifetimeScore),
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.7),
+                                  color: theme.colorScheme.onSurface.withValues(
+                                    alpha: 0.7,
+                                  ),
                                 ),
                               ),
                             ],
@@ -4755,11 +4675,184 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                     ),
                   );
                 }),
-              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AccountSettingsDialog extends StatefulWidget {
+  const _AccountSettingsDialog({required this.initialDisplayName});
+
+  final String initialDisplayName;
+
+  @override
+  State<_AccountSettingsDialog> createState() => _AccountSettingsDialogState();
+}
+
+class _AccountSettingsDialogState extends State<_AccountSettingsDialog> {
+  late final TextEditingController _displayNameController;
+  Timer? _deleteAccountResetTimer;
+  bool _deleteAccountConfirming = false;
+  String? _displayNameErrorText;
+
+  String get _initialDisplayNameTrimmed => widget.initialDisplayName.trim();
+
+  @override
+  void initState() {
+    super.initState();
+    _displayNameController = TextEditingController(
+      text: widget.initialDisplayName,
+    );
+  }
+
+  @override
+  void dispose() {
+    _deleteAccountResetTimer?.cancel();
+    _displayNameController.dispose();
+    super.dispose();
+  }
+
+  String? _displayNameErrorForInput(String value) {
+    if (value.trim() == _initialDisplayNameTrimmed) {
+      return null;
+    }
+    return _localizedDisplayNameValidationMessage(value, context.l10n);
+  }
+
+  void _updateDisplayNameValidation(String value) {
+    final nextErrorText = _displayNameErrorForInput(value);
+    if (_displayNameErrorText == nextErrorText) {
+      return;
+    }
+    setState(() {
+      _displayNameErrorText = nextErrorText;
+    });
+  }
+
+  void _submit({
+    required bool shouldPersist,
+    required bool signOutRequested,
+    required bool deleteAccountRequested,
+  }) {
+    final errorText = shouldPersist
+        ? _localizedDisplayNameValidationMessage(
+            _displayNameController.text,
+            context.l10n,
+          )
+        : null;
+    if (errorText != null) {
+      setState(() {
+        _displayNameErrorText = errorText;
+      });
+      return;
+    }
+    Navigator.of(context).pop(
+      _AccountSettingsDialogResult(
+        displayName: _displayNameController.text,
+        shouldPersist: shouldPersist,
+        signOutRequested: signOutRequested,
+        deleteAccountRequested: deleteAccountRequested,
+      ),
+    );
+  }
+
+  void _handleDeleteAccountPressed() {
+    if (_deleteAccountConfirming) {
+      _deleteAccountResetTimer?.cancel();
+      _submit(
+        shouldPersist: false,
+        signOutRequested: false,
+        deleteAccountRequested: true,
+      );
+      return;
+    }
+
+    _deleteAccountResetTimer?.cancel();
+    setState(() {
+      _deleteAccountConfirming = true;
+    });
+    _deleteAccountResetTimer = Timer(const Duration(seconds: 15), () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _deleteAccountConfirming = false;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return Dialog(
+      backgroundColor: theme.colorScheme.surface,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+        side: BorderSide(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.35),
+        ),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 460),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.accountSettings,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.profileSubtitle,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _displayNameController,
+                textInputAction: TextInputAction.done,
+                decoration: InputDecoration(
+                  labelText: l10n.displayName,
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
+                  errorText: _displayNameErrorText,
+                ),
+                onChanged: _updateDisplayNameValidation,
+                onSubmitted: (_) => _submit(
+                  shouldPersist: true,
+                  signOutRequested: false,
+                  deleteAccountRequested: false,
+                ),
+              ),
+              const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: () => _submitProfileDialog(
+                  onPressed: () => _submit(
+                    shouldPersist: true,
+                    signOutRequested: false,
+                    deleteAccountRequested: false,
+                  ),
+                  child: Text(l10n.submit),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => _submit(
                     shouldPersist: false,
                     signOutRequested: true,
                     deleteAccountRequested: false,
@@ -4767,7 +4860,6 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                   child: Text(l10n.signOut),
                 ),
               ),
-              const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
                 child: TextButton(

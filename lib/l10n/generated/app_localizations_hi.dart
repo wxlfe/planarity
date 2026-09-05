@@ -12,6 +12,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get account => 'खाता';
 
   @override
+  String get accountSettings => 'खाता सेटिंग';
+
+  @override
   String get accountDeleted => 'खाता हटा दिया गया';
 
   @override

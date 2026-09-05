@@ -1,6 +1,7 @@
 {
   "@@locale": "it",
   "account": "account",
+  "accountSettings": "impostazioni account",
   "accountDeleted": "account eliminato",
   "accountExistsSignInInstead": "account esistente - accedi",
   "addedFriend": "{friendName} aggiunto",

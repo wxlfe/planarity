@@ -1,6 +1,7 @@
 {
   "@@locale": "tr",
   "account": "hesap",
+  "accountSettings": "hesap ayarları",
   "accountDeleted": "Hesap Silindi",
   "accountExistsSignInInstead": "hesap mevcut - bunun yerine oturum açın",
   "addedFriend": "{friendName} eklendi",

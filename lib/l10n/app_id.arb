@@ -1,6 +1,7 @@
 {
   "@@locale": "id",
   "account": "akun",
+  "accountSettings": "pengaturan akun",
   "accountDeleted": "akun dihapus",
   "accountExistsSignInInstead": "akun sudah ada - masuk saja",
   "addedFriend": "{friendName} ditambahkan",

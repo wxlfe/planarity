@@ -12,6 +12,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get account => 'アカウント';
 
   @override
+  String get accountSettings => 'アカウント設定';
+
+  @override
   String get accountDeleted => 'アカウントを削除しました';
 
   @override

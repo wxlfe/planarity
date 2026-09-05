@@ -12,6 +12,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get account => 'conta';
 
   @override
+  String get accountSettings => 'definições da conta';
+
+  @override
   String get accountDeleted => 'conta excluída';
 
   @override

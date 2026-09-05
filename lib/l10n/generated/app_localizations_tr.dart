@@ -12,6 +12,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get account => 'hesap';
 
   @override
+  String get accountSettings => 'hesap ayarları';
+
+  @override
   String get accountDeleted => 'Hesap Silindi';
 
   @override

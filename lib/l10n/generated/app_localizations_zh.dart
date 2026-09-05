@@ -12,6 +12,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get account => '账户';
 
   @override
+  String get accountSettings => '账户设置';
+
+  @override
   String get accountDeleted => '账户已删除';
 
   @override

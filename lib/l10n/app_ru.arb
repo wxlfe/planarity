@@ -1,6 +1,7 @@
 {
   "@@locale": "ru",
   "account": "аккаунт",
+  "accountSettings": "настройки аккаунта",
   "accountDeleted": "аккаунт удален",
   "accountExistsSignInInstead": "аккаунт уже существует - войдите",
   "addedFriend": "{friendName} добавлен",

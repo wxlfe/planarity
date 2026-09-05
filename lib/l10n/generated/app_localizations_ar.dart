@@ -12,6 +12,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get account => 'الحساب';
 
   @override
+  String get accountSettings => 'إعدادات الحساب';
+
+  @override
   String get accountDeleted => 'تم حذف الحساب';
 
   @override

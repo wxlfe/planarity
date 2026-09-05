@@ -1,6 +1,7 @@
 {
   "@@locale": "vi",
   "account": "tài khoản",
+  "accountSettings": "cài đặt tài khoản",
   "accountDeleted": "tài khoản đã bị xóa",
   "accountExistsSignInInstead": "tài khoản đã tồn tại - hãy đăng nhập",
   "addedFriend": "đã thêm {friendName}",

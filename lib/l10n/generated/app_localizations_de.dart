@@ -12,6 +12,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get account => 'konto';
 
   @override
+  String get accountSettings => 'kontoeinstellungen';
+
+  @override
   String get accountDeleted => 'konto gelöscht';
 
   @override

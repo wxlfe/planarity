@@ -1,6 +1,7 @@
 {
   "@@locale": "bn",
   "account": "অ্যাকাউন্ট",
+  "accountSettings": "অ্যাকাউন্ট সেটিংস",
   "accountDeleted": "অ্যাকাউন্ট মুছে ফেলা হয়েছে",
   "accountExistsSignInInstead": "অ্যাকাউন্ট আছে - সাইন ইন করুন",
   "addedFriend": "{friendName} যোগ করা হয়েছে",

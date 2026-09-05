@@ -134,6 +134,12 @@ abstract class AppLocalizations {
   /// **'account'**
   String get account;
 
+  /// No description provided for @accountSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'account settings'**
+  String get accountSettings;
+
   /// No description provided for @accountDeleted.
   ///
   /// In en, this message translates to:

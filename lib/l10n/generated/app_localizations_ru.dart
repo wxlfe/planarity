@@ -12,6 +12,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get account => 'аккаунт';
 
   @override
+  String get accountSettings => 'настройки аккаунта';
+
+  @override
   String get accountDeleted => 'аккаунт удален';
 
   @override

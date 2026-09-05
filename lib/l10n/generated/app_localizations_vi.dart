@@ -12,6 +12,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get account => 'tài khoản';
 
   @override
+  String get accountSettings => 'cài đặt tài khoản';
+
+  @override
   String get accountDeleted => 'tài khoản đã bị xóa';
 
   @override

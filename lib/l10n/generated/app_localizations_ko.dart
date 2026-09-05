@@ -12,6 +12,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get account => '계정';
 
   @override
+  String get accountSettings => '계정 설정';
+
+  @override
   String get accountDeleted => '계정이 삭제되었습니다';
 
   @override

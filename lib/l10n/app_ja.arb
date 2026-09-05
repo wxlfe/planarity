@@ -1,6 +1,7 @@
 {
   "@@locale": "ja",
   "account": "アカウント",
+  "accountSettings": "アカウント設定",
   "accountDeleted": "アカウントを削除しました",
   "accountExistsSignInInstead": "アカウントは存在します - ログインしてください",
   "addedFriend": "{friendName} を追加しました",

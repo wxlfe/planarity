@@ -12,6 +12,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get account => 'اکاؤنٹ';
 
   @override
+  String get accountSettings => 'اکاؤنٹ کی ترتیبات';
+
+  @override
   String get accountDeleted => 'اکاؤنٹ حذف کر دیا گیا';
 
   @override

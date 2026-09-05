@@ -1,6 +1,7 @@
 {
   "@@locale": "ar",
   "account": "الحساب",
+  "accountSettings": "إعدادات الحساب",
   "accountDeleted": "تم حذف الحساب",
   "accountExistsSignInInstead": "الحساب موجود - سجّل الدخول بدلًا من ذلك",
   "addedFriend": "تمت إضافة {friendName}",

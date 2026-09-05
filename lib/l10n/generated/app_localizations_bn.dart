@@ -12,6 +12,9 @@ class AppLocalizationsBn extends AppLocalizations {
   String get account => 'অ্যাকাউন্ট';
 
   @override
+  String get accountSettings => 'অ্যাকাউন্ট সেটিংস';
+
+  @override
   String get accountDeleted => 'অ্যাকাউন্ট মুছে ফেলা হয়েছে';
 
   @override

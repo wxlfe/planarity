@@ -1,6 +1,7 @@
 {
   "@@locale": "ur",
   "account": "اکاؤنٹ",
+  "accountSettings": "اکاؤنٹ کی ترتیبات",
   "accountDeleted": "اکاؤنٹ حذف کر دیا گیا",
   "accountExistsSignInInstead": "اکاؤنٹ موجود ہے - اس کے بجائے سائن ان کریں",
   "addedFriend": "{friendName} کو شامل کر دیا گیا",

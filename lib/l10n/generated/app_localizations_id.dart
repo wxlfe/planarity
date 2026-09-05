@@ -12,6 +12,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get account => 'akun';
 
   @override
+  String get accountSettings => 'pengaturan akun';
+
+  @override
   String get accountDeleted => 'akun dihapus';
 
   @override

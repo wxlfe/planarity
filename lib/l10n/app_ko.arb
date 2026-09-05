@@ -1,6 +1,7 @@
 {
   "@@locale": "ko",
   "account": "계정",
+  "accountSettings": "계정 설정",
   "accountDeleted": "계정이 삭제되었습니다",
   "accountExistsSignInInstead": "계정이 있습니다 - 로그인하세요",
   "addedFriend": "{friendName} 추가됨",

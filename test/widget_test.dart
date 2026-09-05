@@ -404,6 +404,68 @@ void main() {
     expect(lockedTitle.style?.color?.a, lessThan(1));
   });
 
+  testWidgets('profile shows read-only identity and three square actions', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: ProfileDialog(
+            displayName: 'Ada',
+            lifetimeScore: 42,
+            onAchievements: () {},
+            onFriends: () {},
+            onAccountSettings: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Ada'), findsOneWidget);
+    expect(find.text('lifetime score 42'), findsOneWidget);
+    expect(find.byType(TextField), findsNothing);
+    expect(find.text('achievements'), findsOneWidget);
+    expect(find.text('friends'), findsOneWidget);
+    expect(find.text('account settings'), findsOneWidget);
+
+    final actionTiles = find.byKey(const ValueKey('profile-action-tile'));
+    expect(actionTiles, findsNWidgets(3));
+    for (final element in actionTiles.evaluate()) {
+      final size = tester.getSize(find.byWidget(element.widget));
+      expect(size.width, closeTo(size.height, 0.01));
+    }
+  });
+
+  testWidgets('profile action tiles invoke their destinations', (
+    WidgetTester tester,
+  ) async {
+    var destination = '';
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: ProfileDialog(
+            displayName: 'Ada',
+            lifetimeScore: 42,
+            onAchievements: () => destination = 'achievements',
+            onFriends: () => destination = 'friends',
+            onAccountSettings: () => destination = 'account settings',
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('achievements'));
+    expect(destination, 'achievements');
+    await tester.tap(find.text('friends'));
+    expect(destination, 'friends');
+    await tester.tap(find.text('account settings'));
+    expect(destination, 'account settings');
+  });
+
   test('daily score snapshot writes are best effort', () async {
     Object? capturedError;
     StackTrace? capturedStackTrace;

@@ -1,6 +1,7 @@
 {
   "@@locale": "es",
   "account": "cuenta",
+  "accountSettings": "configuración de la cuenta",
   "accountDeleted": "cuenta eliminada",
   "accountExistsSignInInstead": "la cuenta existe - inicia sesión",
   "addedFriend": "{friendName} agregado",

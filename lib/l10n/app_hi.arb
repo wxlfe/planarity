@@ -1,6 +1,7 @@
 {
   "@@locale": "hi",
   "account": "खाता",
+  "accountSettings": "खाता सेटिंग",
   "accountDeleted": "खाता हटा दिया गया",
   "accountExistsSignInInstead": "खाता मौजूद है - साइन इन करें",
   "addedFriend": "{friendName} जोड़ा गया",
