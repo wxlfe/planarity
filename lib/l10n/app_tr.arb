@@ -1,6 +1,7 @@
 {
   "@@locale": "tr",
   "account": "hesap",
+  "accountSettings": "hesap ayarları",
   "accountDeleted": "Hesap Silindi",
   "accountExistsSignInInstead": "hesap mevcut - bunun yerine oturum açın",
   "addedFriend": "{friendName} eklendi",
@@ -112,6 +113,9 @@
   "passwordTooWeak": "Şifre çok zayıf",
   "planarity": "planarity",
   "privacyOptions": "gizlilik seçenekleri",
+  "rankingUpdate": "sıralama güncellemesi",
+  "rankingGlobalResult": "{date} tarihinde global sıralamada #{globalRank} oldun",
+  "rankingFriendsAndGlobalResult": "{date} tarihinde arkadaşların arasında #{friendRank}, global sıralamada #{globalRank} oldun",
   "planarGraphWikipedia": "wikipedia: düzlemsel grafik",
   "pressAgainToDelete": "silmek için tekrar basın",
   "profile": "profil",
@@ -182,5 +186,114 @@
   "reportReasonAbuse": "istismar veya taciz",
   "reportReasonImpersonation": "kimliğe bürünme",
   "reportReasonSpam": "istenmeyen e - posta veya dolandırıcılık",
-  "reportReasonOther": "bağımsız"
+  "reportReasonOther": "bağımsız",
+  "nodesCount": "{count} düğüm",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "{count} hamle",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "puan {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "graf {level}, çözülmedi, oyna",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "graf {level}, {moves} hamlede çözüldü, puan {score}, yeniden oyna",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "graf {level}, kilitli",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "graf {level}, yeniden oynama sürüyor, devam et",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "yeniden oyna",
+  "replayGraphQuestion": "{level}. grafi yeniden oyna",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "çözülene kadar - puan 0'a sıfırlanacak ve sonraki grafikler kilitlenecek",
+  "resetAndReplay": "sıfırla ve yeniden oyna",
+  "unableSaveProgress": "ilerleme şu anda kaydedilemiyor",
+  "saveYourProgress": "ilerlemeni kaydet",
+  "saveProgressDescription": "bugünün grafiklerini ve başarılarını tüm cihazlarında saklamak için ücretsiz kaydol.",
+  "achievements": "başarılar",
+  "achievementFirstStepTitle": "ilk adım",
+  "achievementFirstStepDescription": "ilk grafini çöz",
+  "achievementPracticeTitle": "pratik",
+  "achievementPracticeDescription": "8 grafik çöz",
+  "achievementPersistenceTitle": "azim",
+  "achievementPersistenceDescription": "16 grafik çöz",
+  "achievementDedicationTitle": "adanmışlık",
+  "achievementDedicationDescription": "32 grafik çöz",
+  "achievementPlanarityTitle": "düzlemsellik",
+  "achievementPlanarityDescription": "64 grafik çöz",
+  "achievementEfficientTitle": "verimli",
+  "achievementEfficientDescription": "en az 2 hamle kala bir grafik çöz",
+  "achievementPreciseTitle": "hassas",
+  "achievementPreciseDescription": "en az 4 hamle kala bir grafik çöz",
+  "achievementOptimalTitle": "optimum",
+  "achievementOptimalDescription": "mümkün olan en fazla hamle kala bir grafik çöz",
+  "achievementCloseCallTitle": "kıl payı",
+  "achievementCloseCallDescription": "hiç hamle kalmadan bir grafik çöz",
+  "achievementSecondAttemptTitle": "ikinci deneme",
+  "achievementSecondAttemptDescription": "çözülmüş bir grafiği yeniden oyna",
+  "achievementImprovementTitle": "gelişim",
+  "achievementImprovementDescription": "yeniden oynarken önceki puanını geç",
+  "achievementRedemptionTitle": "telafi",
+  "achievementRedemptionDescription": "daha önce 0 puan aldığın bir grafiği yeniden oynayıp sıfırdan yüksek puan al",
+  "achievementPerfectedTitle": "mükemmelleştirildi",
+  "achievementPerfectedDescription": "çözülmüş bir grafiği yeniden oynayarak mümkün olan en yüksek puana çıkar",
+  "unableLoadProfile": "profilin şu anda yüklenemiyor",
+  "unableShareRightNow": "şu anda paylaşılamıyor",
+  "restart": "yeniden başlat",
+  "tutorialNodeInstruction": "bu bir düğüm onu istediğin yere sürükle",
+  "tutorialEdgesInstruction": "düğümler kenarlarla bağlıdır kenarlar bağlı kalır",
+  "tutorialSolvedInstruction": "hiçbir kenar kesişmediğinde grafik çözülür bu grafik zaten çözülmüş"
 }

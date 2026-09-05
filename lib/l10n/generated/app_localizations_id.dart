@@ -12,6 +12,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get account => 'akun';
 
   @override
+  String get accountSettings => 'pengaturan akun';
+
+  @override
   String get accountDeleted => 'akun dihapus';
 
   @override
@@ -242,6 +245,29 @@ class AppLocalizationsId extends AppLocalizations {
   String get privacyOptions => 'opsi privasi';
 
   @override
+  String get rankingUpdate => 'pembaruan peringkat';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'kamu mendapat peringkat #$globalRank secara global pada $dateString';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'kamu mendapat peringkat #$friendRank di antara teman dan #$globalRank secara global pada $dateString';
+  }
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: grafik planar';
 
   @override
@@ -433,4 +459,173 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get reportReasonOther => 'lainnya';
+
+  @override
+  String nodesCount(int count) {
+    return '$count simpul';
+  }
+
+  @override
+  String movesCount(int count) {
+    return '$count langkah';
+  }
+
+  @override
+  String scoreValue(int score) {
+    return 'skor $score';
+  }
+
+  @override
+  String graphUnsolvedSemantics(int level) {
+    return 'graf $level, belum diselesaikan, mainkan';
+  }
+
+  @override
+  String graphSolvedSemantics(int level, int moves, int score) {
+    return 'graf $level, diselesaikan dalam $moves langkah, skor $score, mainkan ulang';
+  }
+
+  @override
+  String graphBlockedSemantics(int level) {
+    return 'graf $level, terkunci';
+  }
+
+  @override
+  String graphReplayInProgressSemantics(int level) {
+    return 'graf $level, permainan ulang sedang berlangsung, lanjutkan';
+  }
+
+  @override
+  String get replay => 'mainkan ulang';
+
+  @override
+  String replayGraphQuestion(int level) {
+    return 'mainkan ulang graf $level';
+  }
+
+  @override
+  String get replayWarning =>
+      'sampai diselesaikan - skor akan diatur ulang ke 0 dan graf yang lebih tinggi akan dikunci';
+
+  @override
+  String get resetAndReplay => 'atur ulang dan mainkan lagi';
+
+  @override
+  String get unableSaveProgress => 'tidak dapat menyimpan progres saat ini';
+
+  @override
+  String get saveYourProgress => 'simpan progres Anda';
+
+  @override
+  String get saveProgressDescription =>
+      'daftar gratis untuk menyimpan graf hari ini dan pencapaian Anda di semua perangkat.';
+
+  @override
+  String get achievements => 'pencapaian';
+
+  @override
+  String get achievementFirstStepTitle => 'langkah pertama';
+
+  @override
+  String get achievementFirstStepDescription => 'selesaikan graf pertama Anda';
+
+  @override
+  String get achievementPracticeTitle => 'latihan';
+
+  @override
+  String get achievementPracticeDescription => 'selesaikan 8 graf';
+
+  @override
+  String get achievementPersistenceTitle => 'kegigihan';
+
+  @override
+  String get achievementPersistenceDescription => 'selesaikan 16 graf';
+
+  @override
+  String get achievementDedicationTitle => 'dedikasi';
+
+  @override
+  String get achievementDedicationDescription => 'selesaikan 32 graf';
+
+  @override
+  String get achievementPlanarityTitle => 'planaritas';
+
+  @override
+  String get achievementPlanarityDescription => 'selesaikan 64 graf';
+
+  @override
+  String get achievementEfficientTitle => 'efisien';
+
+  @override
+  String get achievementEfficientDescription =>
+      'selesaikan graf dengan setidaknya 2 langkah tersisa';
+
+  @override
+  String get achievementPreciseTitle => 'presisi';
+
+  @override
+  String get achievementPreciseDescription =>
+      'selesaikan graf dengan setidaknya 4 langkah tersisa';
+
+  @override
+  String get achievementOptimalTitle => 'optimal';
+
+  @override
+  String get achievementOptimalDescription =>
+      'selesaikan graf dengan jumlah langkah tersisa sebanyak mungkin';
+
+  @override
+  String get achievementCloseCallTitle => 'nyaris';
+
+  @override
+  String get achievementCloseCallDescription =>
+      'selesaikan graf tanpa langkah tersisa';
+
+  @override
+  String get achievementSecondAttemptTitle => 'percobaan kedua';
+
+  @override
+  String get achievementSecondAttemptDescription =>
+      'mainkan ulang graf yang sudah selesai';
+
+  @override
+  String get achievementImprovementTitle => 'peningkatan';
+
+  @override
+  String get achievementImprovementDescription =>
+      'lampaui skor Anda sebelumnya saat bermain ulang';
+
+  @override
+  String get achievementRedemptionTitle => 'penebusan';
+
+  @override
+  String get achievementRedemptionDescription =>
+      'dapatkan skor di atas nol saat memainkan ulang graf yang sebelumnya mendapat skor 0';
+
+  @override
+  String get achievementPerfectedTitle => 'disempurnakan';
+
+  @override
+  String get achievementPerfectedDescription =>
+      'tingkatkan graf yang telah selesai hingga skor maksimalnya saat bermain ulang';
+
+  @override
+  String get unableLoadProfile => 'tidak dapat memuat profil Anda saat ini';
+
+  @override
+  String get unableShareRightNow => 'tidak dapat membagikan saat ini';
+
+  @override
+  String get restart => 'mulai ulang';
+
+  @override
+  String get tutorialNodeInstruction => 'ini adalah simpul seret ke mana saja';
+
+  @override
+  String get tutorialEdgesInstruction =>
+      'simpul terhubung oleh sisi sisi tetap terhubung';
+
+  @override
+  String get tutorialSolvedInstruction =>
+      'graf selesai ketika tidak ada sisi yang berpotongan graf ini sudah selesai';
 }

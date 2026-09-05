@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "account": "account",
+  "accountSettings": "account settings",
   "accountDeleted": "account deleted",
   "accountExistsSignInInstead": "account exists - sign in instead",
   "addedFriend": "added {friendName}",
@@ -112,6 +113,22 @@
   "passwordTooWeak": "password is too weak",
   "planarity": "planarity",
   "privacyOptions": "privacy options",
+  "rankingUpdate": "ranking update",
+  "rankingGlobalResult": "you ranked #{globalRank} globally on {date}",
+  "@rankingGlobalResult": {
+    "placeholders": {
+      "globalRank": {"type": "int"},
+      "date": {"type": "DateTime", "format": "yMd"}
+    }
+  },
+  "rankingFriendsAndGlobalResult": "you ranked #{friendRank} among friends and #{globalRank} globally on {date}",
+  "@rankingFriendsAndGlobalResult": {
+    "placeholders": {
+      "friendRank": {"type": "int"},
+      "globalRank": {"type": "int"},
+      "date": {"type": "DateTime", "format": "yMd"}
+    }
+  },
   "planarGraphWikipedia": "wikipedia: planar graph",
   "pressAgainToDelete": "press again to delete",
   "profile": "profile",
@@ -182,5 +199,114 @@
   "reportReasonAbuse": "abuse or harassment",
   "reportReasonImpersonation": "impersonation",
   "reportReasonSpam": "spam or scam",
-  "reportReasonOther": "other"
+  "reportReasonOther": "other",
+  "nodesCount": "{count} nodes",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "{count} moves",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "score {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "graph {level}, unsolved, play",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "graph {level}, solved in {moves} moves, score {score}, replay",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "graph {level}, blocked",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "graph {level}, replay in progress, continue",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "replay",
+  "replayGraphQuestion": "replay graph {level}",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "until solved - score will reset to 0 and higher graphs will be locked",
+  "resetAndReplay": "reset and replay",
+  "unableSaveProgress": "unable to save progress right now",
+  "saveYourProgress": "save your progress",
+  "saveProgressDescription": "sign up for free to keep today's graphs and achievements across devices.",
+  "achievements": "achievements",
+  "achievementFirstStepTitle": "first step",
+  "achievementFirstStepDescription": "solve your first graph",
+  "achievementPracticeTitle": "practice",
+  "achievementPracticeDescription": "solve 8 graphs",
+  "achievementPersistenceTitle": "persistence",
+  "achievementPersistenceDescription": "solve 16 graphs",
+  "achievementDedicationTitle": "dedication",
+  "achievementDedicationDescription": "solve 32 graphs",
+  "achievementPlanarityTitle": "planarity",
+  "achievementPlanarityDescription": "solve 64 graphs",
+  "achievementEfficientTitle": "efficient",
+  "achievementEfficientDescription": "solve a graph with at least 2 moves remaining",
+  "achievementPreciseTitle": "precise",
+  "achievementPreciseDescription": "solve a graph with at least 4 moves remaining",
+  "achievementOptimalTitle": "optimal",
+  "achievementOptimalDescription": "solve a graph with the maximum possible moves remaining",
+  "achievementCloseCallTitle": "close call",
+  "achievementCloseCallDescription": "solve a graph with no moves remaining",
+  "achievementSecondAttemptTitle": "second attempt",
+  "achievementSecondAttemptDescription": "replay a solved graph",
+  "achievementImprovementTitle": "improvement",
+  "achievementImprovementDescription": "beat your previous score on a replay",
+  "achievementRedemptionTitle": "redemption",
+  "achievementRedemptionDescription": "earn a nonzero score on a replay of a graph previously scored 0",
+  "achievementPerfectedTitle": "perfected",
+  "achievementPerfectedDescription": "improve a solved graph to its maximum possible score on a replay",
+  "unableLoadProfile": "unable to load your profile right now",
+  "unableShareRightNow": "unable to share right now",
+  "restart": "restart",
+  "tutorialNodeInstruction": "this is a node drag it anywhere",
+  "tutorialEdgesInstruction": "nodes are connected by edges edges stay attached",
+  "tutorialSolvedInstruction": "a graph is solved when no edges cross this one is already solved"
 }

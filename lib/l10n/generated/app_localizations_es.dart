@@ -12,6 +12,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get account => 'cuenta';
 
   @override
+  String get accountSettings => 'configuración de la cuenta';
+
+  @override
   String get accountDeleted => 'cuenta eliminada';
 
   @override
@@ -245,6 +248,29 @@ class AppLocalizationsEs extends AppLocalizations {
   String get privacyOptions => 'opciones de privacidad';
 
   @override
+  String get rankingUpdate => 'actualización de clasificación';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'quedaste #$globalRank a nivel global el $dateString';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'quedaste #$friendRank entre amigos y #$globalRank a nivel global el $dateString';
+  }
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: grafo planar';
 
   @override
@@ -439,4 +465,176 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get reportReasonOther => 'otro';
+
+  @override
+  String nodesCount(int count) {
+    return '$count nodos';
+  }
+
+  @override
+  String movesCount(int count) {
+    return '$count movimientos';
+  }
+
+  @override
+  String scoreValue(int score) {
+    return 'puntuación $score';
+  }
+
+  @override
+  String graphUnsolvedSemantics(int level) {
+    return 'grafo $level, sin resolver, jugar';
+  }
+
+  @override
+  String graphSolvedSemantics(int level, int moves, int score) {
+    return 'grafo $level, resuelto en $moves movimientos, puntuación $score, volver a jugar';
+  }
+
+  @override
+  String graphBlockedSemantics(int level) {
+    return 'grafo $level, bloqueado';
+  }
+
+  @override
+  String graphReplayInProgressSemantics(int level) {
+    return 'grafo $level, repetición en curso, continuar';
+  }
+
+  @override
+  String get replay => 'volver a jugar';
+
+  @override
+  String replayGraphQuestion(int level) {
+    return 'volver a jugar el grafo $level';
+  }
+
+  @override
+  String get replayWarning =>
+      'hasta resolverlo - la puntuación volverá a 0 y los grafos superiores quedarán bloqueados';
+
+  @override
+  String get resetAndReplay => 'reiniciar y volver a jugar';
+
+  @override
+  String get unableSaveProgress =>
+      'no se puede guardar el progreso en este momento';
+
+  @override
+  String get saveYourProgress => 'guarda tu progreso';
+
+  @override
+  String get saveProgressDescription =>
+      'regístrate gratis para conservar los grafos de hoy y tus logros en todos tus dispositivos.';
+
+  @override
+  String get achievements => 'logros';
+
+  @override
+  String get achievementFirstStepTitle => 'primer paso';
+
+  @override
+  String get achievementFirstStepDescription => 'resuelve tu primer grafo';
+
+  @override
+  String get achievementPracticeTitle => 'práctica';
+
+  @override
+  String get achievementPracticeDescription => 'resuelve 8 grafos';
+
+  @override
+  String get achievementPersistenceTitle => 'perseverancia';
+
+  @override
+  String get achievementPersistenceDescription => 'resuelve 16 grafos';
+
+  @override
+  String get achievementDedicationTitle => 'dedicación';
+
+  @override
+  String get achievementDedicationDescription => 'resuelve 32 grafos';
+
+  @override
+  String get achievementPlanarityTitle => 'planaridad';
+
+  @override
+  String get achievementPlanarityDescription => 'resuelve 64 grafos';
+
+  @override
+  String get achievementEfficientTitle => 'eficiente';
+
+  @override
+  String get achievementEfficientDescription =>
+      'resuelve un grafo con al menos 2 movimientos restantes';
+
+  @override
+  String get achievementPreciseTitle => 'preciso';
+
+  @override
+  String get achievementPreciseDescription =>
+      'resuelve un grafo con al menos 4 movimientos restantes';
+
+  @override
+  String get achievementOptimalTitle => 'óptimo';
+
+  @override
+  String get achievementOptimalDescription =>
+      'resuelve un grafo con el máximo número posible de movimientos restantes';
+
+  @override
+  String get achievementCloseCallTitle => 'por los pelos';
+
+  @override
+  String get achievementCloseCallDescription =>
+      'resuelve un grafo sin movimientos restantes';
+
+  @override
+  String get achievementSecondAttemptTitle => 'segundo intento';
+
+  @override
+  String get achievementSecondAttemptDescription =>
+      'vuelve a jugar un grafo resuelto';
+
+  @override
+  String get achievementImprovementTitle => 'superación';
+
+  @override
+  String get achievementImprovementDescription =>
+      'supera tu puntuación anterior al volver a jugar';
+
+  @override
+  String get achievementRedemptionTitle => 'redención';
+
+  @override
+  String get achievementRedemptionDescription =>
+      'consigue una puntuación mayor que cero al volver a jugar un grafo en el que antes obtuviste 0';
+
+  @override
+  String get achievementPerfectedTitle => 'perfeccionado';
+
+  @override
+  String get achievementPerfectedDescription =>
+      'mejora un grafo resuelto hasta su máxima puntuación posible al volver a jugar';
+
+  @override
+  String get unableLoadProfile =>
+      'no se puede cargar tu perfil en este momento';
+
+  @override
+  String get unableShareRightNow => 'no se puede compartir en este momento';
+
+  @override
+  String get restart => 'reiniciar';
+
+  @override
+  String get tutorialNodeInstruction =>
+      'esto es un nodo arrástralo a cualquier lugar';
+
+  @override
+  String get tutorialEdgesInstruction =>
+      'los nodos están conectados por aristas las aristas permanecen unidas';
+
+  @override
+  String get tutorialSolvedInstruction =>
+      'un grafo está resuelto cuando ninguna arista se cruza este ya está resuelto';
 }

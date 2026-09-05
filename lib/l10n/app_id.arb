@@ -1,6 +1,7 @@
 {
   "@@locale": "id",
   "account": "akun",
+  "accountSettings": "pengaturan akun",
   "accountDeleted": "akun dihapus",
   "accountExistsSignInInstead": "akun sudah ada - masuk saja",
   "addedFriend": "{friendName} ditambahkan",
@@ -112,6 +113,9 @@
   "passwordTooWeak": "kata sandi terlalu lemah",
   "planarity": "planarity",
   "privacyOptions": "opsi privasi",
+  "rankingUpdate": "pembaruan peringkat",
+  "rankingGlobalResult": "kamu mendapat peringkat #{globalRank} secara global pada {date}",
+  "rankingFriendsAndGlobalResult": "kamu mendapat peringkat #{friendRank} di antara teman dan #{globalRank} secara global pada {date}",
   "planarGraphWikipedia": "wikipedia: grafik planar",
   "pressAgainToDelete": "tekan lagi untuk menghapus",
   "profile": "profil",
@@ -182,5 +186,114 @@
   "reportReasonAbuse": "pelecehan atau perundungan",
   "reportReasonImpersonation": "peniruan identitas",
   "reportReasonSpam": "spam atau penipuan",
-  "reportReasonOther": "lainnya"
+  "reportReasonOther": "lainnya",
+  "nodesCount": "{count} simpul",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "{count} langkah",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "skor {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "graf {level}, belum diselesaikan, mainkan",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "graf {level}, diselesaikan dalam {moves} langkah, skor {score}, mainkan ulang",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "graf {level}, terkunci",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "graf {level}, permainan ulang sedang berlangsung, lanjutkan",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "mainkan ulang",
+  "replayGraphQuestion": "mainkan ulang graf {level}",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "sampai diselesaikan - skor akan diatur ulang ke 0 dan graf yang lebih tinggi akan dikunci",
+  "resetAndReplay": "atur ulang dan mainkan lagi",
+  "unableSaveProgress": "tidak dapat menyimpan progres saat ini",
+  "saveYourProgress": "simpan progres Anda",
+  "saveProgressDescription": "daftar gratis untuk menyimpan graf hari ini dan pencapaian Anda di semua perangkat.",
+  "achievements": "pencapaian",
+  "achievementFirstStepTitle": "langkah pertama",
+  "achievementFirstStepDescription": "selesaikan graf pertama Anda",
+  "achievementPracticeTitle": "latihan",
+  "achievementPracticeDescription": "selesaikan 8 graf",
+  "achievementPersistenceTitle": "kegigihan",
+  "achievementPersistenceDescription": "selesaikan 16 graf",
+  "achievementDedicationTitle": "dedikasi",
+  "achievementDedicationDescription": "selesaikan 32 graf",
+  "achievementPlanarityTitle": "planaritas",
+  "achievementPlanarityDescription": "selesaikan 64 graf",
+  "achievementEfficientTitle": "efisien",
+  "achievementEfficientDescription": "selesaikan graf dengan setidaknya 2 langkah tersisa",
+  "achievementPreciseTitle": "presisi",
+  "achievementPreciseDescription": "selesaikan graf dengan setidaknya 4 langkah tersisa",
+  "achievementOptimalTitle": "optimal",
+  "achievementOptimalDescription": "selesaikan graf dengan jumlah langkah tersisa sebanyak mungkin",
+  "achievementCloseCallTitle": "nyaris",
+  "achievementCloseCallDescription": "selesaikan graf tanpa langkah tersisa",
+  "achievementSecondAttemptTitle": "percobaan kedua",
+  "achievementSecondAttemptDescription": "mainkan ulang graf yang sudah selesai",
+  "achievementImprovementTitle": "peningkatan",
+  "achievementImprovementDescription": "lampaui skor Anda sebelumnya saat bermain ulang",
+  "achievementRedemptionTitle": "penebusan",
+  "achievementRedemptionDescription": "dapatkan skor di atas nol saat memainkan ulang graf yang sebelumnya mendapat skor 0",
+  "achievementPerfectedTitle": "disempurnakan",
+  "achievementPerfectedDescription": "tingkatkan graf yang telah selesai hingga skor maksimalnya saat bermain ulang",
+  "unableLoadProfile": "tidak dapat memuat profil Anda saat ini",
+  "unableShareRightNow": "tidak dapat membagikan saat ini",
+  "restart": "mulai ulang",
+  "tutorialNodeInstruction": "ini adalah simpul seret ke mana saja",
+  "tutorialEdgesInstruction": "simpul terhubung oleh sisi sisi tetap terhubung",
+  "tutorialSolvedInstruction": "graf selesai ketika tidak ada sisi yang berpotongan graf ini sudah selesai"
 }

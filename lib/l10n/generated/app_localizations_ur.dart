@@ -12,6 +12,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get account => 'اکاؤنٹ';
 
   @override
+  String get accountSettings => 'اکاؤنٹ کی ترتیبات';
+
+  @override
   String get accountDeleted => 'اکاؤنٹ حذف کر دیا گیا';
 
   @override
@@ -243,6 +246,29 @@ class AppLocalizationsUr extends AppLocalizations {
   String get privacyOptions => 'رازداری کے اختیارات';
 
   @override
+  String get rankingUpdate => 'درجہ بندی کی تازہ کاری';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'آپ نے $dateString کو عالمی سطح پر #$globalRank مقام حاصل کیا';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'آپ نے $dateString کو دوستوں میں #$friendRank اور عالمی سطح پر #$globalRank مقام حاصل کیا';
+  }
+
+  @override
   String get planarGraphWikipedia => 'ویکیپیڈیا: پلینار گراف';
 
   @override
@@ -429,4 +455,172 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get reportReasonOther => 'دیگر';
+
+  @override
+  String nodesCount(int count) {
+    return '$count نوڈز';
+  }
+
+  @override
+  String movesCount(int count) {
+    return '$count چالیں';
+  }
+
+  @override
+  String scoreValue(int score) {
+    return 'اسکور $score';
+  }
+
+  @override
+  String graphUnsolvedSemantics(int level) {
+    return 'گراف $level، حل نہیں ہوا، کھیلیں';
+  }
+
+  @override
+  String graphSolvedSemantics(int level, int moves, int score) {
+    return 'گراف $level، $moves چالوں میں حل ہوا، اسکور $score، دوبارہ کھیلیں';
+  }
+
+  @override
+  String graphBlockedSemantics(int level) {
+    return 'گراف $level، مقفل';
+  }
+
+  @override
+  String graphReplayInProgressSemantics(int level) {
+    return 'گراف $level، دوبارہ کھیل جاری ہے، جاری رکھیں';
+  }
+
+  @override
+  String get replay => 'دوبارہ کھیلیں';
+
+  @override
+  String replayGraphQuestion(int level) {
+    return 'گراف $level دوبارہ کھیلیں';
+  }
+
+  @override
+  String get replayWarning =>
+      'حل ہونے تک - اسکور 0 پر ری سیٹ ہو جائے گا اور اگلے گراف مقفل رہیں گے';
+
+  @override
+  String get resetAndReplay => 'ری سیٹ کرکے دوبارہ کھیلیں';
+
+  @override
+  String get unableSaveProgress => 'اس وقت پیش رفت محفوظ نہیں کی جا سکتی';
+
+  @override
+  String get saveYourProgress => 'اپنی پیش رفت محفوظ کریں';
+
+  @override
+  String get saveProgressDescription =>
+      'آج کے گراف اور کامیابیاں اپنے تمام آلات پر رکھنے کے لیے مفت سائن اپ کریں۔';
+
+  @override
+  String get achievements => 'کامیابیاں';
+
+  @override
+  String get achievementFirstStepTitle => 'پہلا قدم';
+
+  @override
+  String get achievementFirstStepDescription => 'اپنا پہلا گراف حل کریں';
+
+  @override
+  String get achievementPracticeTitle => 'مشق';
+
+  @override
+  String get achievementPracticeDescription => '8 گراف حل کریں';
+
+  @override
+  String get achievementPersistenceTitle => 'ثابت قدمی';
+
+  @override
+  String get achievementPersistenceDescription => '16 گراف حل کریں';
+
+  @override
+  String get achievementDedicationTitle => 'لگن';
+
+  @override
+  String get achievementDedicationDescription => '32 گراف حل کریں';
+
+  @override
+  String get achievementPlanarityTitle => 'پلینارٹی';
+
+  @override
+  String get achievementPlanarityDescription => '64 گراف حل کریں';
+
+  @override
+  String get achievementEfficientTitle => 'موثر';
+
+  @override
+  String get achievementEfficientDescription =>
+      'کم از کم 2 چالیں باقی رکھتے ہوئے گراف حل کریں';
+
+  @override
+  String get achievementPreciseTitle => 'درست';
+
+  @override
+  String get achievementPreciseDescription =>
+      'کم از کم 4 چالیں باقی رکھتے ہوئے گراف حل کریں';
+
+  @override
+  String get achievementOptimalTitle => 'بہترین';
+
+  @override
+  String get achievementOptimalDescription =>
+      'زیادہ سے زیادہ ممکنہ چالیں باقی رکھتے ہوئے گراف حل کریں';
+
+  @override
+  String get achievementCloseCallTitle => 'بال بال';
+
+  @override
+  String get achievementCloseCallDescription =>
+      'کوئی چال باقی رکھے بغیر گراف حل کریں';
+
+  @override
+  String get achievementSecondAttemptTitle => 'دوسری کوشش';
+
+  @override
+  String get achievementSecondAttemptDescription => 'حل شدہ گراف دوبارہ کھیلیں';
+
+  @override
+  String get achievementImprovementTitle => 'بہتری';
+
+  @override
+  String get achievementImprovementDescription =>
+      'دوبارہ کھیل کر اپنا پچھلا اسکور توڑیں';
+
+  @override
+  String get achievementRedemptionTitle => 'ازالہ';
+
+  @override
+  String get achievementRedemptionDescription =>
+      'جس گراف پر پہلے 0 اسکور ہوا تھا اسے دوبارہ کھیل کر صفر سے زیادہ اسکور حاصل کریں';
+
+  @override
+  String get achievementPerfectedTitle => 'کمال';
+
+  @override
+  String get achievementPerfectedDescription =>
+      'حل شدہ گراف کو دوبارہ کھیل کر اس کے زیادہ سے زیادہ ممکنہ اسکور تک بہتر کریں';
+
+  @override
+  String get unableLoadProfile => 'اس وقت آپ کی پروفائل لوڈ نہیں کی جا سکتی';
+
+  @override
+  String get unableShareRightNow => 'اس وقت شیئر نہیں کیا جا سکتا';
+
+  @override
+  String get restart => 'دوبارہ شروع کریں';
+
+  @override
+  String get tutorialNodeInstruction => 'یہ ایک نوڈ ہے اسے کہیں بھی گھسیٹیں';
+
+  @override
+  String get tutorialEdgesInstruction =>
+      'نوڈ کناروں سے جڑے ہوتے ہیں کنارے نوڈ سے جڑے رہتے ہیں';
+
+  @override
+  String get tutorialSolvedInstruction =>
+      'جب کنارے ایک دوسرے کو نہ کاٹیں تو گراف حل ہو جاتا ہے یہ گراف پہلے ہی حل شدہ ہے';
 }

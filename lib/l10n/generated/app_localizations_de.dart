@@ -12,6 +12,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get account => 'konto';
 
   @override
+  String get accountSettings => 'kontoeinstellungen';
+
+  @override
   String get accountDeleted => 'konto gelöscht';
 
   @override
@@ -246,6 +249,29 @@ class AppLocalizationsDe extends AppLocalizations {
   String get privacyOptions => 'Datenschutzoptionen';
 
   @override
+  String get rankingUpdate => 'ranglisten-update';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'du hast am $dateString weltweit platz #$globalRank erreicht';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'du hast am $dateString unter freunden platz #$friendRank und weltweit platz #$globalRank erreicht';
+  }
+
+  @override
   String get planarGraphWikipedia => 'Wikipedia: Planarer Graph';
 
   @override
@@ -443,4 +469,176 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get reportReasonOther => 'anderes';
+
+  @override
+  String nodesCount(int count) {
+    return '$count Knoten';
+  }
+
+  @override
+  String movesCount(int count) {
+    return '$count Züge';
+  }
+
+  @override
+  String scoreValue(int score) {
+    return 'Punktzahl $score';
+  }
+
+  @override
+  String graphUnsolvedSemantics(int level) {
+    return 'Graph $level, ungelöst, spielen';
+  }
+
+  @override
+  String graphSolvedSemantics(int level, int moves, int score) {
+    return 'Graph $level, in $moves Zügen gelöst, Punktzahl $score, erneut spielen';
+  }
+
+  @override
+  String graphBlockedSemantics(int level) {
+    return 'Graph $level, gesperrt';
+  }
+
+  @override
+  String graphReplayInProgressSemantics(int level) {
+    return 'Graph $level, Wiederholung läuft, fortsetzen';
+  }
+
+  @override
+  String get replay => 'erneut spielen';
+
+  @override
+  String replayGraphQuestion(int level) {
+    return 'Graph $level erneut spielen';
+  }
+
+  @override
+  String get replayWarning =>
+      'bis zur Lösung - Punktzahl wird auf 0 zurückgesetzt und höhere Graphen werden gesperrt';
+
+  @override
+  String get resetAndReplay => 'zurücksetzen und erneut spielen';
+
+  @override
+  String get unableSaveProgress =>
+      'Fortschritt kann derzeit nicht gespeichert werden';
+
+  @override
+  String get saveYourProgress => 'Fortschritt speichern';
+
+  @override
+  String get saveProgressDescription =>
+      'registriere dich kostenlos, um die heutigen Graphen und Erfolge auf all deinen Geräten zu behalten.';
+
+  @override
+  String get achievements => 'Erfolge';
+
+  @override
+  String get achievementFirstStepTitle => 'erster Schritt';
+
+  @override
+  String get achievementFirstStepDescription => 'löse deinen ersten Graphen';
+
+  @override
+  String get achievementPracticeTitle => 'Übung';
+
+  @override
+  String get achievementPracticeDescription => 'löse 8 Graphen';
+
+  @override
+  String get achievementPersistenceTitle => 'Ausdauer';
+
+  @override
+  String get achievementPersistenceDescription => 'löse 16 Graphen';
+
+  @override
+  String get achievementDedicationTitle => 'Hingabe';
+
+  @override
+  String get achievementDedicationDescription => 'löse 32 Graphen';
+
+  @override
+  String get achievementPlanarityTitle => 'Planarität';
+
+  @override
+  String get achievementPlanarityDescription => 'löse 64 Graphen';
+
+  @override
+  String get achievementEfficientTitle => 'effizient';
+
+  @override
+  String get achievementEfficientDescription =>
+      'löse einen Graphen mit mindestens 2 verbleibenden Zügen';
+
+  @override
+  String get achievementPreciseTitle => 'präzise';
+
+  @override
+  String get achievementPreciseDescription =>
+      'löse einen Graphen mit mindestens 4 verbleibenden Zügen';
+
+  @override
+  String get achievementOptimalTitle => 'optimal';
+
+  @override
+  String get achievementOptimalDescription =>
+      'löse einen Graphen mit der maximal möglichen Zahl verbleibender Züge';
+
+  @override
+  String get achievementCloseCallTitle => 'knapp geschafft';
+
+  @override
+  String get achievementCloseCallDescription =>
+      'löse einen Graphen ohne verbleibende Züge';
+
+  @override
+  String get achievementSecondAttemptTitle => 'zweiter Versuch';
+
+  @override
+  String get achievementSecondAttemptDescription =>
+      'spiele einen gelösten Graphen erneut';
+
+  @override
+  String get achievementImprovementTitle => 'Verbesserung';
+
+  @override
+  String get achievementImprovementDescription =>
+      'übertriff beim erneuten Spielen deine bisherige Punktzahl';
+
+  @override
+  String get achievementRedemptionTitle => 'Wiedergutmachung';
+
+  @override
+  String get achievementRedemptionDescription =>
+      'erziele beim erneuten Spielen eines zuvor mit 0 bewerteten Graphen mehr als 0 Punkte';
+
+  @override
+  String get achievementPerfectedTitle => 'perfektioniert';
+
+  @override
+  String get achievementPerfectedDescription =>
+      'verbessere einen gelösten Graphen beim erneuten Spielen auf die maximal mögliche Punktzahl';
+
+  @override
+  String get unableLoadProfile =>
+      'dein Profil kann derzeit nicht geladen werden';
+
+  @override
+  String get unableShareRightNow => 'Teilen ist derzeit nicht möglich';
+
+  @override
+  String get restart => 'neu starten';
+
+  @override
+  String get tutorialNodeInstruction =>
+      'dies ist ein Knoten ziehe ihn an eine beliebige Stelle';
+
+  @override
+  String get tutorialEdgesInstruction =>
+      'Knoten sind durch Kanten verbunden Kanten bleiben mit ihnen verbunden';
+
+  @override
+  String get tutorialSolvedInstruction =>
+      'ein Graph ist gelöst wenn sich keine Kanten kreuzen dieser ist bereits gelöst';
 }

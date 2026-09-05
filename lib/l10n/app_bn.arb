@@ -1,6 +1,7 @@
 {
   "@@locale": "bn",
   "account": "অ্যাকাউন্ট",
+  "accountSettings": "অ্যাকাউন্ট সেটিংস",
   "accountDeleted": "অ্যাকাউন্ট মুছে ফেলা হয়েছে",
   "accountExistsSignInInstead": "অ্যাকাউন্ট আছে - সাইন ইন করুন",
   "addedFriend": "{friendName} যোগ করা হয়েছে",
@@ -112,6 +113,9 @@
   "passwordTooWeak": "পাসওয়ার্ড খুব দুর্বল",
   "planarity": "planarity",
   "privacyOptions": "গোপনীয়তার বিকল্প",
+  "rankingUpdate": "র‍্যাঙ্কিং আপডেট",
+  "rankingGlobalResult": "আপনি {date} তারিখে বিশ্বব্যাপী #{globalRank} স্থান অর্জন করেছেন",
+  "rankingFriendsAndGlobalResult": "আপনি {date} তারিখে বন্ধুদের মধ্যে #{friendRank} এবং বিশ্বব্যাপী #{globalRank} স্থান অর্জন করেছেন",
   "planarGraphWikipedia": "উইকিপিডিয়া: প্ল্যানার গ্রাফ",
   "pressAgainToDelete": "মুছে ফেলার জন্য আবার টিপুন",
   "profile": "প্রোফাইল",
@@ -182,5 +186,114 @@
   "reportReasonAbuse": "অপব্যবহার বা হয়রানি",
   "reportReasonImpersonation": "ছদ্মবেশ ধারণ",
   "reportReasonSpam": "স্প্যাম বা প্রতারণা",
-  "reportReasonOther": "অন্যান্য"
+  "reportReasonOther": "অন্যান্য",
+  "nodesCount": "{count}টি নোড",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "{count}টি চাল",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "স্কোর {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "গ্রাফ {level}, সমাধান করা হয়নি, খেলুন",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "গ্রাফ {level}, {moves} চালে সমাধান করা হয়েছে, স্কোর {score}, আবার খেলুন",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "গ্রাফ {level}, লক করা আছে",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "গ্রাফ {level}, আবার খেলা চলছে, চালিয়ে যান",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "আবার খেলুন",
+  "replayGraphQuestion": "গ্রাফ {level} আবার খেলুন",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "সমাধান না হওয়া পর্যন্ত - স্কোর 0-তে রিসেট হবে এবং পরবর্তী গ্রাফগুলো লক থাকবে",
+  "resetAndReplay": "রিসেট করে আবার খেলুন",
+  "unableSaveProgress": "এই মুহূর্তে অগ্রগতি সংরক্ষণ করা যাচ্ছে না",
+  "saveYourProgress": "আপনার অগ্রগতি সংরক্ষণ করুন",
+  "saveProgressDescription": "আজকের গ্রাফ ও অর্জনগুলো সব ডিভাইসে রাখতে বিনামূল্যে সাইন আপ করুন।",
+  "achievements": "অর্জন",
+  "achievementFirstStepTitle": "প্রথম পদক্ষেপ",
+  "achievementFirstStepDescription": "আপনার প্রথম গ্রাফ সমাধান করুন",
+  "achievementPracticeTitle": "অনুশীলন",
+  "achievementPracticeDescription": "8টি গ্রাফ সমাধান করুন",
+  "achievementPersistenceTitle": "অধ্যবসায়",
+  "achievementPersistenceDescription": "16টি গ্রাফ সমাধান করুন",
+  "achievementDedicationTitle": "নিষ্ঠা",
+  "achievementDedicationDescription": "32টি গ্রাফ সমাধান করুন",
+  "achievementPlanarityTitle": "প্ল্যানারিটি",
+  "achievementPlanarityDescription": "64টি গ্রাফ সমাধান করুন",
+  "achievementEfficientTitle": "দক্ষ",
+  "achievementEfficientDescription": "অন্তত 2টি চাল বাকি রেখে একটি গ্রাফ সমাধান করুন",
+  "achievementPreciseTitle": "নিখুঁত",
+  "achievementPreciseDescription": "অন্তত 4টি চাল বাকি রেখে একটি গ্রাফ সমাধান করুন",
+  "achievementOptimalTitle": "সর্বোত্তম",
+  "achievementOptimalDescription": "সর্বোচ্চ সম্ভব চাল বাকি রেখে একটি গ্রাফ সমাধান করুন",
+  "achievementCloseCallTitle": "অল্পের জন্য",
+  "achievementCloseCallDescription": "কোনো চাল বাকি না রেখে একটি গ্রাফ সমাধান করুন",
+  "achievementSecondAttemptTitle": "দ্বিতীয় প্রচেষ্টা",
+  "achievementSecondAttemptDescription": "সমাধান করা একটি গ্রাফ আবার খেলুন",
+  "achievementImprovementTitle": "উন্নতি",
+  "achievementImprovementDescription": "আবার খেলে আপনার আগের স্কোর ছাড়িয়ে যান",
+  "achievementRedemptionTitle": "ঘুরে দাঁড়ানো",
+  "achievementRedemptionDescription": "আগে 0 স্কোর করা গ্রাফ আবার খেলে শূন্যের বেশি স্কোর করুন",
+  "achievementPerfectedTitle": "সম্পূর্ণ নিখুঁত",
+  "achievementPerfectedDescription": "আবার খেলে সমাধান করা একটি গ্রাফের স্কোর সর্বোচ্চ সম্ভব স্কোরে উন্নীত করুন",
+  "unableLoadProfile": "এই মুহূর্তে আপনার প্রোফাইল লোড করা যাচ্ছে না",
+  "unableShareRightNow": "এই মুহূর্তে শেয়ার করা যাচ্ছে না",
+  "restart": "আবার শুরু করুন",
+  "tutorialNodeInstruction": "এটি একটি নোড এটিকে যেকোনো জায়গায় টেনে নিন",
+  "tutorialEdgesInstruction": "নোডগুলো প্রান্ত দিয়ে যুক্ত থাকে প্রান্তগুলো নোডের সঙ্গে যুক্ত থাকে",
+  "tutorialSolvedInstruction": "কোনো প্রান্ত পরস্পরকে ছেদ না করলে গ্রাফটি সমাধান হয় এটি ইতিমধ্যেই সমাধান করা"
 }

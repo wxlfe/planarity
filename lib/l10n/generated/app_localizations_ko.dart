@@ -12,6 +12,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get account => '계정';
 
   @override
+  String get accountSettings => '계정 설정';
+
+  @override
   String get accountDeleted => '계정이 삭제되었습니다';
 
   @override
@@ -233,6 +236,29 @@ class AppLocalizationsKo extends AppLocalizations {
   String get privacyOptions => '개인정보 옵션';
 
   @override
+  String get rankingUpdate => '순위 업데이트';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString에 전 세계 #$globalRank위를 기록했습니다';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString에 친구 중 #$friendRank위, 전 세계 #$globalRank위를 기록했습니다';
+  }
+
+  @override
   String get planarGraphWikipedia => '위키백과: 평면 그래프';
 
   @override
@@ -407,4 +433,165 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get reportReasonOther => '기타';
+
+  @override
+  String nodesCount(int count) {
+    return '노드 $count개';
+  }
+
+  @override
+  String movesCount(int count) {
+    return '$count번 이동';
+  }
+
+  @override
+  String scoreValue(int score) {
+    return '점수 $score';
+  }
+
+  @override
+  String graphUnsolvedSemantics(int level) {
+    return '그래프 $level, 미해결, 플레이';
+  }
+
+  @override
+  String graphSolvedSemantics(int level, int moves, int score) {
+    return '그래프 $level, $moves번 만에 해결, 점수 $score, 다시 플레이';
+  }
+
+  @override
+  String graphBlockedSemantics(int level) {
+    return '그래프 $level, 잠김';
+  }
+
+  @override
+  String graphReplayInProgressSemantics(int level) {
+    return '그래프 $level, 다시 플레이 진행 중, 계속';
+  }
+
+  @override
+  String get replay => '다시 플레이';
+
+  @override
+  String replayGraphQuestion(int level) {
+    return '그래프 $level 다시 플레이';
+  }
+
+  @override
+  String get replayWarning => '해결할 때까지 - 점수는 0으로 초기화되고 이후 그래프는 잠깁니다';
+
+  @override
+  String get resetAndReplay => '초기화하고 다시 플레이';
+
+  @override
+  String get unableSaveProgress => '지금은 진행 상황을 저장할 수 없습니다';
+
+  @override
+  String get saveYourProgress => '진행 상황 저장';
+
+  @override
+  String get saveProgressDescription => '무료로 가입하고 오늘의 그래프와 업적을 모든 기기에서 이어가세요.';
+
+  @override
+  String get achievements => '업적';
+
+  @override
+  String get achievementFirstStepTitle => '첫걸음';
+
+  @override
+  String get achievementFirstStepDescription => '첫 번째 그래프 풀기';
+
+  @override
+  String get achievementPracticeTitle => '연습';
+
+  @override
+  String get achievementPracticeDescription => '그래프 8개 풀기';
+
+  @override
+  String get achievementPersistenceTitle => '끈기';
+
+  @override
+  String get achievementPersistenceDescription => '그래프 16개 풀기';
+
+  @override
+  String get achievementDedicationTitle => '헌신';
+
+  @override
+  String get achievementDedicationDescription => '그래프 32개 풀기';
+
+  @override
+  String get achievementPlanarityTitle => '평면성';
+
+  @override
+  String get achievementPlanarityDescription => '그래프 64개 풀기';
+
+  @override
+  String get achievementEfficientTitle => '효율적';
+
+  @override
+  String get achievementEfficientDescription => '2번 이상 이동을 남기고 그래프 풀기';
+
+  @override
+  String get achievementPreciseTitle => '정확함';
+
+  @override
+  String get achievementPreciseDescription => '4번 이상 이동을 남기고 그래프 풀기';
+
+  @override
+  String get achievementOptimalTitle => '최적';
+
+  @override
+  String get achievementOptimalDescription => '가능한 최대 이동 횟수를 남기고 그래프 풀기';
+
+  @override
+  String get achievementCloseCallTitle => '아슬아슬';
+
+  @override
+  String get achievementCloseCallDescription => '이동 횟수를 남기지 않고 그래프 풀기';
+
+  @override
+  String get achievementSecondAttemptTitle => '두 번째 도전';
+
+  @override
+  String get achievementSecondAttemptDescription => '푼 그래프 다시 플레이하기';
+
+  @override
+  String get achievementImprovementTitle => '향상';
+
+  @override
+  String get achievementImprovementDescription => '다시 플레이해 이전 점수 넘기기';
+
+  @override
+  String get achievementRedemptionTitle => '명예 회복';
+
+  @override
+  String get achievementRedemptionDescription =>
+      '이전에 0점을 받은 그래프를 다시 플레이해 0점보다 높은 점수 얻기';
+
+  @override
+  String get achievementPerfectedTitle => '완벽 달성';
+
+  @override
+  String get achievementPerfectedDescription =>
+      '푼 그래프를 다시 플레이해 가능한 최고 점수로 향상하기';
+
+  @override
+  String get unableLoadProfile => '지금은 프로필을 불러올 수 없습니다';
+
+  @override
+  String get unableShareRightNow => '지금은 공유할 수 없습니다';
+
+  @override
+  String get restart => '다시 시작';
+
+  @override
+  String get tutorialNodeInstruction => '이것은 꼭짓점입니다 원하는 곳으로 드래그하세요';
+
+  @override
+  String get tutorialEdgesInstruction =>
+      '꼭짓점은 변으로 연결되어 있으며 변은 계속 연결된 상태로 유지됩니다';
+
+  @override
+  String get tutorialSolvedInstruction =>
+      '어떤 변도 교차하지 않으면 그래프가 풀립니다 이 그래프는 이미 풀려 있습니다';
 }

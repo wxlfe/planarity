@@ -1,6 +1,7 @@
 {
   "@@locale": "zh",
   "account": "账户",
+  "accountSettings": "账户设置",
   "accountDeleted": "账户已删除",
   "accountExistsSignInInstead": "账户已存在 - 请登录",
   "addedFriend": "已添加 {friendName}",
@@ -112,6 +113,9 @@
   "passwordTooWeak": "密码太弱",
   "planarity": "planarity",
   "privacyOptions": "隐私选项",
+  "rankingUpdate": "排名更新",
+  "rankingGlobalResult": "你在 {date} 的全球排名为第 #{globalRank} 名",
+  "rankingFriendsAndGlobalResult": "你在 {date} 的好友排名为第 #{friendRank} 名，全球排名为第 #{globalRank} 名",
   "planarGraphWikipedia": "维基百科：平面图",
   "pressAgainToDelete": "再次按下以删除",
   "profile": "个人资料",
@@ -182,5 +186,114 @@
   "reportReasonAbuse": "辱骂或骚扰",
   "reportReasonImpersonation": "冒充他人",
   "reportReasonSpam": "垃圾信息或诈骗",
-  "reportReasonOther": "其他"
+  "reportReasonOther": "其他",
+  "nodesCount": "{count} 个节点",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "{count} 步",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "得分 {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "图形 {level}，未解开，开始",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "图形 {level}，已用 {moves} 步解开，得分 {score}，重新挑战",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "图形 {level}，已锁定",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "图形 {level}，正在重新挑战，继续",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "重新挑战",
+  "replayGraphQuestion": "重新挑战图形 {level}",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "直到解开 - 分数将重置为 0，更高关卡的图形将被锁定",
+  "resetAndReplay": "重置并重新挑战",
+  "unableSaveProgress": "目前无法保存进度",
+  "saveYourProgress": "保存你的进度",
+  "saveProgressDescription": "免费注册，即可在所有设备上保留今日图形和成就。",
+  "achievements": "成就",
+  "achievementFirstStepTitle": "第一步",
+  "achievementFirstStepDescription": "解开你的第一个图形",
+  "achievementPracticeTitle": "练习",
+  "achievementPracticeDescription": "解开 8 个图形",
+  "achievementPersistenceTitle": "坚持不懈",
+  "achievementPersistenceDescription": "解开 16 个图形",
+  "achievementDedicationTitle": "全心投入",
+  "achievementDedicationDescription": "解开 32 个图形",
+  "achievementPlanarityTitle": "平面性",
+  "achievementPlanarityDescription": "解开 64 个图形",
+  "achievementEfficientTitle": "高效",
+  "achievementEfficientDescription": "至少剩余 2 步时解开一个图形",
+  "achievementPreciseTitle": "精准",
+  "achievementPreciseDescription": "至少剩余 4 步时解开一个图形",
+  "achievementOptimalTitle": "最优",
+  "achievementOptimalDescription": "以尽可能多的剩余步数解开一个图形",
+  "achievementCloseCallTitle": "险胜",
+  "achievementCloseCallDescription": "剩余 0 步时解开一个图形",
+  "achievementSecondAttemptTitle": "再次尝试",
+  "achievementSecondAttemptDescription": "重新挑战一个已解开的图形",
+  "achievementImprovementTitle": "更进一步",
+  "achievementImprovementDescription": "重新挑战时超过之前的分数",
+  "achievementRedemptionTitle": "扳回一局",
+  "achievementRedemptionDescription": "重新挑战一个之前得分为 0 的图形，并取得非零分数",
+  "achievementPerfectedTitle": "臻于完美",
+  "achievementPerfectedDescription": "重新挑战一个已解开的图形，将其提升至最高可能分数",
+  "unableLoadProfile": "目前无法加载你的个人资料",
+  "unableShareRightNow": "目前无法分享",
+  "restart": "重新开始",
+  "tutorialNodeInstruction": "这是一个顶点可将它拖到任意位置",
+  "tutorialEdgesInstruction": "顶点由边连接移动时边会保持连接",
+  "tutorialSolvedInstruction": "所有边都不相交时图形即为解开状态这个图形已经解开"
 }

@@ -1,6 +1,7 @@
 {
   "@@locale": "ru",
   "account": "аккаунт",
+  "accountSettings": "настройки аккаунта",
   "accountDeleted": "аккаунт удален",
   "accountExistsSignInInstead": "аккаунт уже существует - войдите",
   "addedFriend": "{friendName} добавлен",
@@ -112,6 +113,9 @@
   "passwordTooWeak": "пароль слишком слабый",
   "planarity": "planarity",
   "privacyOptions": "настройки конфиденциальности",
+  "rankingUpdate": "обновление рейтинга",
+  "rankingGlobalResult": "ваше место в мировом рейтинге за {date}: #{globalRank}",
+  "rankingFriendsAndGlobalResult": "ваше место среди друзей за {date}: #{friendRank}, в мировом рейтинге: #{globalRank}",
   "planarGraphWikipedia": "википедия: планарный граф",
   "pressAgainToDelete": "нажмите еще раз, чтобы удалить",
   "profile": "профиль",
@@ -182,5 +186,114 @@
   "reportReasonAbuse": "оскорбления или домогательства",
   "reportReasonImpersonation": "выдача себя за другого",
   "reportReasonSpam": "спам или мошенничество",
-  "reportReasonOther": "другое"
+  "reportReasonOther": "другое",
+  "nodesCount": "узлов: {count}",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "ходов: {count}",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "счёт {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "граф {level}, не решён, играть",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "граф {level}, решён за {moves} ходов, счёт {score}, переиграть",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "граф {level}, заблокирован",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "граф {level}, идёт повторное прохождение, продолжить",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "переиграть",
+  "replayGraphQuestion": "переиграть граф {level}",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "до решения - результат будет сброшен до 0, а следующие графы будут заблокированы",
+  "resetAndReplay": "сбросить и переиграть",
+  "unableSaveProgress": "сейчас не удаётся сохранить прогресс",
+  "saveYourProgress": "сохраните свой прогресс",
+  "saveProgressDescription": "зарегистрируйтесь бесплатно, чтобы сохранить сегодняшние графы и достижения на всех устройствах.",
+  "achievements": "достижения",
+  "achievementFirstStepTitle": "первый шаг",
+  "achievementFirstStepDescription": "решите свой первый граф",
+  "achievementPracticeTitle": "практика",
+  "achievementPracticeDescription": "решите 8 графов",
+  "achievementPersistenceTitle": "упорство",
+  "achievementPersistenceDescription": "решите 16 графов",
+  "achievementDedicationTitle": "преданность",
+  "achievementDedicationDescription": "решите 32 графа",
+  "achievementPlanarityTitle": "планарность",
+  "achievementPlanarityDescription": "решите 64 графа",
+  "achievementEfficientTitle": "эффективность",
+  "achievementEfficientDescription": "решите граф, сохранив не менее 2 ходов",
+  "achievementPreciseTitle": "точность",
+  "achievementPreciseDescription": "решите граф, сохранив не менее 4 ходов",
+  "achievementOptimalTitle": "оптимальность",
+  "achievementOptimalDescription": "решите граф, сохранив максимально возможное число ходов",
+  "achievementCloseCallTitle": "на пределе",
+  "achievementCloseCallDescription": "решите граф, не оставив ни одного хода",
+  "achievementSecondAttemptTitle": "вторая попытка",
+  "achievementSecondAttemptDescription": "переиграйте решённый граф",
+  "achievementImprovementTitle": "улучшение",
+  "achievementImprovementDescription": "превзойдите свой предыдущий результат при повторной игре",
+  "achievementRedemptionTitle": "исправление",
+  "achievementRedemptionDescription": "наберите больше нуля при повторной игре в графе, за который ранее получили 0",
+  "achievementPerfectedTitle": "совершенство",
+  "achievementPerfectedDescription": "улучшите результат решённого графа до максимально возможного при повторной игре",
+  "unableLoadProfile": "сейчас не удаётся загрузить ваш профиль",
+  "unableShareRightNow": "сейчас не удаётся поделиться",
+  "restart": "начать заново",
+  "tutorialNodeInstruction": "это вершина перетащите её в любое место",
+  "tutorialEdgesInstruction": "вершины соединены рёбрами рёбра остаются прикреплёнными",
+  "tutorialSolvedInstruction": "граф решён когда рёбра не пересекаются этот граф уже решён"
 }

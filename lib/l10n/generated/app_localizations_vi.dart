@@ -12,6 +12,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get account => 'tài khoản';
 
   @override
+  String get accountSettings => 'cài đặt tài khoản';
+
+  @override
   String get accountDeleted => 'tài khoản đã bị xóa';
 
   @override
@@ -244,6 +247,29 @@ class AppLocalizationsVi extends AppLocalizations {
   String get privacyOptions => 'tùy chọn quyền riêng tư';
 
   @override
+  String get rankingUpdate => 'cập nhật thứ hạng';
+
+  @override
+  String rankingGlobalResult(int globalRank, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'bạn xếp hạng #$globalRank toàn cầu vào $dateString';
+  }
+
+  @override
+  String rankingFriendsAndGlobalResult(
+    int friendRank,
+    int globalRank,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'bạn xếp hạng #$friendRank trong nhóm bạn và #$globalRank toàn cầu vào $dateString';
+  }
+
+  @override
   String get planarGraphWikipedia => 'wikipedia: đồ thị phẳng';
 
   @override
@@ -436,4 +462,174 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get reportReasonOther => 'khác';
+
+  @override
+  String nodesCount(int count) {
+    return '$count nút';
+  }
+
+  @override
+  String movesCount(int count) {
+    return '$count lượt';
+  }
+
+  @override
+  String scoreValue(int score) {
+    return 'điểm $score';
+  }
+
+  @override
+  String graphUnsolvedSemantics(int level) {
+    return 'đồ thị $level, chưa giải, chơi';
+  }
+
+  @override
+  String graphSolvedSemantics(int level, int moves, int score) {
+    return 'đồ thị $level, đã giải trong $moves lượt, điểm $score, chơi lại';
+  }
+
+  @override
+  String graphBlockedSemantics(int level) {
+    return 'đồ thị $level, bị khóa';
+  }
+
+  @override
+  String graphReplayInProgressSemantics(int level) {
+    return 'đồ thị $level, đang chơi lại, tiếp tục';
+  }
+
+  @override
+  String get replay => 'chơi lại';
+
+  @override
+  String replayGraphQuestion(int level) {
+    return 'chơi lại đồ thị $level';
+  }
+
+  @override
+  String get replayWarning =>
+      'cho đến khi giải xong - điểm sẽ được đặt lại về 0 và các đồ thị tiếp theo sẽ bị khóa';
+
+  @override
+  String get resetAndReplay => 'đặt lại và chơi lại';
+
+  @override
+  String get unableSaveProgress => 'hiện không thể lưu tiến trình';
+
+  @override
+  String get saveYourProgress => 'lưu tiến trình của bạn';
+
+  @override
+  String get saveProgressDescription =>
+      'đăng ký miễn phí để giữ đồ thị hôm nay và thành tích của bạn trên mọi thiết bị.';
+
+  @override
+  String get achievements => 'thành tích';
+
+  @override
+  String get achievementFirstStepTitle => 'bước đầu tiên';
+
+  @override
+  String get achievementFirstStepDescription => 'giải đồ thị đầu tiên của bạn';
+
+  @override
+  String get achievementPracticeTitle => 'luyện tập';
+
+  @override
+  String get achievementPracticeDescription => 'giải 8 đồ thị';
+
+  @override
+  String get achievementPersistenceTitle => 'kiên trì';
+
+  @override
+  String get achievementPersistenceDescription => 'giải 16 đồ thị';
+
+  @override
+  String get achievementDedicationTitle => 'tận tâm';
+
+  @override
+  String get achievementDedicationDescription => 'giải 32 đồ thị';
+
+  @override
+  String get achievementPlanarityTitle => 'tính phẳng';
+
+  @override
+  String get achievementPlanarityDescription => 'giải 64 đồ thị';
+
+  @override
+  String get achievementEfficientTitle => 'hiệu quả';
+
+  @override
+  String get achievementEfficientDescription =>
+      'giải một đồ thị khi còn ít nhất 2 lượt';
+
+  @override
+  String get achievementPreciseTitle => 'chính xác';
+
+  @override
+  String get achievementPreciseDescription =>
+      'giải một đồ thị khi còn ít nhất 4 lượt';
+
+  @override
+  String get achievementOptimalTitle => 'tối ưu';
+
+  @override
+  String get achievementOptimalDescription =>
+      'giải một đồ thị với số lượt còn lại tối đa có thể';
+
+  @override
+  String get achievementCloseCallTitle => 'sát nút';
+
+  @override
+  String get achievementCloseCallDescription =>
+      'giải một đồ thị khi không còn lượt nào';
+
+  @override
+  String get achievementSecondAttemptTitle => 'lần thử thứ hai';
+
+  @override
+  String get achievementSecondAttemptDescription =>
+      'chơi lại một đồ thị đã giải';
+
+  @override
+  String get achievementImprovementTitle => 'tiến bộ';
+
+  @override
+  String get achievementImprovementDescription =>
+      'vượt qua điểm số trước đó khi chơi lại';
+
+  @override
+  String get achievementRedemptionTitle => 'gỡ gạc';
+
+  @override
+  String get achievementRedemptionDescription =>
+      'đạt điểm lớn hơn 0 khi chơi lại đồ thị từng đạt 0 điểm';
+
+  @override
+  String get achievementPerfectedTitle => 'hoàn thiện';
+
+  @override
+  String get achievementPerfectedDescription =>
+      'chơi lại và nâng một đồ thị đã giải lên điểm số tối đa có thể';
+
+  @override
+  String get unableLoadProfile => 'hiện không thể tải hồ sơ của bạn';
+
+  @override
+  String get unableShareRightNow => 'hiện không thể chia sẻ';
+
+  @override
+  String get restart => 'bắt đầu lại';
+
+  @override
+  String get tutorialNodeInstruction =>
+      'đây là một đỉnh hãy kéo nó đến bất kỳ đâu';
+
+  @override
+  String get tutorialEdgesInstruction =>
+      'các đỉnh được nối bằng cạnh các cạnh luôn gắn với các đỉnh';
+
+  @override
+  String get tutorialSolvedInstruction =>
+      'đồ thị được giải khi không có cạnh nào giao nhau đồ thị này đã được giải';
 }

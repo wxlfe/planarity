@@ -1,6 +1,7 @@
 {
   "@@locale": "pt",
   "account": "conta",
+  "accountSettings": "definições da conta",
   "accountDeleted": "conta excluída",
   "accountExistsSignInInstead": "a conta existe - entre",
   "addedFriend": "{friendName} adicionado",
@@ -112,6 +113,9 @@
   "passwordTooWeak": "A senha é fraca demais!",
   "planarity": "planarity",
   "privacyOptions": "opções de privacidade",
+  "rankingUpdate": "atualização da classificação",
+  "rankingGlobalResult": "você ficou em #{globalRank} no mundo em {date}",
+  "rankingFriendsAndGlobalResult": "você ficou em #{friendRank} entre amigos e em #{globalRank} no mundo em {date}",
   "planarGraphWikipedia": "wikipedia: grafo planar",
   "pressAgainToDelete": "prima novamente para eliminar",
   "profile": "perfil",
@@ -182,5 +186,114 @@
   "reportReasonAbuse": "abuso ou assédio",
   "reportReasonImpersonation": "falsificação de identidade",
   "reportReasonSpam": "spam ou golpe",
-  "reportReasonOther": "outro"
+  "reportReasonOther": "outro",
+  "nodesCount": "{count} nós",
+  "@nodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "movesCount": "{count} movimentos",
+  "@movesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scoreValue": "pontuação {score}",
+  "@scoreValue": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphUnsolvedSemantics": "grafo {level}, não resolvido, jogar",
+  "@graphUnsolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphSolvedSemantics": "grafo {level}, resolvido em {moves} movimentos, pontuação {score}, jogar novamente",
+  "@graphSolvedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "moves": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "graphBlockedSemantics": "grafo {level}, bloqueado",
+  "@graphBlockedSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "graphReplayInProgressSemantics": "grafo {level}, repetição em andamento, continuar",
+  "@graphReplayInProgressSemantics": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replay": "jogar novamente",
+  "replayGraphQuestion": "jogar novamente o grafo {level}",
+  "@replayGraphQuestion": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "replayWarning": "até resolver - a pontuação será reposta para 0 e os grafos seguintes ficarão bloqueados",
+  "resetAndReplay": "repor e jogar novamente",
+  "unableSaveProgress": "não é possível guardar o progresso neste momento",
+  "saveYourProgress": "guarde o seu progresso",
+  "saveProgressDescription": "registe-se gratuitamente para manter os grafos de hoje e as suas conquistas em todos os dispositivos.",
+  "achievements": "conquistas",
+  "achievementFirstStepTitle": "primeiro passo",
+  "achievementFirstStepDescription": "resolva o seu primeiro grafo",
+  "achievementPracticeTitle": "prática",
+  "achievementPracticeDescription": "resolva 8 grafos",
+  "achievementPersistenceTitle": "persistência",
+  "achievementPersistenceDescription": "resolva 16 grafos",
+  "achievementDedicationTitle": "dedicação",
+  "achievementDedicationDescription": "resolva 32 grafos",
+  "achievementPlanarityTitle": "planaridade",
+  "achievementPlanarityDescription": "resolva 64 grafos",
+  "achievementEfficientTitle": "eficiente",
+  "achievementEfficientDescription": "resolva um grafo com pelo menos 2 movimentos restantes",
+  "achievementPreciseTitle": "preciso",
+  "achievementPreciseDescription": "resolva um grafo com pelo menos 4 movimentos restantes",
+  "achievementOptimalTitle": "ótimo",
+  "achievementOptimalDescription": "resolva um grafo com o máximo possível de movimentos restantes",
+  "achievementCloseCallTitle": "por pouco",
+  "achievementCloseCallDescription": "resolva um grafo sem movimentos restantes",
+  "achievementSecondAttemptTitle": "segunda tentativa",
+  "achievementSecondAttemptDescription": "jogue novamente um grafo resolvido",
+  "achievementImprovementTitle": "melhoria",
+  "achievementImprovementDescription": "supere a sua pontuação anterior ao jogar novamente",
+  "achievementRedemptionTitle": "redenção",
+  "achievementRedemptionDescription": "obtenha uma pontuação superior a zero ao jogar novamente um grafo em que antes obteve 0",
+  "achievementPerfectedTitle": "aperfeiçoado",
+  "achievementPerfectedDescription": "melhore um grafo resolvido até à pontuação máxima possível ao jogar novamente",
+  "unableLoadProfile": "não é possível carregar o seu perfil neste momento",
+  "unableShareRightNow": "não é possível partilhar neste momento",
+  "restart": "recomeçar",
+  "tutorialNodeInstruction": "isto é um vértice arraste-o para qualquer lugar",
+  "tutorialEdgesInstruction": "os vértices estão ligados por arestas as arestas permanecem ligadas",
+  "tutorialSolvedInstruction": "um grafo está resolvido quando nenhuma aresta se cruza este já está resolvido"
 }
